@@ -1,0 +1,3 @@
+doc_id	norm_id	begin	end	adherence	llr
+M010029SP	002	12.5	40.2	true	0.75
+M010029SP	002	56.5	70.7	false	0.50
