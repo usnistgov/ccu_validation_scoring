@@ -1,4 +1,0 @@
-doc_id	is_processed	message	path
-M010005QD	True		./M010005QD.tsv
-M010015BY	False	failed to download	
-M010029SP	True	no output	./M010015BY.tsv

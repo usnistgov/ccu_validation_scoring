@@ -8,7 +8,7 @@ logger = logging.getLogger('VALIDATION')
 def get_reference_submission_files(ref_dir, subm_dir):
 
 	# Get and check index file
-	index_file_path = os.path.join(subm_dir, "{}_index.tsv".format(os.path.basename(subm_dir)))
+	index_file_path = os.path.join(subm_dir, "system_output.index.tab")
 	if os.path.exists(index_file_path):
 		pass
 	else:
@@ -31,7 +31,7 @@ def get_reference_submission_files(ref_dir, subm_dir):
 
 	ref_docs = [os.path.splitext(x)[0] for x in ref_files]
 
-	subm_files = [path.as_posix() for path in Path(subm_dir).rglob('*')]
+	subm_files = [path.as_posix() for path in Path(subm_dir).rglob('*.tab')]
 
 	index_df, subm_file_paths = check_index_file(index_file_path, ref_docs, subm_dir)
 
@@ -58,13 +58,13 @@ def get_reference_submission_files(ref_dir, subm_dir):
 
 	return index_df, subm_file_paths, ref_file_paths_list
 
-def check_valid_csv(subm_file_path):
+def check_valid_tab(subm_file_path):
 
 	try:
 		submission_df = pd.read_csv(subm_file_path, sep='\t')
 		return True
 	except Exception as e:
-		logger.error('{} is not a valid tsv file'.format(subm_file_path))
+		logger.error('{} is not a valid tab file'.format(subm_file_path))
 		return False
 
 def check_column_number(subm_file_path, columns_number):
@@ -187,61 +187,63 @@ def check_docid_index_match(subm_file_path, doc_id):
 
 def check_index_file(index_file_path, ref_docs, subm_dir):
 
-	if check_valid_csv(index_file_path):
-		if check_column_number(index_file_path,4):
-			index_map = {"doc_id": "object","is_processed": "bool","message":"object","path":"object"}
-			if check_valid_header(index_file_path,list(index_map)):
-				if check_data_type(index_file_path, index_map):
-					index_df = pd.read_csv(index_file_path, sep='\t')
+	index_map = {"doc_id": "object","is_processed": "bool","message":"object","path":"object"}
 
-					# Compare if reference doc is equal to index doc
-					if set(list(index_df["doc_id"])) != set(ref_docs):
-						logger.error('Doc_ids in reference dir are different from doc_ids in index_file')
-						logger.error('Validation failed')
-						exit(1)
-					# Make sure is_processed true doc has corresponding path, otherwise no path
-					na_paths = index_df["path"][index_df["is_processed"] == False]
-					for i in na_paths:
-						if i == i: # check if it's NaN value when is_processed false
-							logger.error("Submission file paths of not processed file have been found")
-							logger.error('Validation failed')
-							exit(1)
+	if (check_valid_tab(index_file_path) and
+		check_column_number(index_file_path,4) and
+		check_valid_header(index_file_path,list(index_map)) and
+		check_data_type(index_file_path, index_map)):
 
-					subm_file_paths = index_df["path"][index_df["is_processed"] == True]
-					# Make sure each path is accessible
-					subm_file_paths_list = []
-					for j in subm_file_paths:
-						if j != j:
-							logger.error("Can't find submission file path of processed file")
-							logger.error('Validation failed')
-							exit(1)
+		index_df = pd.read_csv(index_file_path, sep='\t')
 
-						if j[:2] == './': #Check if path is start with ./
-							j = j[2:]
-						if subm_dir not in j: # Check it's absolute or relative path
-							j = os.path.join(subm_dir, j)
-						if os.path.exists(j):
-							subm_file_paths_list.append(j)
-						else:
-							logger.error("Submission file path of processed file {} is inaccessible".format(j))
-							logger.error('Validation failed')
-							exit(1)
-				else:
-					logger.error('Validation failed')
-					exit(1)
+		# Compare if reference doc is equal to index doc
+		if set(list(index_df["doc_id"])) != set(ref_docs):
+			logger.error('Doc_ids in reference dir are different from doc_ids in index_file')
+			logger.error('Validation failed')
+			exit(1)
+		# Make sure is_processed true doc has corresponding path, otherwise no path
+		na_paths = index_df["path"][index_df["is_processed"] == False]
+		for i in na_paths:
+			if i == i: # check if it's NaN value when is_processed false
+				logger.error("Submission file paths of not processed file have been found")
+				logger.error('Validation failed')
+				exit(1)
+
+		subm_file_paths = index_df["path"][index_df["is_processed"] == True]
+		# Make sure each path is accessible
+		subm_file_paths_list = []
+		for j in subm_file_paths:
+			if j != j:
+				logger.error("Can't find submission file path of processed file")
+				logger.error('Validation failed')
+				exit(1)
+
+			if j[:2] == './': #Check if path is start with ./
+				j = j[2:]
+			if subm_dir not in j: # Check it's absolute or relative path
+				j = os.path.join(subm_dir, j)
+			if os.path.exists(j):
+				subm_file_paths_list.append(j)
+			else:
+				logger.error("Submission file path of processed file {} is inaccessible".format(j))
+				logger.error('Validation failed')
+				exit(1)
+	else:
+		logger.error('Validation failed')
+		exit(1)
 
 	return index_df, subm_file_paths_list
 
 def find_corresponding_ref(subm_file_path,index_df,ref_dir,subm_dir):
 
-	if subm_file_path in index_df["path"]: 
+	if subm_file_path in list(index_df["path"]):
 		doc_id = index_df["doc_id"][index_df["path"] == subm_file_path] # If it's absolute path
-	elif subm_file_path.replace(subm_dir+"/","") in index_df["path"]:
+	elif subm_file_path.replace(subm_dir+"/","") in list(index_df["path"]):
 		doc_id = index_df["doc_id"][index_df["path"] == subm_file_path.replace(subm_dir+"/","")]
-	else:								
+	else:							
 		doc_id = index_df["doc_id"][index_df["path"] == "./" + subm_file_path.replace(subm_dir+"/","")] # If it's relative path
 
-	ref_file_path = os.path.join(ref_dir, "{}.tsv".format(doc_id.values[0]))
+	ref_file_path = os.path.join(ref_dir, "{}.tab".format(doc_id.values[0]))
 	if os.path.exists(ref_file_path):
 		return doc_id.values[0], ref_file_path
 	else:
