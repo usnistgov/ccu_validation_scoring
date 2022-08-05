@@ -35,7 +35,9 @@ setup(name=PACKAGE_NAME,
       packages=find_packages(include=['CCU_validation_scoring', 'CCU_validation_scoring.*']),
       install_requires=[
         'pandas',
-        'pathlib'
+        'pathlib',
+        'numpy',
+        'joblib'
     ],
       version=CCU_validation_scoring.__version__,
       entry_points='''

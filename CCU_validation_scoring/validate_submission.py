@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import logging
 import argparse
-from .check import *
+from . import check
 
 logger = logging.getLogger('VALIDATION')
 

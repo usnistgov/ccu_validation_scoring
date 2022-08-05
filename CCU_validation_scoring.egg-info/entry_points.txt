@@ -1,0 +1,4 @@
+
+          [console_scripts]
+          CCU_scoring=CCU_validation_scoring.cli:main
+      

@@ -1,3 +1,5 @@
-doc_id	norm_id	begin	end	adherence	llr
-M010005QD	001	12.3	40.6	true	0.75
-M010005QD	001	56.4	70.7	false	0.50
+file_id	norm	start	end	status	llr
+M010005QD	001	45.2	60.2	adhere	1.5
+M010005QD	002	45.2	60.2	violate	1.5
+M010005QD	007	60.2	75.2	violate	1.5
+M010005QD	004	90.2	105.2	adhere	1.5
