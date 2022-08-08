@@ -4,6 +4,9 @@ import numpy as np
 from .preprocess_reference import *
 
 def concatenate_submission_file(subm_dir, task):
+	"""
+	read all submission files in submission dir and concat into a global dataframe
+	"""
 
 	index_file_path = os.path.join(subm_dir, "system_output.index.tab")
 	index_df = pd.read_csv(index_file_path, sep='\t')
@@ -38,7 +41,9 @@ def convert_task_column(task):
 	return column_name
 
 def mapping_known_hidden_norm(mapping_dir, hyp):
-
+	"""
+	Extract mapping info from mapping file and then modify old hyp by changing old system norm to new hidden reference norm
+	"""
 	mapping_file = os.path.join(mapping_dir, "nd.map.tab")
 	mapping_df = pd.read_csv(mapping_file, sep = "\t")
 	new_hyp = mapping_df.merge(hyp, left_on='sys_norm', right_on='Class')

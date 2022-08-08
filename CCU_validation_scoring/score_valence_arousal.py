@@ -5,6 +5,17 @@ from .utils import *
 from .preprocess_reference import *
 
 def change_continuous_text(df):
+  """
+  Convert the ref and hyp into discrete time-series (Text-based decision unit)
+  e.g.
+  From 
+  docid	start end Class
+  doc1	1	  2	  1
+  To
+  docid	point Class
+  doc1	1	  1
+  doc1	2	  1
+  """
 	
   doc = []
   point = []
@@ -23,6 +34,18 @@ def change_continuous_text(df):
   return df_new
 
 def change_continuous_non_text(df,step = 2):
+	"""
+	Convert the ref and hyp into discrete time-series (Time-based decision unit). The gap is set to 2 seconds by default
+	e.g.(step = 1)
+  	From
+	docid	start end  valence             
+	doc1	0     1     1                   
+	doc1	1     2.1   2                  
+	To
+	docid	start end  valence
+	doc1	0     1   (1*1)/1.0=1
+	doc1	1     2   (2*1.0)/1.0=2
+	"""
 
 	start = list(df["start"])
 	end = list(df["end"])
@@ -85,6 +108,9 @@ def change_continuous_non_text(df,step = 2):
 	return df_new
 
 def process_ref_hyp_time_series(ref, hyp):
+	"""
+	Convert the ref and hyp into discrete time-series that have the same length
+	"""
 
 	ref_list = []
 	hyp_list = []
@@ -141,7 +167,9 @@ def write_valence_arousal_scores(output_dir, CCC_result):
 	result_df.to_csv(os.path.join(output_dir, "system_scores.csv"), index = None)
 
 def score_valence_arousal(ref, hyp, output_dir):
-
+	"""
+	The wrapper
+	"""
 	ref_list, hyp_list = process_ref_hyp_time_series(ref, hyp)
 	CCC_result = ccc(ref_list, hyp_list)
 	write_valence_arousal_scores(output_dir, CCC_result)

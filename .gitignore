@@ -1,0 +1,10 @@
+.eggs/**
+tmp/**
+CCU_validation_scoring.egg-info/**
+CCU_validation_scoring/__pycache__/**
+__pycache__/**
+*.csv
+.DS_Store
+test/.swp**
+test/.DS_Store
+test/__pycache__/**

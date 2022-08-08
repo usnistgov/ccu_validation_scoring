@@ -174,7 +174,7 @@ def compute_average_precision_tad(ref, hyp, iou_thresholds=np.linspace(0.5, 0.95
     return output
 
 
-def compute_multiclass_iou_pr(ref, hyp, iou_thresholds=np.linspace(0.5, 0.95, 10), nb_jobs=-1):
+def compute_multiclass_iou_pr(ref, hyp, iou_thresholds=0.2, nb_jobs=-1):
     """ Given dataframe of predictions compute P/R Metrics using
     'compute_average_precision_tad' at a specific IoU threshold.
 
