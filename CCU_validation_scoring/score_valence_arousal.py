@@ -5,33 +5,33 @@ from .utils import *
 from .preprocess_reference import *
 
 def change_continuous_text(df):
-  """
-  Convert the ref and hyp into discrete time-series (Text-based decision unit)
-  e.g.
-  From 
-  docid	start end Class
-  doc1	1	  2	  1
-  To
-  docid	point Class
-  doc1	1	  1
-  doc1	2	  1
-  """
-	
-  doc = []
-  point = []
-  label_new = []
+		"""
+		Convert the ref and hyp into discrete time-series (Text-based decision unit)
+		e.g.
+		From 
+		docid	start end Class
+		doc1	1	  2	  1
+		To
+		docid	point Class
+		doc1	1	  1
+		doc1	2	  1
+		"""
+		
+		doc = []
+		point = []
+		label_new = []
 
-  df["diff"] = list(abs(df["end"] - df["start"]) + 1)
+		df["diff"] = list(abs(df["end"] - df["start"]) + 1)
 
-  for i in range(0,df.shape[0]):
-  	doc.extend([df.iloc[i]["file_id"]] * int(df.iloc[i]["diff"]))
-  	point.extend(np.linspace(df.iloc[i]["start"],df.iloc[i]["end"],int(df.iloc[i]["diff"])))
-  	label_new.extend([df.iloc[i]["Class"]] * int(df.iloc[i]["diff"]))
-	
-  point_new = [int(x) for x in point]
-  df_new = pd.DataFrame({"file_id": doc, "Class": label_new, "point": point_new})
+		for i in range(0,df.shape[0]):
+			doc.extend([df.iloc[i]["file_id"]] * int(df.iloc[i]["diff"]))
+			point.extend(np.linspace(df.iloc[i]["start"],df.iloc[i]["end"],int(df.iloc[i]["diff"])))
+			label_new.extend([df.iloc[i]["Class"]] * int(df.iloc[i]["diff"]))
+		
+		point_new = [int(x) for x in point]
+		df_new = pd.DataFrame({"file_id": doc, "Class": label_new, "point": point_new})
 
-  return df_new
+		return df_new
 
 def change_continuous_non_text(df,step = 2):
 	"""

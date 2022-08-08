@@ -1,10 +1,11 @@
-.eggs/**
-tmp/**
-CCU_validation_scoring.egg-info/**
-CCU_validation_scoring/__pycache__/**
-__pycache__/**
+*.eggs/
+tmp/
+*.egg-info/
+CCU_validation_scoring/__pycache__/
+__pycache__/
 *.csv
+*.pyc
 .DS_Store
 test/.swp**
 test/.DS_Store
-test/__pycache__/**
+test/__pycache__/
