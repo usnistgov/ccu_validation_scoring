@@ -45,9 +45,10 @@ def mapping_known_hidden_norm(mapping_dir, hyp):
 	Extract mapping info from mapping file and then modify old hyp by changing old system norm to new hidden reference norm
 	"""
 	mapping_file = os.path.join(mapping_dir, "nd.map.tab")
-	mapping_df = pd.read_csv(mapping_file, sep = "\t")
+	mapping_df = pd.read_csv(mapping_file, dtype="object", sep = "\t")
 	new_hyp = mapping_df.merge(hyp, left_on='sys_norm', right_on='Class')
-
+	new_hyp = new_hyp[["file_id","start","end","status","llr","ref_norm"]]
+	new_hyp.rename(columns={"ref_norm": "Class"}, inplace=True)
 	return new_hyp
 
 def extract_df(df, file_id):
