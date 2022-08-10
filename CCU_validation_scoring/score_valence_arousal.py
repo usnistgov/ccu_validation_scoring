@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import numpy as np
+from sklearn.metrics import cohen_kappa_score
 from .utils import *
 from .preprocess_reference import *
 
@@ -107,7 +108,7 @@ def change_continuous_non_text(df,step = 2):
 	
 	return df_new
 
-def process_ref_hyp_time_series(ref, hyp):
+def process_ref_hyp_time_series(ref, hyp, task):
 	"""
 	Convert the ref and hyp into discrete time-series that have the same length
 	"""
@@ -116,44 +117,104 @@ def process_ref_hyp_time_series(ref, hyp):
 	hyp_list = []
 
 	file_ids = get_unique_items_in_array(ref['file_id'])
-
 	for file_id in file_ids: 
+	
 		sub_ref = extract_df(ref, file_id)
 		sub_hyp = extract_df(hyp, file_id)
 
 		# Check file type
 		if list(sub_ref["type"])[0] == "text":
 			continue_ref = change_continuous_text(sub_ref)
-			continue_hyp = change_continuous_text(sub_hyp)
-
+			
 			pruned_continue_ref = continue_ref[continue_ref["Class"] != "nospeech"].copy()
 			pruned_continue_ref.rename(columns={"Class": "continue_ref"}, inplace=True)
 
-			# Get the time series of no speech in reference
-			non_silence_point = list(continue_ref["point"][continue_ref["Class"] != "nospeech"])
-			# Prune system using the time series of no speech in reference
-			pruned_continue_hyp = continue_hyp[continue_hyp["point"].isin(non_silence_point)].copy()
-			pruned_continue_hyp.rename(columns={"Class": "continue_hyp"}, inplace=True)
+			if len(sub_hyp) != 0:
+				continue_hyp = change_continuous_text(sub_hyp)
+				# Get the time series of no speech in reference
+				non_silence_point = list(continue_ref["point"][continue_ref["Class"] != "nospeech"])
+				# Prune system using the time series of no speech in reference
+				pruned_continue_hyp = continue_hyp[continue_hyp["point"].isin(non_silence_point)].copy()
+				pruned_continue_hyp.rename(columns={"Class": "continue_hyp"}, inplace=True)
+
+				ref_hyp_continue = pd.merge(pruned_continue_ref, pruned_continue_hyp)
+				ref_list.extend(list(ref_hyp_continue["continue_ref"]))
+				hyp_list.extend(list(ref_hyp_continue["continue_hyp"]))
+			else:
+				# If no output in hyp, add fake output 500 for valence and 1 for arousal
+				ref_list.extend(list(pruned_continue_ref["continue_ref"]))
+				if task == "valence_continuous":
+					hyp_list.extend([500]*len(list(pruned_continue_ref["continue_ref"])))
+				else:
+					hyp_list.extend([1]*len(list(pruned_continue_ref["continue_ref"])))
 
 		else:
 			continue_ref = change_continuous_non_text(sub_ref)
-			continue_hyp = change_continuous_non_text(sub_hyp)
 
 			pruned_continue_ref = continue_ref[continue_ref["Class"] != "nospeech"].copy()
 			pruned_continue_ref.rename(columns={"Class": "continue_ref"}, inplace=True)
 
-			# Get the time series of no speech in reference
-			non_silence_df = continue_ref.loc[:,["start","end"]][continue_ref["Class"] != "nospeech"]
-			# Prune system using the time series of no speech in reference
-			pruned_continue_hyp = non_silence_df.merge(continue_hyp)
-			pruned_continue_hyp.rename(columns={"Class": "continue_hyp"}, inplace=True)
+			if len(sub_hyp) != 0:
+				continue_hyp = change_continuous_non_text(sub_hyp)
+				# Get the time series of no speech in reference
+				non_silence_df = continue_ref.loc[:,["start","end"]][continue_ref["Class"] != "nospeech"]
+				# Prune system using the time series of no speech in reference
+				pruned_continue_hyp = non_silence_df.merge(continue_hyp)
+				pruned_continue_hyp.rename(columns={"Class": "continue_hyp"}, inplace=True)
 
-		ref_hyp_continue = pd.merge(pruned_continue_ref, pruned_continue_hyp)
-		ref_list.extend(list(ref_hyp_continue["continue_ref"]))
-		hyp_list.extend(list(ref_hyp_continue["continue_hyp"]))
+				ref_hyp_continue = pd.merge(pruned_continue_ref, pruned_continue_hyp)
+				ref_list.extend(list(ref_hyp_continue["continue_ref"]))
+				hyp_list.extend(list(ref_hyp_continue["continue_hyp"]))
+			else:
+				# If no output in hyp, add fake output 500 for valence and 1 for arousal
+				ref_list.extend(list(pruned_continue_ref["continue_ref"]))
+				if task == "valence_continuous":
+					hyp_list.extend([500]*len(list(pruned_continue_ref["continue_ref"])))
+				else:
+					hyp_list.extend([1]*len(list(pruned_continue_ref["continue_ref"])))
 
-		return(ref_list, hyp_list)
+	return(ref_list, hyp_list)
 
+def apply_level_label(list, task):
+	"""
+	Apply the level labels for both the reference and hypothesized system output
+	positive → valence == 700-1000
+	neutral → valence == 300-699
+	negative → valence == 1-299
+
+	high → arousal == 700-1000
+	medium → arousal == 300-699
+	low → arousal == 1-299
+	"""
+
+	labels = []
+	if task == "valence_continuous":
+		for i in list:
+			if i >= 1 and i <= 299:
+				label = "negative"
+			if i >= 300 and i <= 699:
+				label = "neutral"
+			if i >= 700 and i <= 1000:
+				label = "positive"
+			labels.append(label)
+	else:
+		for i in list:
+			if i >= 1 and i <= 299:
+				label = "low"
+			if i >= 300 and i <= 699:
+				label = "medium"
+			if i >= 700 and i <= 1000:
+				label = "high"
+			labels.append(label)
+
+	return labels
+
+def kappa(x,y):
+	'''Cohen’s kappa'''
+	result = cohen_kappa_score(x,y)
+
+	return result
+			
 def ccc(x,y):
     ''' Concordance Correlation Coefficient'''
     sxy = np.sum((x - np.mean(x))*(y - np.mean(y)))/len(x)
@@ -161,18 +222,23 @@ def ccc(x,y):
 
     return rhoc
 
-def write_valence_arousal_scores(output_dir, CCC_result):
+def write_valence_arousal_scores(output_dir, CCC_result, kappa_result):
 
-	result_df = pd.DataFrame({"Metric": ["CCC"], "Score": [CCC_result]})
+	result_df = pd.DataFrame({"Metric": ["CCC","Kappa"], "Score": [CCC_result, kappa_result]})
 	result_df.to_csv(os.path.join(output_dir, "system_scores.csv"), index = None)
 
-def score_valence_arousal(ref, hyp, output_dir):
+def score_valence_arousal(ref, hyp, output_dir, task):
 	"""
 	The wrapper
 	"""
-	ref_list, hyp_list = process_ref_hyp_time_series(ref, hyp)
+	ref_list, hyp_list = process_ref_hyp_time_series(ref, hyp, task)
 	CCC_result = ccc(ref_list, hyp_list)
-	write_valence_arousal_scores(output_dir, CCC_result)
+
+	ref_level = apply_level_label(ref_list, task)
+	hyp_level = apply_level_label(hyp_list, task)
+	kappa_result = kappa(ref_level, hyp_level)
+	
+	write_valence_arousal_scores(output_dir, CCC_result, kappa_result)
 
 
 

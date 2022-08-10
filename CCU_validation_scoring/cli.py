@@ -63,7 +63,7 @@ def main():
 
     score_nd_parser.set_defaults(func=score_submission.score_nd_submission_dir_cli)
 
-    score_ed_parser = subs.add_parser('score-ed', description='Score a submission directory')
+    score_ed_parser = subs.add_parser('score-ed', description='Score a emotion detection submission directory')
     score_ed_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a emotion submission')
     score_ed_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
     score_ed_parser.add_argument("-i", "--iou_thresholds", nargs='?', default="0.2", help="A comma separated list of IoU thresholds.")
@@ -71,25 +71,25 @@ def main():
 
     score_ed_parser.set_defaults(func=score_submission.score_ed_submission_dir_cli)
 
-    score_vd_parser = subs.add_parser('score-vd', description='Score a submission directory')
-    score_vd_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a submission')
+    score_vd_parser = subs.add_parser('score-vd', description='Score a valence detection submission directory')
+    score_vd_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a valence submission')
     score_vd_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
-    score_vd_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output the system level and class level score to a directory")
+    score_vd_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output the system level score to a directory")
 
     score_vd_parser.set_defaults(func=score_submission.score_vd_submission_dir_cli)
 
-    score_ad_parser = subs.add_parser('score-ad', description='Score a submission directory')
-    score_ad_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a submission')
+    score_ad_parser = subs.add_parser('score-ad', description='Score an arousal submission directory')
+    score_ad_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing an arousal submission')
     score_ad_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
-    score_ad_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output the system level and class level score to a directory")
+    score_ad_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output the system level score to a directory")
 
     score_ad_parser.set_defaults(func=score_submission.score_ad_submission_dir_cli)
 
-    # score_cd_parser = subs.add_parser('score_cd', description='Score a submission directory')
-    # score_cd_parser.add_argument('-s','--submission-dir', type=str, required=True, nargs=1, help='Directory containing a submission')
-    # score_cd_parser.add_argument('-ref','--reference-dir', type=str, required=True, nargs=1, help='Reference directory')
-    # score_cd_parser.add_argument("-i", "--iou_thresholds", nargs='?', default="0.2", help="A comma separated list of IoU thresholds.")
-    # score_cd_parser.add_argument("-o", "--output_dir", type=str, nargs=1, default="tmp", help="Output the system level and class level score to a directory")
+    # score_cd_parser = subs.add_parser('score-cd', description='Score a changepoint submission directory')
+    # score_cd_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a changepoint submission')
+    # score_cd_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
+    # score_cd_parser.add_argument("-d", "--delta_cp_thresholds", nargs='?', default="0.2", help="A comma separated list of delta CP thresholds.")
+    # score_cd_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output the system level score to a directory")
 
     # score_cd_parser.set_defaults(func=score_submission.score_cd_submission_dir_cli)
 

@@ -48,7 +48,7 @@ def score_vd_submission_dir_cli(args):
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, task = "valence_continuous")
 	hyp = concatenate_submission_file(subm_dir = args.submission_dir, task = "valence_continuous")
 
-	score_valence_arousal(ref, hyp, output_dir = args.output_dir)
+	score_valence_arousal(ref, hyp, output_dir = args.output_dir, task = "valence_continuous")
 
 	print("System Score")
 	print("-------------")
@@ -60,11 +60,24 @@ def score_ad_submission_dir_cli(args):
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, task = "arousal_continuous")
 	hyp = concatenate_submission_file(subm_dir = args.submission_dir, task = "arousal_continuous")
 
-	score_valence_arousal(ref, hyp, output_dir = args.output_dir)
+	score_valence_arousal(ref, hyp, output_dir = args.output_dir, task = "arousal_continuous")
 
 	print("System Score")
 	print("-------------")
 	print(open(os.path.join(args.output_dir, 'system_scores.csv')).read())
+
+def score_cd_submission_dir_cli(args):
+
+	ref = preprocess_reference_dir(ref_dir = args.reference_dir, task = "changepoint")
+	hyp = concatenate_submission_file(subm_dir = args.submission_dir, task = "changepoint")
+	print(ref)
+	print(hyp)
+	# score_valence_arousal(ref, hyp, output_dir = args.output_dir, task = "arousal_continuous")
+
+	# print("System Score")
+	# print("-------------")
+	# print(open(os.path.join(args.output_dir, 'system_scores.csv')).read())
+
 
 
 
