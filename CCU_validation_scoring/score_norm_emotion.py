@@ -8,14 +8,14 @@ from .utils import *
 logger = logging.getLogger('SCORING')
 
 
-def generate_zero_scores(labels):
+def generate_zero_scores_norm_emotion(labels):
     y = []
     if len(labels)>0:
         for i in labels:
-            y.append( [ i, 0, [ 0.0, 0.0 ], [ 0.0, 0.0 ] ])
+            y.append( [ i, 0.0, [0.0, 0.0], [0.0, 1.0] ])
     else:
         logger.error("No matching Classes found in system output.")
-        y.append( [ 'no_macthing_Class', 0, [ 0.0, 0.0 ], [ 0.0, 0.0 ] ]) 
+        y.append( [ 'no_macthing_Class', 0.0, [0.0, 0.0], [0.0, 1.0] ]) 
     return pd.DataFrame(y, columns=['Class', 'ap', 'precision', 'recall'])
 
 
@@ -286,7 +286,8 @@ def score_tad(ref, hyp, class_type, iou_thresholds, metrics, output_dir, nb_jobs
         pr_iou_scores = compute_multiclass_iou_pr(ref, hyp, iou_thresholds, nb_jobs)
     else:
         pr_iou_scores = {}
-        [ pr_iou_scores.setdefault(iout, generate_zero_scores(hyp)) for iout in iou_thresholds ]
+        alist = ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False].Class.unique()
+        [ pr_iou_scores.setdefault(iout, generate_zero_scores_norm_emotion(alist)) for iout in iou_thresholds ]
 
     results = _sumup_tad_system_level_scores(metrics, pr_iou_scores, iou_thresholds)
     al_results = _sumup_tad_class_level_scores(metrics, pr_iou_scores, iou_thresholds)

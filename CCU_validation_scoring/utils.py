@@ -74,6 +74,7 @@ def concatenate_submission_file(subm_dir, task):
 
 	submission_dfs.drop_duplicates(inplace = True)
 	submission_dfs = submission_dfs.reset_index(drop=True)
+	
 	new_submission_dfs = change_class_type(submission_dfs, convert_task_column(task))
 
 	return new_submission_dfs
@@ -117,7 +118,6 @@ def extract_df(df, file_id):
 
 def change_class_type(df, class_type):
 
-	df["Class"] = df[class_type]
-	df.drop(columns=[class_type],inplace=True)
+	new_df = df.rename(columns = {class_type: "Class"})
 
-	return df
+	return new_df

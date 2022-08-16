@@ -8,15 +8,33 @@ from .utils import *
 logger = logging.getLogger('SCORING')
 
 
-def generate_zero_scores(labels):
-    y = []
+def generate_zero_scores_changepoint(labels, delta_cp_text_thresholds, delta_cp_time_thresholds):
+
     if len(labels)>0:
-        for i in labels:
-            y.append( [ i, 0, [ 0.0, 0.0 ], [ 0.0, 0.0 ] ])
+        y_text = []
+        y_time = []
+        for idx, act in enumerate(labels):
+            if act == "text":
+                y_text.append( [ act, 0.0, [0.0, 0.0], [0.0, 1.0] ])
+            else:
+                y_time.append( [ act, 0.0, [0.0, 0.0], [0.0, 1.0] ])
+        df_text = pd.DataFrame(y_text, columns=['type', 'ap', 'precision', 'recall'])
+        df_time = pd.DataFrame(y_time, columns=['type', 'ap', 'precision', 'recall'])
+        pr_iou_scores = {}
+        for iout in delta_cp_text_thresholds:
+            pr_iou_scores[iout] = df_text
+        for iout in delta_cp_time_thresholds:
+            pr_iou_scores[iout] = df_time
+
     else:
+        y = []
         logger.error("No matching Types found in system output.")
-        y.append( [ 'no_macthing_Type', 0, [ 0.0, 0.0 ], [ 0.0, 0.0 ] ]) 
-    return pd.DataFrame(y, columns=['type', 'ap', 'precision', 'recall'])
+        y.append( [ 'no_macthing_Type', 0.0, [0.0, 0.0], [0.0, 1.0] ])
+        df_whole = pd.DataFrame(y, columns=['type', 'ap', 'precision', 'recall'])
+        pr_iou_scores = {}
+        for iout in delta_cp_text_thresholds + delta_cp_time_thresholds:
+            pr_iou_scores[iout] = df_whole
+    return pr_iou_scores
 
 
 def segment_cp(ref_class, tgts):
@@ -224,15 +242,15 @@ def score_cp(ref, hyp, delta_cp_text_thresholds, delta_cp_time_thresholds, outpu
         - **pr_iou_scores** (dict of df)
             multi-type pr for all types
     """    
-    # Add text/audio/video info to hyp
+    # Add text/audio/video info to hyp   
+    tad_add_noscore_region(ref,hyp)
     hyp_type = add_type_column(ref, hyp)
-    # FIXME: Use a No score-region parameter
-    tad_add_noscore_region(ref,hyp_type)
-    # Fix out of scope and NA's
-    # remove_out_of_scope_activities(ref,hyp) 
-    
-    if len(hyp_type) > 0:
+
+    if len(hyp) > 0:
         pr_iou_scores = compute_multiclass_cp_pr(ref, hyp_type, delta_cp_text_thresholds, delta_cp_time_thresholds, nb_jobs)
+    else:
+        alist = ref.loc[ref.Class != 'NO_SCORE_REGION'].type.unique()
+        pr_iou_scores = generate_zero_scores_changepoint(alist, delta_cp_text_thresholds, delta_cp_time_thresholds)
 
     ensure_output_dir(output_dir)
     write_type_level_scores(output_dir, pr_iou_scores, delta_cp_text_thresholds, delta_cp_time_thresholds)
