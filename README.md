@@ -15,7 +15,10 @@ CCU_scoring -h
 CCU_scoring score-nd -h
 
 # Score Norm Detection Task
-CCU_scoring score-nd -s test/submission/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample
+CCU_scoring score-nd -s test/submission/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220815_164235 -ref test/reference/LDC_reference_sample
+
+# Score Norm Detection Task with a mapping file
+CCU_scoring score-nd -s test/submission/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample -m test/submission/NDMAP/CCU_P1_TA1_NDMAP_NIST_mini-eval1_20220605_050236
 
 # Score Emotion Detection Task
 CCU_scoring score-ed -s test/submission/ED/CCU_P1_TA1_ED_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample 
@@ -25,6 +28,9 @@ CCU_scoring score-vd -s test/submission/VD/CCU_P1_TA1_VD_NIST_mini-eval1_2022053
 
 # Score Arousal Detection Task
 CCU_scoring score-ad -s test/submission/AD/CCU_P1_TA1_AD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample 
+
+# Score Change Detection Task
+CCU_scoring score-cd -s test/submission/CD/CCU_P1_TA1_CD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample 
 
 ```
 

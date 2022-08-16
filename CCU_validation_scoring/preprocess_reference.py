@@ -442,6 +442,7 @@ def preprocess_reference_dir(ref_dir, task):
 	else:
 		ref = data_df.merge(index_df)
 		ref = ref[ref.timestamp != "none"]
+		ref = change_class_type(ref, convert_task_column(task))
 
 	return ref
 

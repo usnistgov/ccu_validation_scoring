@@ -85,13 +85,14 @@ def main():
 
     score_ad_parser.set_defaults(func=score_submission.score_ad_submission_dir_cli)
 
-    # score_cd_parser = subs.add_parser('score-cd', description='Score a changepoint submission directory')
-    # score_cd_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a changepoint submission')
-    # score_cd_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
-    # score_cd_parser.add_argument("-d", "--delta_cp_thresholds", nargs='?', default="0.2", help="A comma separated list of delta CP thresholds.")
-    # score_cd_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output the system level score to a directory")
+    score_cd_parser = subs.add_parser('score-cd', description='Score a changepoint submission directory')
+    score_cd_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a changepoint submission')
+    score_cd_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
+    score_cd_parser.add_argument("-e", "--delta_cp_text_thresholds", nargs='?', default="100", help="A comma separated list of delta CP text thresholds.")
+    score_cd_parser.add_argument("-i", "--delta_cp_time_thresholds", nargs='?', default="10", help="A comma separated list of delta CP time thresholds.")
+    score_cd_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output the system level score to a directory")
 
-    # score_cd_parser.set_defaults(func=score_submission.score_cd_submission_dir_cli)
+    score_cd_parser.set_defaults(func=score_submission.score_cd_submission_dir_cli)
 
 
     args = parser.parse_args()
