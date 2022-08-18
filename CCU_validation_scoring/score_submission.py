@@ -6,7 +6,7 @@ from .preprocess_reference import preprocess_reference_dir
 from .utils import *
 from .score_norm_emotion import score_tad
 from .score_valence_arousal import *
-from .score_checkpoint import *
+from .score_changepoint import *
 
 logger = logging.getLogger('SCORING')
 

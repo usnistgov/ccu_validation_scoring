@@ -5,22 +5,24 @@ import pandas as pd
 import numpy as np
 from .preprocess_reference import *
 
+silence_string = "nospeech"
+
 def tad_add_noscore_region(ref,hyp):
 	""" 
 	Convert nospeech class into NO_SCORE_REGION in ref and remove nospeech class in hyp
 	"""    
-	gtnan = ref[ref.Class == "nospeech"]
+	gtnan = ref[ref.Class == silence_string]
 	gtnanl = len(gtnan)
 	if gtnanl > 0:
 		# logger.warning("Reference contains {} no-score regions.".format(gtnanl))
-		ref.loc[ref.Class == "nospeech", "Class"]= "NO_SCORE_REGION"
+		ref.loc[ref.Class == silence_string, "Class"]= "NO_SCORE_REGION"
 
-	prednan = hyp[hyp.Class == "nospeech"]
+	prednan = hyp[hyp.Class == silence_string]
 	prednanl = len(prednan)
 	if prednanl > 0:
 		logger = logging.getLogger('SCORING')
 		logger.warning("NaN Class in system-output detected. Dropping {} NaN entries".format(prednanl))
-		hyp.drop(hyp[hyp['Class'] == "nospeech"].index, inplace = True)
+		hyp.drop(hyp[hyp['Class'] == silence_string].index, inplace = True)
 
 def remove_out_of_scope_activities(ref,hyp):
 	""" 
@@ -107,6 +109,8 @@ def mapping_known_hidden_norm(mapping_dir, hyp):
 	new_hyp = mapping_df.merge(hyp, left_on='sys_norm', right_on='Class')
 	new_hyp = new_hyp[["file_id","start","end","status","llr","ref_norm"]]
 	new_hyp.rename(columns={"ref_norm": "Class"}, inplace=True)
+	new_hyp.drop_duplicates(inplace = True)
+	
 	return new_hyp
 
 def extract_df(df, file_id):

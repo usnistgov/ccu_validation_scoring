@@ -5,6 +5,8 @@ from sklearn.metrics import cohen_kappa_score
 from .utils import *
 from .preprocess_reference import *
 
+silence_string = "nospeech"
+
 def change_continuous_text(df):
 		"""
 		Convert the ref and hyp into discrete time-series (Text-based decision unit)
@@ -70,36 +72,36 @@ def change_continuous_non_text(df,step = 2):
 		label_new = 0
 		for k in range(df.shape[0]):
 			if i < end[k] and j > end[k] and i >= start[k]:
-				if label_list[k] == "nospeech":
-					label_new = "nospeech"
+				if label_list[k] == silence_string:
+					label_new = silence_string
 				else:
 					label_new = label_new + label_list[k]*(end[k]-i)
 
 					while j > end[k]:
 						k = k + 1
 						if j > end[k]:
-							if label_list[k] == "nospeech":
-								label_new = "nospeech"
+							if label_list[k] == silence_string:
+								label_new = silence_string
 							else:
 								label_new = label_new + label_list[k]*(end[k]-start[k])
 
-					if label_new != "nospeech" and label_list[k] != "nospeech":
+					if label_new != silence_string and label_list[k] != silence_string:
 						label_new = label_new + label_list[k]*(j-start[k])
 					else: 
-						label_new = "nospeech"
+						label_new = silence_string
 						
 			elif i < end[k] and j <= end[k] and i >= start[k]:
 
 
-				if label_list[k] == "nospeech":
-					label_new = "nospeech"
+				if label_list[k] == silence_string:
+					label_new = silence_string
 				else:
 					label_new = label_new + label_list[k]*(j-i)
 			else:
 				continue
 
 		# print(i,j,label_new)
-		if label_new != "nospeech":
+		if label_new != silence_string:
 			label_new = round(label_new/(j-i),3)
 		label_new_list.append(label_new)
 	
@@ -126,13 +128,13 @@ def process_ref_hyp_time_series(ref, hyp, task):
 		if list(sub_ref["type"])[0] == "text":
 			continue_ref = change_continuous_text(sub_ref)
 			
-			pruned_continue_ref = continue_ref[continue_ref["Class"] != "nospeech"].copy()
+			pruned_continue_ref = continue_ref[continue_ref["Class"] != silence_string].copy()
 			pruned_continue_ref.rename(columns={"Class": "continue_ref"}, inplace=True)
 
 			if len(sub_hyp) != 0:
 				continue_hyp = change_continuous_text(sub_hyp)
 				# Get the time series of no speech in reference
-				non_silence_point = list(continue_ref["point"][continue_ref["Class"] != "nospeech"])
+				non_silence_point = list(continue_ref["point"][continue_ref["Class"] != silence_string])
 				# Prune system using the time series of no speech in reference
 				pruned_continue_hyp = continue_hyp[continue_hyp["point"].isin(non_silence_point)].copy()
 				pruned_continue_hyp.rename(columns={"Class": "continue_hyp"}, inplace=True)
@@ -151,13 +153,13 @@ def process_ref_hyp_time_series(ref, hyp, task):
 		else:
 			continue_ref = change_continuous_non_text(sub_ref)
 
-			pruned_continue_ref = continue_ref[continue_ref["Class"] != "nospeech"].copy()
+			pruned_continue_ref = continue_ref[continue_ref["Class"] != silence_string].copy()
 			pruned_continue_ref.rename(columns={"Class": "continue_ref"}, inplace=True)
 
 			if len(sub_hyp) != 0:
 				continue_hyp = change_continuous_non_text(sub_hyp)
 				# Get the time series of no speech in reference
-				non_silence_df = continue_ref.loc[:,["start","end"]][continue_ref["Class"] != "nospeech"]
+				non_silence_df = continue_ref.loc[:,["start","end"]][continue_ref["Class"] != silence_string]
 				# Prune system using the time series of no speech in reference
 				pruned_continue_hyp = non_silence_df.merge(continue_hyp)
 				pruned_continue_hyp.rename(columns={"Class": "continue_hyp"}, inplace=True)
