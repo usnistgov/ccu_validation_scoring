@@ -104,7 +104,7 @@ def compute_average_precision_tad(ref, hyp, iou_thresholds=[0.2]):
         for iout in iou_thresholds:
             output[iout] = 0.0, [0.0, 0.0], [0.0, 1.0]
         return output
- 
+
     # Compute IoU for all hyps incl. NO_SCORE_REGION
     for idx, myhyp in hyp.iterrows():
         out.append(compute_ious(myhyp, ref))
@@ -115,8 +115,8 @@ def compute_average_precision_tad(ref, hyp, iou_thresholds=[0.2]):
 
     # Sort by confidence score
     ihyp.sort_values(["llr"], ascending=False, inplace=True)        
-    ihyp.reset_index(inplace=True, drop=True)        
-        
+    ihyp.reset_index(inplace=True, drop=True)
+         
     # Determine TP/FP @ IoU-Threshold
     for iout in iou_thresholds:        
         ihyp[['tp', 'fp']] = [ 0, 1 ]        
@@ -132,7 +132,7 @@ def compute_average_precision_tad(ref, hyp, iou_thresholds=[0.2]):
     return output
 
 
-def compute_multiclass_iou_pr(ref, hyp, iou_thresholds=0.2, nb_jobs=-1):
+def compute_multiclass_iou_pr(ref, hyp, iou_thresholds=0.2, nb_jobs=-1, mapping_df = None):
     """ Compute average precision score (AP) and precision-recall curves for
     each class at a set of specific temp. intersection-over-union (tIoU)
     thresholds. If references have empty class they will be marked as
@@ -158,7 +158,6 @@ def compute_multiclass_iou_pr(ref, hyp, iou_thresholds=0.2, nb_jobs=-1):
         Dict of Dataframe w/ class,ap,prec,rec columns w/ IoU-Thresholds as
         keys.
     """
-
     # Initialize
     scores = {}
     [ scores.setdefault(iout, []) for iout in iou_thresholds ]
@@ -166,10 +165,27 @@ def compute_multiclass_iou_pr(ref, hyp, iou_thresholds=0.2, nb_jobs=-1):
     # Iterate over all Classes treating them as a binary detection
     alist = ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False].Class.unique()        
 
-    apScores = Parallel(n_jobs=nb_jobs)(delayed(compute_average_precision_tad)(
-            ref=ref.loc[(ref.Class == act) | (ref.Class == 'NO_SCORE_REGION')].reset_index(drop=True),                        
-            hyp=hyp.loc[(hyp.Class == act)].reset_index(drop=True),
-            iou_thresholds=iou_thresholds) for idx, act in enumerate(alist))
+    if mapping_df is not None:
+        apScores = []
+        for idx, act in enumerate(alist):
+            sub_mapping_df = mapping_df.loc[mapping_df.ref_norm == act]
+            if not sub_mapping_df.empty:
+                final_sub_hyp = replace_hyp_norm_mapping(sub_mapping_df, hyp, act)
+            else:
+                final_sub_hyp = hyp.loc[(hyp.Class == act)]
+
+            apScore = compute_average_precision_tad(
+                    ref=ref.loc[(ref.Class == act) | (ref.Class == 'NO_SCORE_REGION')].reset_index(drop=True),                        
+                    hyp=final_sub_hyp.reset_index(drop=True),
+                    iou_thresholds=iou_thresholds)
+                        
+            apScores.append(apScore)
+
+    else:         
+        apScores = Parallel(n_jobs=nb_jobs)(delayed(compute_average_precision_tad)(
+                ref=ref.loc[(ref.Class == act) | (ref.Class == 'NO_SCORE_REGION')].reset_index(drop=True),                        
+                hyp=hyp.loc[(hyp.Class == act)].reset_index(drop=True),
+                iou_thresholds=iou_thresholds) for idx, act in enumerate(alist))
 
     for idx, act in enumerate(alist):
         for iout in iou_thresholds:            
@@ -193,8 +209,7 @@ def _sumup_tad_system_level_scores(metrics, pr_iou_scores, iou_thresholds):
     return ciou
         
 def _sumup_tad_class_level_scores(metrics, pr_iou_scores, iou_thresholds):
-    """ Map internal to public representation. Scores per Class and IoU Level """
-    metrics = metrics    
+    """ Map internal to public representation. Scores per Class and IoU Level """  
     act = {}    
     for iout in iou_thresholds:        
         prs = pr_iou_scores[iout]        
@@ -243,7 +258,7 @@ def write_class_level_scores(output_dir, results, class_type):
     class_level_scores = class_level_scores[["Class_type", "Class", "IoU", "Metric", "Score"]]
     class_level_scores.to_csv(os.path.join(output_dir, "class_scores.csv"), index = None)
    
-def score_tad(ref, hyp, class_type, iou_thresholds, metrics, output_dir, nb_jobs):
+def score_tad(ref, hyp, class_type, iou_thresholds, metrics, output_dir, nb_jobs, mapping_df):
     """ Score System output of Norm/Emotion Detection Task
  
     Parameters
@@ -276,14 +291,14 @@ def score_tad(ref, hyp, class_type, iou_thresholds, metrics, output_dir, nb_jobs
         - **al_results** (df)
             metrics for class level
     """    
-   
+
     # FIXME: Use a No score-region parameter
     tad_add_noscore_region(ref,hyp)
     # Fix out of scope and NA's
-    remove_out_of_scope_activities(ref,hyp) 
+    remove_out_of_scope_activities(ref,hyp,class_type) 
     
     if len(hyp) > 0:
-        pr_iou_scores = compute_multiclass_iou_pr(ref, hyp, iou_thresholds, nb_jobs)
+        pr_iou_scores = compute_multiclass_iou_pr(ref, hyp, iou_thresholds, nb_jobs, mapping_df)
     else:
         pr_iou_scores = {}
         alist = ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False].Class.unique()

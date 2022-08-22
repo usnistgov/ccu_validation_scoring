@@ -24,14 +24,15 @@ def tad_add_noscore_region(ref,hyp):
 		logger.warning("NaN Class in system-output detected. Dropping {} NaN entries".format(prednanl))
 		hyp.drop(hyp[hyp['Class'] == silence_string].index, inplace = True)
 
-def remove_out_of_scope_activities(ref,hyp):
+def remove_out_of_scope_activities(ref,hyp,class_type):
 	""" 
 	If there are any Class which are out of scope or NA, whole entry is
 	removed.    
 
 	"""
-	# ref.Class will already include NO_SCORE_REGION Class 
-	hyp.drop(hyp[~hyp.Class.isin(ref.Class.unique())].index, inplace = True)
+	# ref.Class will already include NO_SCORE_REGION Class
+	if class_type == "emotion": 
+		hyp.drop(hyp[~hyp.Class.isin(ref.Class.unique())].index, inplace = True)
 	hyp.drop(hyp[hyp.Class.isna()].index, inplace = True)
 
 def ap_interp(prec, rec):
@@ -100,19 +101,6 @@ def add_type_column(ref, hyp):
 
 	return hyp_type
 
-def mapping_known_hidden_norm(mapping_dir, hyp):
-	"""
-	Extract mapping info from mapping file and then modify old hyp by changing old system norm to new hidden reference norm
-	"""
-	mapping_file = os.path.join(mapping_dir, "nd.map.tab")
-	mapping_df = pd.read_csv(mapping_file, dtype="object", sep = "\t")
-	new_hyp = mapping_df.merge(hyp, left_on='sys_norm', right_on='Class')
-	new_hyp = new_hyp[["file_id","start","end","status","llr","ref_norm"]]
-	new_hyp.rename(columns={"ref_norm": "Class"}, inplace=True)
-	new_hyp.drop_duplicates(inplace = True)
-	
-	return new_hyp
-
 def extract_df(df, file_id):
 
 	partial_df = df[df['file_id']==file_id]
@@ -125,3 +113,15 @@ def change_class_type(df, class_type):
 	new_df = df.rename(columns = {class_type: "Class"})
 
 	return new_df
+
+def replace_hyp_norm_mapping(sub_mapping_df, hyp, act):
+
+	sys_norm_list = list(sub_mapping_df.sys_norm)
+	sub_hyp = hyp[hyp.Class.isin(sys_norm_list)]
+	new_sub_hyp = sub_mapping_df.merge(sub_hyp, left_on='sys_norm', right_on='Class')
+	new_sub_hyp = new_sub_hyp[["file_id","ref_norm","start","end","status","llr"]]
+	new_sub_hyp.rename(columns={"ref_norm": "Class"}, inplace=True)
+	new_sub_hyp.drop_duplicates(inplace = True)
+	final_sub_hyp = pd.concat([new_sub_hyp, hyp.loc[(hyp.Class == act)]])
+
+	return final_sub_hyp

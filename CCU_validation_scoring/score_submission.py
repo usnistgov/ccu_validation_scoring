@@ -16,13 +16,13 @@ def score_nd_submission_dir_cli(args):
 	hyp = concatenate_submission_file(subm_dir = args.submission_dir, task = "norms")
 
 	if args.mapping_submission_dir:
-		hyp = mapping_known_hidden_norm(args.mapping_submission_dir, hyp)
+		mapping_file = os.path.join(args.mapping_submission_dir, "nd.map.tab")
+		mapping_df = pd.read_csv(mapping_file, dtype="object", sep = "\t")
+	else:
+		mapping_df = None
 
-	# print(ref)
-	# print(hyp)
-		
 	thresholds = [float(i) for i in args.iou_thresholds.split(',')]
-	score_tad(ref, hyp, "norm", iou_thresholds=thresholds, metrics=['map'], output_dir=args.output_dir, nb_jobs = -1)
+	score_tad(ref, hyp, "norm", iou_thresholds=thresholds, metrics=['map'], output_dir=args.output_dir, nb_jobs = -1, mapping_df = mapping_df)
 
 	print("Class Scores")
 	print("---------------")
@@ -37,7 +37,7 @@ def score_ed_submission_dir_cli(args):
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, task = "emotions")
 	hyp = concatenate_submission_file(subm_dir = args.submission_dir, task = "emotions")
 	thresholds = [float(i) for i in args.iou_thresholds.split(',')]
-	score_tad(ref, hyp, "emotion", iou_thresholds=thresholds, metrics=['map'], output_dir=args.output_dir, nb_jobs = -1)
+	score_tad(ref, hyp, "emotion", iou_thresholds=thresholds, metrics=['map'], output_dir=args.output_dir, nb_jobs = -1, mapping_df = None)
 
 	print("Class Scores")
 	print("---------------")
