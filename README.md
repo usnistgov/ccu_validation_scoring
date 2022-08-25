@@ -14,11 +14,17 @@ CCU_scoring -h
 # Command Specific Help
 CCU_scoring score-nd -h
 
+# Validate Norm Detection Task
+CCU_scoring validate-nd -s test/submission/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220815_164235 -ref test/reference/LDC_reference_sample
+
 # Score Norm Detection Task
 CCU_scoring score-nd -s test/submission/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220815_164235 -ref test/reference/LDC_reference_sample
 
 # Score Norm Detection Task with a mapping file
 CCU_scoring score-nd -s test/submission/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample -m test/submission/NDMAP/CCU_P1_TA1_NDMAP_NIST_mini-eval1_20220605_050236
+
+# Validate Emotion Detection Task
+CCU_scoring validate-ed -s test/submission/ED/CCU_P1_TA1_ED_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample
 
 # Score Emotion Detection Task
 CCU_scoring score-ed -s test/submission/ED/CCU_P1_TA1_ED_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample 

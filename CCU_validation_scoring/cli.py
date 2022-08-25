@@ -24,17 +24,17 @@ def main():
 
     # validate_ref_parser.set_defaults(func=validate_reference.validate_ref_submission_dir_cli)
 
-    # validate_nd_parser = subs.add_parser('validate-nd', description='Validate a norm detection submission directory')
-    # validate_nd_parser.add_argument('-s','--submission-dir', type=str, required=True, nargs=1, help='Directory containing a submission')
-    # validate_nd_parser.add_argument('-ref','--reference-dir', type=str, required=True, nargs=1, help='Reference directory')
+    validate_nd_parser = subs.add_parser('validate-nd', description='Validate a norm detection submission directory')
+    validate_nd_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a norm submission')
+    validate_nd_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
 
-    # validate_nd_parser.set_defaults(func=validate_submission.validate_nd_submission_dir_cli)
+    validate_nd_parser.set_defaults(func=validate_submission.validate_nd_submission_dir_cli)
 
-    # validate_ed_parser = subs.add_parser('validate-ed', description='Validate a submission directory')
-    # validate_ed_parser.add_argument('-s','--submission-dir', type=str, required=True, nargs=1, help='Directory containing a submission')
-    # validate_ed_parser.add_argument('-ref','--reference-dir', type=str, required=True, nargs=1, help='Reference directory')
+    validate_ed_parser = subs.add_parser('validate-ed', description='Validate a emotion detection submission directory')
+    validate_ed_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a emotion submission')
+    validate_ed_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
 
-    # validate_ed_parser.set_defaults(func=validate_submission.validate_ed_submission_dir_cli)
+    validate_ed_parser.set_defaults(func=validate_submission.validate_ed_submission_dir_cli)
 
     # validate_vd_parser = subs.add_parser('validate-vd', description='Validate a submission directory')
     # validate_vd_parser.add_argument('-s','--submission-dir', type=str, required=True, nargs=1, help='Directory containing a submission')
