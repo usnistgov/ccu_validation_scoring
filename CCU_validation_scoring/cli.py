@@ -36,17 +36,17 @@ def main():
 
     validate_ed_parser.set_defaults(func=validate_submission.validate_ed_submission_dir_cli)
 
-    # validate_vd_parser = subs.add_parser('validate-vd', description='Validate a submission directory')
-    # validate_vd_parser.add_argument('-s','--submission-dir', type=str, required=True, nargs=1, help='Directory containing a submission')
-    # validate_vd_parser.add_argument('-ref','--reference-dir', type=str, required=True, nargs=1, help='Reference directory')
+    validate_vd_parser = subs.add_parser('validate-vd', description='Validate a valence detection submission directory')
+    validate_vd_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a valence submission')
+    validate_vd_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
 
-    # validate_vd_parser.set_defaults(func=validate_submission.validate_vd_submission_dir_cli)
+    validate_vd_parser.set_defaults(func=validate_submission.validate_vd_submission_dir_cli)
 
-    # validate_ad_parser = subs.add_parser('validate_ad', description='Validate a submission directory')
-    # validate_ad_parser.add_argument('-s','--submission-dir', type=str, required=True, nargs=1, help='Directory containing a submission')
-    # validate_ad_parser.add_argument('-ref','--reference-dir', type=str, required=True, nargs=1, help='Reference directory')
+    validate_ad_parser = subs.add_parser('validate-ad', description='Validate a arousal detection submission directory')
+    validate_ad_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a arousal submission')
+    validate_ad_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
 
-    # validate_ad_parser.set_defaults(func=validate_submission.validate_ad_submission_dir_cli)
+    validate_ad_parser.set_defaults(func=validate_submission.validate_ad_submission_dir_cli)
 
     # validate_cd_parser = subs.add_parser('validate_cd', description='Validate a submission directory')
     # validate_cd_parser.add_argument('-s','--submission-dir', type=str, required=True, nargs=1, help='Directory containing a submission')

@@ -29,8 +29,14 @@ CCU_scoring validate-ed -s test/submission/ED/CCU_P1_TA1_ED_NIST_mini-eval1_2022
 # Score Emotion Detection Task
 CCU_scoring score-ed -s test/submission/ED/CCU_P1_TA1_ED_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample 
 
+# Validate Valence Detection Task
+CCU_scoring validate-vd -s test/submission/VD/CCU_P1_TA1_VD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample 
+
 # Score Valence Detection Task
-CCU_scoring score-vd -s test/submission/VD/CCU_P1_TA1_VD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample 
+CCU_scoring score-vd -s test/submission/VD/CCU_P1_TA1_VD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample
+
+# Validate Arousal Detection Task
+CCU_scoring validate-ad -s test/submission/AD/CCU_P1_TA1_AD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample
 
 # Score Arousal Detection Task
 CCU_scoring score-ad -s test/submission/AD/CCU_P1_TA1_AD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample 

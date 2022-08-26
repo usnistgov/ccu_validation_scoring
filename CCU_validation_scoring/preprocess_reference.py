@@ -287,7 +287,6 @@ def get_average_score_based_on_time(data_frame):
 		time_dict: dictionary which key is period and value includes average valence/arousal value
 		"""
 		time_dict = {}
-		average_dict = {}
 		pre_key = ''
 		voter_count = 0
 		counted_items = 0
@@ -367,11 +366,10 @@ def convert_valence_arousal_dict_df(result_dict, class_type):
 
 		for file_id in result_dict:
 			for duration in result_dict[file_id]:
-				for info in result_dict[file_id][duration]:
-					file_ids.append(result_dict[file_id][duration]["file_id"])
-					starts.append(result_dict[file_id][duration]["start"])
-					ends.append(result_dict[file_id][duration]["end"])
-					Class.append(result_dict[file_id][duration]["Class"])
+				file_ids.append(result_dict[file_id][duration]["file_id"])
+				starts.append(result_dict[file_id][duration]["start"])
+				ends.append(result_dict[file_id][duration]["end"])
+				Class.append(result_dict[file_id][duration]["Class"])
 
 		result_df = pd.DataFrame({"file_id":file_ids,"Class":Class,"start":starts,"end":ends})
 		result_df.drop_duplicates(inplace = True)
@@ -415,38 +413,40 @@ def preprocess_reference_dir(ref_dir, task):
 	and then preprocess the merged data frame
 	"""
 
-	if task == "valence_continuous" or task == "arousal_continuous":
-		data_file = os.path.join(ref_dir,"data","valence_arousal.tab")
-	else:
-		data_file = os.path.join(ref_dir,"data","{}.tab".format(task))  
-	#TODO: determine the delivery of system input index
 	index_file = os.path.join(ref_dir,"docs","system_input.index.tab")
-
-	data_df = read_dedupe_reference_file(data_file)  
 	index_df = read_dedupe_reference_file(index_file)
 
-	if task != "changepoint":
+	if task == "norms" or task == "emotions":
+		data_file = os.path.join(ref_dir,"data","{}.tab".format(task))
+		data_df = read_dedupe_reference_file(data_file)  
 		segment_file = os.path.join(ref_dir,"docs","segments.tab")
 		segment_df = read_dedupe_reference_file(segment_file)
 		segment_prune = delete_gap_segment(segment_df)
 		reference_df = data_df.merge(segment_prune.merge(index_df))
-		if task == "norms" or task == "emotions":
-			column_name = task.replace("s","")
-			ref = preprocess_norm_emotion_reference_df(reference_df, column_name)
-			ref = ref[ref.Class != "none"]
-			ref = ref.merge(index_df)
-		else:
-			column_name = task
-			ref = preprocess_valence_arousal_reference_df(reference_df, column_name)
-			ref = ref.merge(index_df)
-	else:
+		column_name = task.replace("s","")
+		ref = preprocess_norm_emotion_reference_df(reference_df, column_name)
+		ref = ref[ref.Class != "none"]
+		ref = ref.merge(index_df)
+
+	if task == "valence_continuous" or task == "arousal_continuous":
+		data_file = os.path.join(ref_dir,"data","valence_arousal.tab")
+		data_df = read_dedupe_reference_file(data_file)  
+		segment_file = os.path.join(ref_dir,"docs","segments.tab")
+		segment_df = read_dedupe_reference_file(segment_file)
+		segment_prune = delete_gap_segment(segment_df)
+		reference_df = data_df.merge(segment_prune.merge(index_df))
+		column_name = task
+		ref = preprocess_valence_arousal_reference_df(reference_df, column_name)
+		ref = ref.merge(index_df)
+
+	if task == "changepoint":
+		data_file = os.path.join(ref_dir,"data","{}.tab".format(task))
+		data_df = read_dedupe_reference_file(data_file)  
 		ref = data_df.merge(index_df)
 		ref = ref[ref.timestamp != "none"]
 		ref = change_class_type(ref, convert_task_column(task))
 
 	return ref
-
-
 
 
 

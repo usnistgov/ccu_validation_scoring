@@ -6,7 +6,7 @@ import logging
 
 logger = logging.getLogger('VALIDATION')
 
-def check_submission_files(subm_dir, index_file_path, index_df, subm_file_dict):
+def check_submission_files(subm_dir, index_file_path, subm_file_dict):
 
 	subm_files = [path.as_posix() for path in Path(subm_dir).rglob('*.tab') if path.as_posix() != index_file_path]
 
@@ -137,39 +137,41 @@ def check_start_small_end(subm_file_path):
 def check_time_no_gap(subm_file_path, header_type):
 
 	submission_df = pd.read_csv(subm_file_path, dtype={'norm': object}, sep='\t')
+	submission_df_sorted = submission_df.sort_values(by=['start','end'])
 
 	if header_type["start"] == "int":
-		for i in range(submission_df.shape[0]-1):
-			if submission_df.iloc[i]["end"] + 1 != submission_df.iloc[i+1]["start"]:
+		for i in range(submission_df_sorted.shape[0]-1):
+			if submission_df_sorted.iloc[i]["end"] + 1 != submission_df_sorted.iloc[i+1]["start"]:
 				logger.error('Invalid file {}:'.format(subm_file_path))
 				logger.error("There are some gaps in timestamp of {}".format(subm_file_path))
 				return False
 		return True
 	
 	if header_type["start"] == "float":
-		for i in range(submission_df.shape[0]-1):
-			if submission_df.iloc[i]["end"] != submission_df.iloc[i+1]["start"]:
+		for i in range(submission_df_sorted.shape[0]-1):
+			if submission_df_sorted.iloc[i]["end"] != submission_df_sorted.iloc[i+1]["start"]:
 				logger.error('Invalid file {}:'.format(subm_file_path))
 				logger.error("There are some gaps in timestamp of {}".format(subm_file_path))
 				return False
 		return True
 
-def check_duration_equal(subm_file_path, ref_file_path):
+def check_duration_equal(subm_file_path, ref_df):
 
 	submission_df = pd.read_csv(subm_file_path, dtype={'norm': object}, sep='\t')
-	reference_df = pd.read_csv(ref_file_path, sep='\t')
 
 	def calculate_duration_vd_ad(df):
-		start = list(df["start"])
-		end = list(df["end"])
-		time_pool = start + end
-		duration = max(time_pool)-min(time_pool)
 
-		return duration
+		start = min(list(df["start"]))
+		end = max(list(df["end"]))
 
-	if calculate_duration_vd_ad(submission_df) != calculate_duration_vd_ad(reference_df):
+		return start, end
+
+	start_ref, end_ref = calculate_duration_vd_ad(ref_df)
+	start_hyp, end_hyp = calculate_duration_vd_ad(submission_df)
+	
+	if not ((start_ref == start_hyp) and (end_ref == end_hyp)):
 		logger.error('Invalid file {}:'.format(subm_file_path))
-		logger.error("The duration of {} is different from the duration of {}".format(subm_file_path, ref_file_path))
+		logger.error("The duration of {} is different from the duration of reference".format(subm_file_path))
 		return False
 
 	return True
@@ -216,7 +218,7 @@ def check_index_get_submission_files(ref, subm_dir):
 			logger.error('Validation failed')
 			exit(1)
 	
-		# Then check submission path, if it's ok, 
+		# Then check submission path, if it's ok, append path into dictionary
 		subm_file_paths_dict = {}
 		for j in index_df["file_id"]:
 			processed_label = index_df["is_processed"][index_df["file_id"] == j].values[0]
@@ -242,7 +244,7 @@ def check_index_get_submission_files(ref, subm_dir):
 		logger.error('Validation failed')
 		exit(1)
 
-	return index_file_path, index_df, subm_file_paths_dict
+	return index_file_path, subm_file_paths_dict
 
 def check_start_end_within_length(subm_file_path, length):
 
@@ -260,6 +262,22 @@ def check_start_end_within_length(subm_file_path, length):
 			logger.error("Start/end in {} is not within the file length".format(subm_file_path))
 			return False
 	return True
+
+def check_value_range(subm_file_path, task):
+
+	submission_df = pd.read_csv(subm_file_path, dtype={'norm': object}, sep='\t')
+	if submission_df.shape[0] != 0:
+		invalid_value_range = []
+		for i in submission_df[task]:
+			if not((i >= 1) and (i <= 1000)):
+				invalid_value_range.append(i)
+
+		if len(invalid_value_range) > 0:
+			logger.error('Invalid file {}:'.format(subm_file_path))
+			logger.error("{} in {} is not in the range of [1,1000]".format(task, subm_file_path))
+			return False
+	return True
+
 
 def extract_modality_info(file_type):
 
