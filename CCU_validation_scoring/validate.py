@@ -30,21 +30,6 @@ def check_submission_files(subm_dir, index_file_path, subm_file_dict):
 
 	return None
 
-def add_length_subm_file_dict(ref_dir, subm_file_dict):
-
-	index_file = os.path.join(ref_dir,"docs","system_input.index.tab")
-	index_df = read_dedupe_reference_file(index_file)
-
-	for file_id in subm_file_dict:
-		try:
-			length = index_df["length"][index_df["file_id"] == file_id].values[0]
-			subm_file_dict[file_id]["length"] = length
-		except Exception as e:
-			logger.error("Can't find corresponding length of {} in system input index file".format(file_id))
-			exit(1)
-	
-	return subm_file_dict
-
 def check_valid_tab(subm_file_path):
 
 	try:
@@ -229,13 +214,14 @@ def check_index_get_submission_files(ref, subm_dir):
 				exit(1)
 
 			type = ref["type"][ref["file_id"] == j].values[0]
+			length = ref["length"][ref["file_id"] == j].values[0]
 			if subm_file_path[:2] == './': #Check if path is start with ./
 				subm_file_path = subm_file_path[2:]
 			if subm_dir not in subm_file_path: # Check it's absolute or relative path
 				subm_file_path = os.path.join(subm_dir, subm_file_path)
 
 			if os.path.exists(subm_file_path): # Make sure each path is accessible
-				subm_file_paths_dict[j] = {"path": subm_file_path, "type": type, "processed": processed_label}
+				subm_file_paths_dict[j] = {"path": subm_file_path, "type": type, "processed": processed_label, "length": length}
 			else:
 				logger.error("Submission file path of file {} is inaccessible".format(j))
 				logger.error('Validation failed')
