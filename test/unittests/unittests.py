@@ -1,4 +1,5 @@
 from CCU_validation_scoring.preprocess_reference import *
+import json
 import ast
 import sys
 import unittest
@@ -7,20 +8,28 @@ import pandas as pd
 class NormDiscoveryTests(unittest.TestCase):
     #  For norm discovery, since there is only one annotation pass,
     # only "Instance Merging" is performed
-    def test_merge_vote_time_periods(self):
+    def test_merge_vote_time_periods(self,input_file_path="mergeInputFile1.txt", expected_path_file="mergeExpectedFile1.txt"):
     # Test Case: merge_vote_time_periods correctly merges time periods if gap is appropriate
-    
-        # Create an input dictionary
-        input_dict = {'001': [{'start': '0.00', 'end': '10.00'}], '002': [{'start': '0.00', 'end': '5.00'}], '001': [{'start': '10.00', 'end': '12.00'}]}
-        print("\nINPUT DICT: ", input_dict)
+        #data = ""
+        # Create an input dict
+        with open(input_file_path) as file: 
+            data = file.read()
+        input_dict = json.loads(data)
 
-        # Create an expected dictionary
+        # Create expected list
+        with open(expected_path_file) as file:
+            data = file.read()
+        expected_list = json.loads(data)
 
         # Create a dictionary that is returned by merge_vote_time_periods
-        generated_dict = merge_vote_time_periods(input_dict)
-        print("GENERATED DICT: ", generated_dict)
-    
+        generated_list = merge_vote_time_periods(input_dict)   
+
         # Compare generated dict to the expected dict
+        for i  in range(0, len(generated_list)):
+            is_accurate = generated_list[i] == expected_list[i]
+            if not is_accurate:
+                self.assertEqual(generated_list[i]['range'], expected_list[i]['range'], msg=str(generated_list[i]['range']) + " does not equal " + str(expected_list[i]['range']))
+                self.assertEqual(generated_list[i]['Class'], expected_list[i]['Class'], msg=str(generated_list[i]['Class']) + " does not equal " + str(expected_list[i]['Class']))
 
 
 
