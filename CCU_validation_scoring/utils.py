@@ -3,7 +3,6 @@ import re
 import logging
 import pandas as pd
 import numpy as np
-from .preprocess_reference import *
 
 silence_string = "nospeech"
 
@@ -21,40 +20,40 @@ def tad_add_noscore_region(ref,hyp):
 	prednanl = len(prednan)
 	if prednanl > 0:
 		logger = logging.getLogger('SCORING')
-		logger.warning("NaN Class in system-output detected. Dropping {} NaN entries".format(prednanl))
+		logger.warning("Invalid or NaN Class in system-output detected. Dropping {} entries".format(prednanl))
 		hyp.drop(hyp[hyp['Class'] == silence_string].index, inplace = True)
-
-def remove_out_of_scope_activities(ref,hyp,class_type):
-	""" 
-	If there are any Class which are out of scope or NA, whole entry is
-	removed.    
-
-	"""
-	# ref.Class will already include NO_SCORE_REGION Class
-	if class_type == "emotion": 
-		hyp.drop(hyp[~hyp.Class.isin(ref.Class.unique())].index, inplace = True)
-	hyp.drop(hyp[hyp.Class.isna()].index, inplace = True)
+		hyp.drop(hyp[hyp.Class.isna()].index, inplace = True)
 
 def ap_interp(prec, rec):
-    """Interpolated AP - Based on VOCdevkit from VOC 2011.
-    """
-    mprec, mrec, idx = ap_interp_pr(prec, rec)
-    ap = np.sum((mrec[idx] - mrec[idx - 1]) * mprec[idx])
-    return ap
+	"""Interpolated AP - Based on VOCdevkit from VOC 2011.
+	"""
+	mprec, mrec, idx = ap_interp_pr(prec, rec)
+	ap = np.sum((mrec[idx] - mrec[idx - 1]) * mprec[idx])
+	return ap
 
 def ap_interp_pr(prec, rec):
-    """Return Interpolated P/R curve - Based on VOCdevkit from VOC 2011.
-    """
-    mprec = np.hstack([[0], prec, [0]])
-    mrec = np.hstack([[0], rec, [1]])
-    for i in range(len(mprec) - 1)[::-1]:
-        mprec[i] = max(mprec[i], mprec[i + 1])
-    idx = np.where(mrec[1::] != mrec[0:-1])[0] + 1
-    return mprec, mrec, idx
+	"""Return Interpolated P/R curve - Based on VOCdevkit from VOC 2011.
+	"""
+	mprec = np.hstack([[0], prec, [0]])
+	mrec = np.hstack([[0], rec, [1]])
+	for i in range(len(mprec) - 1)[::-1]:
+		mprec[i] = max(mprec[i], mprec[i + 1])
+	idx = np.where(mrec[1::] != mrec[0:-1])[0] + 1
+	return mprec, mrec, idx
 
 def ensure_output_dir(output_dir):
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+	if not os.path.exists(output_dir):
+		os.makedirs(output_dir)
+
+def load_list(fn):
+	try:
+		fh = open(fn, "r")
+		entries = fh.read()
+		raw_list = entries.split("\n")
+		return (list(filter(None, raw_list)))
+	except IOError:
+		print("File not found: '{}'".format(fn))
+		exit(1)
 				
 def concatenate_submission_file(subm_dir, task):
 	"""

@@ -20,7 +20,10 @@ CCU_scoring validate-nd -s test/submission/ND/CCU_P1_TA1_ND_NIST_mini-eval1_2022
 # Score Norm Detection Task
 CCU_scoring score-nd -s test/submission/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220815_164235 -ref test/reference/LDC_reference_sample
 
-# Score Norm Detection Task with a mapping file
+# Validate Norm Detection Mapping Submission
+CCU_scoring validate-ndmap -ref test/reference/LDC_reference_sample -m test/submission/NDMAP/CCU_P1_TA1_NDMAP_NIST_mini-eval1_20220605_050236
+
+# Score Norm Detection Task With A Mapping File
 CCU_scoring score-nd -s test/submission/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample -m test/submission/NDMAP/CCU_P1_TA1_NDMAP_NIST_mini-eval1_20220605_050236
 
 # Validate Emotion Detection Task
@@ -29,17 +32,20 @@ CCU_scoring validate-ed -s test/submission/ED/CCU_P1_TA1_ED_NIST_mini-eval1_2022
 # Score Emotion Detection Task
 CCU_scoring score-ed -s test/submission/ED/CCU_P1_TA1_ED_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample 
 
-# Validate Valence Detection Task
+# Validate Valence Diarization Task
 CCU_scoring validate-vd -s test/submission/VD/CCU_P1_TA1_VD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample 
 
-# Score Valence Detection Task
+# Score Valence Diarization Task
 CCU_scoring score-vd -s test/submission/VD/CCU_P1_TA1_VD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample
 
-# Validate Arousal Detection Task
+# Validate Arousal Diarization Task
 CCU_scoring validate-ad -s test/submission/AD/CCU_P1_TA1_AD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample
 
-# Score Arousal Detection Task
+# Score Arousal Diarization Task
 CCU_scoring score-ad -s test/submission/AD/CCU_P1_TA1_AD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample 
+
+# Validate Change Detection Task
+CCU_scoring validate-cd -s test/submission/CD/CCU_P1_TA1_CD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample 
 
 # Score Change Detection Task
 CCU_scoring score-cd -s test/submission/CD/CCU_P1_TA1_CD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample 

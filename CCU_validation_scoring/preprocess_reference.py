@@ -5,6 +5,17 @@ from .utils import *
 
 silence_string = "nospeech"
 
+def process_subset_norm_emotion(list_file, ref):
+	""" 
+	Method to check filter args and apply them to ref so they can be used by
+	multiple commands.    
+	"""
+	norm_emotion_list = load_list(list_file)
+	# Exclude all classes but include relevant norm in reference
+	pruned_ref = ref.loc[(ref.Class.isin(norm_emotion_list)) | (ref.Class == silence_string)]
+	
+	return pruned_ref
+
 def read_dedupe_reference_file(path):
 	"""
 	Read file and remove duplicate records 

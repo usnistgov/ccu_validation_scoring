@@ -294,8 +294,6 @@ def score_tad(ref, hyp, class_type, iou_thresholds, metrics, output_dir, nb_jobs
 
     # FIXME: Use a No score-region parameter
     tad_add_noscore_region(ref,hyp)
-    # Fix out of scope and NA's
-    remove_out_of_scope_activities(ref,hyp,class_type) 
     
     if len(hyp) > 0:
         pr_iou_scores = compute_multiclass_iou_pr(ref, hyp, iou_thresholds, nb_jobs, mapping_df)
