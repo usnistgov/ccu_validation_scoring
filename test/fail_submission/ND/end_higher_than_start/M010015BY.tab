@@ -1,0 +1,4 @@
+file_id	norm	start	end	status	llr
+M010015BY	001	1104.567	1119.567	adhere	1.5
+M010015BY	002	1104.567	1119.567	violate	1.5
+M010015BY	007	1119.567	1100	violate	1.5

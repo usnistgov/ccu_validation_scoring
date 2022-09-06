@@ -1,0 +1,5 @@
+file_id	norm	start	end	status	llr
+M010029SP	001	200	215	adhere	1.5
+M010029SP	A3	200	215	violate	1.5
+M010029SP	A1	216	230	violate	1.5
+M010029SP	A2	246	260	adhere	1.5

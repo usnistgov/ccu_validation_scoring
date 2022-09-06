@@ -130,7 +130,7 @@ def validate_ndmap_submission_dir_cli(args):
 
 	mapping_file = os.path.join(args.mapping_submission_dir, "nd.map.tab")
 
-	check_file_exist(mapping_file, args.mapping_submission_dir)
+	check_file_exist(mapping_file, mapping_file, args.mapping_submission_dir)
 
 	column_map = {"ndmap": 3}
 	header_map = {"ndmap":{"sys_norm": "object","ref_norm": "object","sub_id": "object"}}
