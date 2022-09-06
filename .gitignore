@@ -5,6 +5,9 @@ CCU_validation_scoring/__pycache__/
 __pycache__/
 *.csv
 *.pyc
+*~
+*#
+.#*
 .DS_Store
 test/.swp**
 test/.DS_Store
