@@ -38,7 +38,7 @@ def test_nd_first(tmpdir):
     """ USE-CASES
     """
 
-    class_df, agg_df = scoring_run('test/reference/LDC_reference_sample', 'test/submission/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220815_164236', "0.01", tmpdir)
+    class_df, agg_df = scoring_run('test/reference/LDC_reference_sample', 'test/submission/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220815_164235', "0.01", tmpdir)
     
     print(agg_df)
     print(class_df)
