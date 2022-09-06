@@ -1,4 +1,5 @@
-file_id	type
-M010005QD	audio
-M010015BY	video
-M010029SP	video
+file_id	type	file_path	length
+M010015BY	audio	./data/audio/M010015BY.flac.ldcc	1404.586
+M010019QD	text	./data/text/M010019QD.ltf.xml	195
+M010029SP	text	./data/text/M010029SP.ltf.xml	320
+M010005QD	video	./data/video/M010005QD.mp4.ldcc	495.229
