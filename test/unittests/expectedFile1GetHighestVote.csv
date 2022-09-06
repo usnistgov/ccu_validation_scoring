@@ -1,0 +1,10 @@
+Emotion,0,1
+anger,"{'start': '200.133', 'end': '215.133'}","{'start': '275.133', 'end': '290.133'}"
+sadness,"{'start': '200.133', 'end': '215.133'}",None
+none,"{'start': '215.133', 'end': '230.133'}","{'start': '260.133', 'end': '275.133'}"
+nospeech,"{'start': '230.133', 'end': '245.133'}",None
+joy,"{'start': '245.133', 'end': '260.133'}",None
+surprise,"{'start': '245.133', 'end': '260.133'}",None
+fear,"{'start': '275.133', 'end': '290.133'}",None
+anticipation,"{'start': '290.133', 'end': '305.133'}",None
+disgust,"{'start': '305.133', 'end': '320.133'}",None
