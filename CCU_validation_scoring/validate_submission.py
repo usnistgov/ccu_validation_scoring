@@ -28,6 +28,7 @@ def validate_nd_submission_dir_cli(args):
 
 	if len(invalid_subm_file_path) > 0:
 		logger.error('Validation failed')
+		exit(1)
 	else:
 		logger.info('Validation succedeed')
 
@@ -52,6 +53,7 @@ def validate_ed_submission_dir_cli(args):
 
 	if len(invalid_subm_file_path) > 0:
 		logger.error('Validation failed')
+		exit(1)
 	else:
 		logger.info('Validation succedeed')
 
@@ -76,6 +78,7 @@ def validate_vd_submission_dir_cli(args):
 
 	if len(invalid_subm_file_path) > 0:
 		logger.error('Validation failed')
+		exit(1)
 	else:
 		logger.info('Validation succedeed')
 
@@ -100,6 +103,7 @@ def validate_ad_submission_dir_cli(args):
 
 	if len(invalid_subm_file_path) > 0:
 		logger.error('Validation failed')
+		exit(1)
 	else:
 		logger.info('Validation succedeed')
 
@@ -123,14 +127,15 @@ def validate_cd_submission_dir_cli(args):
 
 	if len(invalid_subm_file_path) > 0:
 		logger.error('Validation failed')
+		exit(1)
 	else:
 		logger.info('Validation succedeed')
 
 def validate_ndmap_submission_dir_cli(args):
 
-	mapping_file = os.path.join(args.mapping_submission_dir, "nd.map.tab")
+	mapping_file = os.path.join(args.submission_dir, "nd.map.tab")
 
-	check_file_exist(mapping_file, mapping_file, args.mapping_submission_dir)
+	check_file_exist(mapping_file, mapping_file, args.submission_dir)
 
 	column_map = {"ndmap": 3}
 	header_map = {"ndmap":{"sys_norm": "object","ref_norm": "object","sub_id": "object"}}
@@ -140,6 +145,7 @@ def validate_ndmap_submission_dir_cli(args):
 		logger.info('Validation succedeed')
 	else:
 		logger.error('Validation failed')
+		exit(1)
 
 
 

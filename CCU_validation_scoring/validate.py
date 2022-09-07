@@ -20,7 +20,7 @@ def individual_file_check(task, subm_file_path, column_map, header_map, processe
 		file_checks = (check_valid_tab(subm_file_path) and
 			check_column_number(subm_file_path,column_map[task]) and
 			check_valid_header(subm_file_path,list(header_map[task])) and
-			check_output_records(subm_file_path, processed_label) and
+			check_output_records(subm_file_path, task, processed_label) and
 			check_data_type(subm_file_path, header_map[task]) and
 			check_fileid_index_match(subm_file_path, subm_file) and
 			check_start_small_end(subm_file_path) and
@@ -30,7 +30,7 @@ def individual_file_check(task, subm_file_path, column_map, header_map, processe
 		file_checks = (check_valid_tab(subm_file_path) and
 			check_column_number(subm_file_path,column_map[task]) and
 			check_valid_header(subm_file_path,list(header_map[task])) and
-			check_output_records(subm_file_path, processed_label) and
+			check_output_records(subm_file_path, task, processed_label) and
 			check_data_type(subm_file_path, header_map[task]) and
 			check_fileid_index_match(subm_file_path, subm_file) and
 			check_emotion_id(subm_file_path) and
@@ -41,7 +41,7 @@ def individual_file_check(task, subm_file_path, column_map, header_map, processe
 		file_checks = (check_valid_tab(subm_file_path) and
 			check_column_number(subm_file_path,column_map[task]) and
 			check_valid_header(subm_file_path,list(header_map[task])) and
-			check_output_records(subm_file_path, processed_label) and
+			check_output_records(subm_file_path, task, processed_label) and
 			check_data_type(subm_file_path, header_map[task]) and
 			check_fileid_index_match(subm_file_path, subm_file) and
 			check_start_small_end(subm_file_path) and
@@ -54,7 +54,7 @@ def individual_file_check(task, subm_file_path, column_map, header_map, processe
 		file_checks = (check_valid_tab(subm_file_path) and
 			check_column_number(subm_file_path,column_map[task]) and
 			check_valid_header(subm_file_path,list(header_map[task])) and
-			check_output_records(subm_file_path, processed_label) and
+			check_output_records(subm_file_path, task, processed_label) and
 			check_data_type(subm_file_path, header_map[task]) and
 			check_fileid_index_match(subm_file_path, subm_file) and
 			check_start_end_timestamp_within_length(subm_file_path, task, length))
@@ -146,12 +146,21 @@ def check_valid_header(file, header):
 		return False
 	return True
 
-def check_output_records(file, processed_label):
+def check_output_records(file, task, processed_label):
 
 	df = pd.read_csv(file, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
-	if processed_label == False and df.shape[0] != 0:
-		logger.error("Output records have been found in submission file {} with False is_processed label".format(file))
-		return False
+
+	if task == "valence_continuous" or task == "arousal_continuous":
+		if processed_label == False and df.shape[0] != 0:
+			logger.error("Output records have been found in submission file {} with False is_processed label".format(file))
+			return False
+		if processed_label == True and df.shape[0] == 0:
+			logger.error("Can't find output records in vd/ad submission file {} with True is_processed label".format(file))
+			return False
+	else:
+		if processed_label == False and df.shape[0] != 0:
+			logger.error("Output records have been found in submission file {} with False is_processed label".format(file))
+			return False
 	return True
 
 def check_data_type(file, header_type):

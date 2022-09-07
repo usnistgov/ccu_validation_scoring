@@ -1,14 +1,13 @@
 from CCU_validation_scoring.preprocess_reference import *
 import json
 import ast
-import sys
 import unittest
 import pandas as pd
 
 class NormDiscoveryTests(unittest.TestCase):
     #  For norm discovery, since there is only one annotation pass,
     # only "Instance Merging" is performed
-    def test_merge_vote_time_periods(self,input_file_path="mergeInputFile1.txt", expected_path_file="mergeExpectedFile1.txt"):
+    def test_merge_vote_time_periods(self,input_file_path="test/scores/unittests/mergeInputFile1.txt", expected_path_file="test/scores/unittests/mergeExpectedFile1.txt"):
     # Test Case: merge_vote_time_periods correctly merges time periods if gap is appropriate
         #data = ""
         # Create an input dict
@@ -37,7 +36,7 @@ class EmotionDetectionTests(unittest.TestCase):
     # For emotion detection, since there are more than one annotation passes (up to 3),
     # "Judgment Collapsing by Majority Voting" will be applied, followed by "Instance Merging"
 
-    def test_get_highest_vote_input_processing(self, input_file_path='inputeFile1GetHighestVote.csv', expected_file_path='expectedFile1GetHighestVote.csv'):
+    def test_get_highest_vote_input_processing(self, input_file_path='test/scores/unittests/inputeFile1GetHighestVote.csv', expected_file_path='test/scores/unittests/expectedFile1GetHighestVote.csv'):
         # Test Case: Tests that get_highest_vote_based_on_time reads in data frame correctly,
         # & returns valid dict w/ expected keys and values
 
@@ -103,7 +102,7 @@ class ArousalAndValenceTests(unittest.TestCase):
     # For arousal and valence detection, since there are more than one annotation passes (up tp 3).
     # "Judgment Averaging" will be applied, followed by converting it into time series
 
-    def test_get_average_score_input_processing(self, input_file_path='inputFile1GetAvgScore.csv', expected_file_path='expectedFile1GetAvgScore.csv'):
+    def test_get_average_score_input_processing(self, input_file_path='test/scores/unittests/inputFile1GetAvgScore.csv', expected_file_path='test/scores/unittests/expectedFile1GetAvgScore.csv'):
         # Take in name of two files
         # Test Case: Tests whether or not get_average_score_based_on_time reads in data_frame correctly, 
         # & returns valid dict w/ appropriate keys and values

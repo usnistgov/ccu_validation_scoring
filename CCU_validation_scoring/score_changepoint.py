@@ -213,7 +213,8 @@ def write_type_level_scores(output_dir, results, delta_cp_text_thresholds, delta
         result_cp = result_cp[["Delta_CP", "Type", "Metric", "Score"]]
         type_level_scores = pd.concat([type_level_scores, result_cp])
 
-    type_level_scores.to_csv(os.path.join(output_dir, "system_scores.csv"), index = None)
+    type_level_scores_sort = type_level_scores.sort_values(by=['Type'], ascending=True)
+    type_level_scores_sort.to_csv(os.path.join(output_dir, "system_scores.csv"), index = None)
    
 def score_cp(ref, hyp, delta_cp_text_thresholds, delta_cp_time_thresholds, output_dir, nb_jobs):
     """ Score System output of Changepoint Detection Task

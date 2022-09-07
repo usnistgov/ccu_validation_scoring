@@ -1,5 +1,0 @@
-file_id	is_processed	message	file_path
-M010005QD	True		./test/submission/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220823_164235/out/M010005QD.tab
-M010015BY	True		./test/submission/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220823_164235/out/M010015BY.tab
-M010029SP	True		./test/submission/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220823_164235/out/M010029SP.tab
-M010019QD	False		./test/submission/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220823_164235/out/M010019QD.tab

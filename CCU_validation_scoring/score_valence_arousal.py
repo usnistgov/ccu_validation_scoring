@@ -226,7 +226,7 @@ def ccc(x,y):
 
 def write_valence_arousal_scores(output_dir, CCC_result, kappa_result):
 
-	result_df = pd.DataFrame({"Metric": ["CCC","Kappa"], "Score": [CCC_result, kappa_result]})
+	result_df = pd.DataFrame({"Metric": ["CCC","Kappa"], "Score": [round(CCC_result,5), round(kappa_result,5)]})
 	result_df.to_csv(os.path.join(output_dir, "system_scores.csv"), index = None)
 
 def score_valence_arousal(ref, hyp, output_dir, task):
@@ -240,6 +240,7 @@ def score_valence_arousal(ref, hyp, output_dir, task):
 	hyp_level = apply_level_label(hyp_list, task)
 	kappa_result = kappa(ref_level, hyp_level)
 	
+	ensure_output_dir(output_dir)
 	write_valence_arousal_scores(output_dir, CCC_result, kappa_result)
 
 
