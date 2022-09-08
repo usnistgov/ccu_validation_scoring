@@ -55,7 +55,7 @@ def main():
     validate_cd_parser.set_defaults(func=validate_submission.validate_cd_submission_dir_cli)
 
     validate_ndmap_parser = subs.add_parser('validate-ndmap', description='Validate a norm detection mapping submission directory')
-    validate_ndmap_parser.add_argument('-m','--mapping-submission-dir', type=str, required=True, help='Directory containing a norm mapping submission')
+    validate_ndmap_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a norm mapping submission')
     validate_ndmap_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
 
     validate_ndmap_parser.set_defaults(func=validate_submission.validate_ndmap_submission_dir_cli)    

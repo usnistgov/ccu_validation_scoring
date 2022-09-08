@@ -20,7 +20,7 @@ def individual_file_check(task, subm_file_path, column_map, header_map, processe
 		file_checks = (check_valid_tab(subm_file_path) and
 			check_column_number(subm_file_path,column_map[task]) and
 			check_valid_header(subm_file_path,list(header_map[task])) and
-			check_output_records(subm_file_path, processed_label) and
+			check_output_records(subm_file_path, task, processed_label) and
 			check_data_type(subm_file_path, header_map[task]) and
 			check_fileid_index_match(subm_file_path, subm_file) and
 			check_start_small_end(subm_file_path) and
@@ -30,7 +30,7 @@ def individual_file_check(task, subm_file_path, column_map, header_map, processe
 		file_checks = (check_valid_tab(subm_file_path) and
 			check_column_number(subm_file_path,column_map[task]) and
 			check_valid_header(subm_file_path,list(header_map[task])) and
-			check_output_records(subm_file_path, processed_label) and
+			check_output_records(subm_file_path, task, processed_label) and
 			check_data_type(subm_file_path, header_map[task]) and
 			check_fileid_index_match(subm_file_path, subm_file) and
 			check_emotion_id(subm_file_path) and
@@ -41,11 +41,11 @@ def individual_file_check(task, subm_file_path, column_map, header_map, processe
 		file_checks = (check_valid_tab(subm_file_path) and
 			check_column_number(subm_file_path,column_map[task]) and
 			check_valid_header(subm_file_path,list(header_map[task])) and
-			check_output_records(subm_file_path, processed_label) and
+			check_output_records(subm_file_path, task, processed_label) and
 			check_data_type(subm_file_path, header_map[task]) and
 			check_fileid_index_match(subm_file_path, subm_file) and
 			check_start_small_end(subm_file_path) and
-			check_time_no_gap(subm_file_path, header_map[task]) and
+			check_time_no_gap(subm_file_path, ref_df) and
 			check_duration_equal(subm_file_path, ref_df) and
 			check_start_end_timestamp_within_length(subm_file_path, task, length) and
 			check_value_range(subm_file_path, task))
@@ -54,7 +54,7 @@ def individual_file_check(task, subm_file_path, column_map, header_map, processe
 		file_checks = (check_valid_tab(subm_file_path) and
 			check_column_number(subm_file_path,column_map[task]) and
 			check_valid_header(subm_file_path,list(header_map[task])) and
-			check_output_records(subm_file_path, processed_label) and
+			check_output_records(subm_file_path, task, processed_label) and
 			check_data_type(subm_file_path, header_map[task]) and
 			check_fileid_index_match(subm_file_path, subm_file) and
 			check_start_end_timestamp_within_length(subm_file_path, task, length))
@@ -81,13 +81,13 @@ def check_submission_files(subm_dir, index_file_path, subm_file_dict):
 	if set(subm_files) != set([i["path"] for i in subm_file_dict.values()]):
 		logger.error('Invalid directory {}:'.format(subm_dir))
 
-		# Check if we had not enough docs in the  reference files
-		invalid_file = set(subm_files) - set([i["path"] for i in subm_file_dict.values()].values())
+		# Check whether we had too many docs in the submission files
+		invalid_file = set(subm_files) - set([i["path"] for i in subm_file_dict.values()])
 		if invalid_file:
 			logger.error("Additional file(s) {} have been found in submission {}".format(invalid_file, subm_dir))
  
 		# Check whether we had too many docs in the reference files
-		invalid_file = set([i["path"] for i in subm_file_dict.values()].values()) - set(subm_files)
+		invalid_file = set([i["path"] for i in subm_file_dict.values()]) - set(subm_files)
 		if invalid_file:
 			logger.error('The following document(s) {} were not found: {}'.format(invalid_file, subm_dir))
 			
@@ -98,9 +98,9 @@ def check_submission_files(subm_dir, index_file_path, subm_file_dict):
 
 	return None
 
-def check_file_exist(file, dir):
+def check_file_exist(file_path, file, dir):
 
-	if os.path.exists(file):
+	if os.path.exists(file_path):
 		pass
 	else:
 		logger.error('No file {} found in {}'.format(file, dir))
@@ -146,12 +146,21 @@ def check_valid_header(file, header):
 		return False
 	return True
 
-def check_output_records(file, processed_label):
+def check_output_records(file, task, processed_label):
 
 	df = pd.read_csv(file, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
-	if processed_label == False and df.shape[0] != 0:
-		logger.error("Output records have been found in submission file {} with False is_processed label".format(file))
-		return False
+
+	if task == "valence_continuous" or task == "arousal_continuous":
+		if processed_label == False and df.shape[0] != 0:
+			logger.error("Output records have been found in submission file {} with False is_processed label".format(file))
+			return False
+		if processed_label == True and df.shape[0] == 0:
+			logger.error("Can't find output records in vd/ad submission file {} with True is_processed label".format(file))
+			return False
+	else:
+		if processed_label == False and df.shape[0] != 0:
+			logger.error("Output records have been found in submission file {} with False is_processed label".format(file))
+			return False
 	return True
 
 def check_data_type(file, header_type):
@@ -192,16 +201,16 @@ def check_start_small_end(file):
 		for i in range(df.shape[0]):
 			if df.iloc[i]["start"] >= df.iloc[i]["end"]:
 				logger.error('Invalid file {}:'.format(file))
-				logger.error("Start is equal to /larger than end in {}".format(file))
+				logger.error("Start is equal to /higher than end in {}".format(file))
 				return False
 	return True
 
-def check_time_no_gap(file, header_type):
+def check_time_no_gap(file, ref):
 
 	df = pd.read_csv(file, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
 	df_sorted = df.sort_values(by=['start','end'])
 
-	if header_type["start"] == "int":
+	if ref["type"].unique()[0] == "text":
 		for i in range(df_sorted.shape[0]-1):
 			if df_sorted.iloc[i]["end"] + 1 != df_sorted.iloc[i+1]["start"]:
 				logger.error('Invalid file {}:'.format(file))
@@ -209,7 +218,7 @@ def check_time_no_gap(file, header_type):
 				return False
 		return True
 	
-	if header_type["start"] == "float":
+	if ref["type"].unique()[0] == "audio" or ref["type"].unique()[0] == "video":
 		for i in range(df_sorted.shape[0]-1):
 			if df_sorted.iloc[i]["end"] != df_sorted.iloc[i+1]["start"]:
 				logger.error('Invalid file {}:'.format(file))
@@ -228,13 +237,14 @@ def check_duration_equal(file, ref_df):
 
 		return start, end
 
-	start_ref, end_ref = calculate_duration_vd_ad(ref_df)
-	start_hyp, end_hyp = calculate_duration_vd_ad(df)
-	
-	if not ((start_ref == start_hyp) and (end_ref == end_hyp)):
-		logger.error('Invalid file {}:'.format(file))
-		logger.error("The duration of {} is different from the duration of reference".format(file))
-		return False
+	if df.shape[0] != 0:
+		start_ref, end_ref = calculate_duration_vd_ad(ref_df)
+		start_hyp, end_hyp = calculate_duration_vd_ad(df)
+		
+		if not ((start_ref == start_hyp) and (end_ref == end_hyp)):
+			logger.error('Invalid file {}:'.format(file))
+			logger.error("The duration of {} is different from the duration of reference".format(file))
+			return False
 
 	return True
 
@@ -257,7 +267,7 @@ def check_index_get_submission_files(ref, subm_dir):
 
 	# Get and check if index file is there
 	index_file_path = os.path.join(subm_dir, "system_output.index.tab")
-	check_file_exist(index_file_path, subm_dir)
+	check_file_exist(index_file_path, index_file_path, subm_dir)
 
 	# Check the format of index file
 	column_map = {"index": 4}
@@ -268,7 +278,7 @@ def check_index_get_submission_files(ref, subm_dir):
 
 		# Then check if file_id in reference is equal to file_id in index file
 		if sorted(list(index_df["file_id"])) != sorted(list(ref["file_id"].unique())):
-			logger.error('File_ids in reference are different from file_ids in index_file')
+			logger.error('File_ids in index_file are different from file_ids in reference')
 			logger.error('Validation failed')
 			exit(1)
 	
@@ -287,11 +297,12 @@ def check_index_get_submission_files(ref, subm_dir):
 			if subm_file_path[:2] == './': #Check if path is start with ./
 				subm_file_path = subm_file_path[2:]
 			if subm_dir not in subm_file_path: # Check it's absolute or relative path
-				subm_file_path = os.path.join(subm_dir, subm_file_path)
-
-			check_file_exist(subm_file_path, subm_dir)
-
-			subm_file_paths_dict[j] = {"path": subm_file_path, "type": type, "processed": processed_label, "length": length}
+				full_subm_file_path = os.path.join(subm_dir, subm_file_path)
+				check_file_exist(full_subm_file_path, subm_file_path, subm_dir)
+				subm_file_paths_dict[j] = {"path": full_subm_file_path, "type": type, "processed": processed_label, "length": length}
+			else:
+				check_file_exist(subm_file_path, subm_file_path, subm_dir)
+				subm_file_paths_dict[j] = {"path": subm_file_path, "type": type, "processed": processed_label, "length": length}
 	else:
 		logger.error('Validation failed')
 		exit(1)

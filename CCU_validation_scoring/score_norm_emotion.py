@@ -256,7 +256,8 @@ def write_class_level_scores(output_dir, results, class_type):
     class_level_scores = pd.DataFrame({"Class": classes, "IoU": ious, "Metric": metrics, "Score": scores})
     class_level_scores["Class_type"] = class_type
     class_level_scores = class_level_scores[["Class_type", "Class", "IoU", "Metric", "Score"]]
-    class_level_scores.to_csv(os.path.join(output_dir, "class_scores.csv"), index = None)
+    class_level_scores_sort = class_level_scores.sort_values(by=['Class'], ascending=True)
+    class_level_scores_sort.to_csv(os.path.join(output_dir, "class_scores.csv"), index = None)
    
 def score_tad(ref, hyp, class_type, iou_thresholds, metrics, output_dir, nb_jobs, mapping_df):
     """ Score System output of Norm/Emotion Detection Task
