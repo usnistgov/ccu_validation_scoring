@@ -20,6 +20,8 @@ class TestValidateSubmission(unittest.TestCase):
 
         self.pass_submissions_path = os.path.join(test_dir_path, 'pass_submissions')
         self.fail_submissions_path = os.path.join(test_dir_path, 'fail_submissions')
+        self.scoring_index_path = os.path.join(test_dir_path, 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab')
+        self.hidden_norm_path = os.path.join(test_dir_path, 'hidden_norms.txt')
         self.reference_path = os.path.join(test_dir_path, 'reference', 'LDC_reference_sample')
 
     def test_valid_submissions(self):
@@ -31,11 +33,16 @@ class TestValidateSubmission(unittest.TestCase):
             assert len(subdirs) > 0
 
             for subdir in subdirs:
-                sys.argv[1:] = ["validate-{}".format(dir.lower()), "-ref", self.reference_path,
-                                    "-s", subdir]
+                if dir == "NDMAP":
+                    sys.argv[1:] = ["validate-{}".format(dir.lower()),
+                                    "-s", subdir, "-n", self.hidden_norm_path]
+                else:
+                    sys.argv[1:] = ["validate-{}".format(dir.lower()), "-ref", self.reference_path,
+                                    "-s", subdir, "-i", self.scoring_index_path]
                 try:
                     cli.main()
                 except Exception:
+                    print(sys.argv[1:])
                     self.fail("Validator failed on valid submission {}".format(subdir))
 
 
@@ -48,10 +55,15 @@ class TestValidateSubmission(unittest.TestCase):
             assert len(subdirs) > 0
 
             for subdir in subdirs:
-                sys.argv[1:] = ["validate-{}".format(dir.lower()), "-ref", self.reference_path,
-                                    "-s", subdir]
+                if dir == "NDMAP":
+                    sys.argv[1:] = ["validate-{}".format(dir.lower()),
+                                    "-s", subdir, "-n", self.hidden_norm_path]
+                else:
+                    sys.argv[1:] = ["validate-{}".format(dir.lower()), "-ref", self.reference_path,
+                                    "-s", subdir, "-i", self.scoring_index_path]
                 with self.assertRaises(SystemExit):
                     cli.main()
+                    print(sys.argv[1:])
                     self.fail("Validator succedded on invalid submission {}".format(subdir))
 
 

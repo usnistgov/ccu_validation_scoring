@@ -192,7 +192,6 @@ def compute_multiclass_cp_pr(ref, hyp, delta_cp_text_thresholds = 100, delta_cp_
         apScores.append(apScore)
         alignment_df = pd.concat([alignment_df, alignment])
 
-    print(alignment_df)
     for idx, act in enumerate(alist):
         for iout in delta_cp_thresholds[act]:            
             scores[iout].append([act, apScores[idx][iout][0], apScores[idx][iout][1], apScores[idx][iout][2]])       

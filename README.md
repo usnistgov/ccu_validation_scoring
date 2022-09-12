@@ -15,40 +15,40 @@ CCU_scoring -h
 CCU_scoring score-nd -h
 
 # Validate Norm Detection Task
-CCU_scoring validate-nd -s test/pass_submissions/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220815_164235 -ref test/reference/LDC_reference_sample
+CCU_scoring validate-nd -s test/pass_submissions/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220815_164235 -ref test/reference/LDC_reference_sample -i test/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
 
 # Score Norm Detection Task
-CCU_scoring score-nd -s test/pass_submissions/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220815_164235 -ref test/reference/LDC_reference_sample
+CCU_scoring score-nd -s test/pass_submissions/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220815_164235 -ref test/reference/LDC_reference_sample -i test/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
 
 # Validate Norm Detection Mapping Submission
-CCU_scoring validate-ndmap -m test/pass_submissions/NDMAP/CCU_P1_TA1_NDMAP_NIST_mini-eval1_20220605_050236 -ref test/reference/LDC_reference_sample 
+CCU_scoring validate-ndmap -s test/pass_submissions/NDMAP/CCU_P1_TA1_NDMAP_NIST_mini-eval1_20220605_050236 -n test/hidden_norms.txt 
 
 # Score Norm Detection Task With A Mapping File
-CCU_scoring score-nd -s test/pass_submissions/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample -m test/pass_submissions/NDMAP/CCU_P1_TA1_NDMAP_NIST_mini-eval1_20220605_050236
+CCU_scoring score-nd -s test/pass_submissions/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample -m test/pass_submissions/NDMAP/CCU_P1_TA1_NDMAP_NIST_mini-eval1_20220605_050236 -i test/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
 
 # Validate Emotion Detection Task
-CCU_scoring validate-ed -s test/pass_submissions/ED/CCU_P1_TA1_ED_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample
+CCU_scoring validate-ed -s test/pass_submissions/ED/CCU_P1_TA1_ED_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample -i test/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
 
 # Score Emotion Detection Task
-CCU_scoring score-ed -s test/pass_submissions/ED/CCU_P1_TA1_ED_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample 
+CCU_scoring score-ed -s test/pass_submissions/ED/CCU_P1_TA1_ED_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample -i test/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
 
 # Validate Valence Diarization Task
-CCU_scoring validate-vd -s test/pass_submissions/VD/CCU_P1_TA1_VD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample 
+CCU_scoring validate-vd -s test/pass_submissions/VD/CCU_P1_TA1_VD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample -i test/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
 
 # Score Valence Diarization Task
-CCU_scoring score-vd -s test/pass_submissions/VD/CCU_P1_TA1_VD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample
+CCU_scoring score-vd -s test/pass_submissions/VD/CCU_P1_TA1_VD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample -i test/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
 
 # Validate Arousal Diarization Task
-CCU_scoring validate-ad -s test/pass_submissions/AD/CCU_P1_TA1_AD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample
+CCU_scoring validate-ad -s test/pass_submissions/AD/CCU_P1_TA1_AD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample -i test/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
 
 # Score Arousal Diarization Task
-CCU_scoring score-ad -s test/pass_submissions/AD/CCU_P1_TA1_AD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample 
+CCU_scoring score-ad -s test/pass_submissions/AD/CCU_P1_TA1_AD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample -i test/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
 
 # Validate Change Detection Task
-CCU_scoring validate-cd -s test/pass_submissions/CD/CCU_P1_TA1_CD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample 
+CCU_scoring validate-cd -s test/pass_submissions/CD/CCU_P1_TA1_CD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample -i test/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab 
 
 # Score Change Detection Task
-CCU_scoring score-cd -s test/pass_submissions/CD/CCU_P1_TA1_CD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample 
+CCU_scoring score-cd -s test/pass_submissions/CD/CCU_P1_TA1_CD_NIST_mini-eval1_20220531_050236 -ref test/reference/LDC_reference_sample -i test/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab 
 
 ```
 

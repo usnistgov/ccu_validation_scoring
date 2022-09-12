@@ -1,0 +1,4 @@
+anger
+anticipation
+disgust
+fear

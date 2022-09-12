@@ -27,36 +27,41 @@ def main():
     validate_nd_parser = subs.add_parser('validate-nd', description='Validate a norm detection submission directory')
     validate_nd_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a norm detection submission')
     validate_nd_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
+    validate_nd_parser.add_argument('-i','--scoring-index-file', type=str, required=True, help='Use to filter file from scoring (REF)')
 
     validate_nd_parser.set_defaults(func=validate_submission.validate_nd_submission_dir_cli)
 
     validate_ed_parser = subs.add_parser('validate-ed', description='Validate a emotion detection submission directory')
     validate_ed_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a emotion detection submission')
     validate_ed_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
+    validate_ed_parser.add_argument('-i','--scoring-index-file', type=str, required=True, help='Use to filter file from scoring (REF)')
 
     validate_ed_parser.set_defaults(func=validate_submission.validate_ed_submission_dir_cli)
 
     validate_vd_parser = subs.add_parser('validate-vd', description='Validate a valence diarization submission directory')
     validate_vd_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a valence diarization submission')
     validate_vd_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
+    validate_vd_parser.add_argument('-i','--scoring-index-file', type=str, required=True, help='Use to filter file from scoring (REF)')
 
     validate_vd_parser.set_defaults(func=validate_submission.validate_vd_submission_dir_cli)
 
     validate_ad_parser = subs.add_parser('validate-ad', description='Validate an arousal diarization submission directory')
     validate_ad_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing an arousal diarization submission')
     validate_ad_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
+    validate_ad_parser.add_argument('-i','--scoring-index-file', type=str, required=True, help='Use to filter file from scoring (REF)')
 
     validate_ad_parser.set_defaults(func=validate_submission.validate_ad_submission_dir_cli)
 
     validate_cd_parser = subs.add_parser('validate-cd', description='Validate a change detection submission directory')
     validate_cd_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a change detection submission')
     validate_cd_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
+    validate_cd_parser.add_argument('-i','--scoring-index-file', type=str, required=True, help='Use to filter file from scoring (REF)')
 
     validate_cd_parser.set_defaults(func=validate_submission.validate_cd_submission_dir_cli)
 
     validate_ndmap_parser = subs.add_parser('validate-ndmap', description='Validate a norm detection mapping submission directory')
     validate_ndmap_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a norm mapping submission')
-    validate_ndmap_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
+    validate_ndmap_parser.add_argument('-n', '--hidden-norm-list-file', type=str, required=True, help="Use to validate ref_norm in mapping file")
 
     validate_ndmap_parser.set_defaults(func=validate_submission.validate_ndmap_submission_dir_cli)    
 

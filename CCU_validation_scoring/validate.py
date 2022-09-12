@@ -6,9 +6,15 @@ import logging
 
 logger = logging.getLogger('VALIDATION')
 
-def global_file_checks(task, reference_dir, submission_dir):
+def global_file_checks(task, reference_dir, submission_dir, scoring_index_file):
 
-	ref = preprocess_reference_dir(ref_dir = reference_dir, task = task)
+	try:
+		scoring_index = pd.read_csv(scoring_index_file, usecols = ['file_id'], sep = "\t")
+	except Exception as e:
+		logger.error('{} is not a valid scoring index file'.format(scoring_index_file))
+		exit(1)
+
+	ref = preprocess_reference_dir(ref_dir = reference_dir, scoring_index = scoring_index, task = task)
 	index_file_path, subm_file_dict = check_index_get_submission_files(ref, submission_dir)
 	check_submission_files(submission_dir, index_file_path, subm_file_dict)
 
@@ -170,8 +176,12 @@ def check_data_type(file, header_type):
 		res = df.dtypes
 		invalid_type_column = []
 		for i in df.columns:
-			if res[i] != header_type[i]:
-				invalid_type_column.append(i)
+			if type(header_type[i]) is list:		
+				if res[i] not in header_type[i]:
+					invalid_type_column.append(i)
+			else:
+				if res[i] != header_type[i]:
+					invalid_type_column.append(i)
 
 		if len(invalid_type_column) > 0:
 			logger.error('Invalid file {}:'.format(file))
@@ -364,9 +374,9 @@ def check_ref_norm(hidden_norm, mapping_file):
 def extract_modality_info(file_type):
 
 	if file_type == "text":
-		frame_data_type = "int"
+		frame_data_type = ["int"]
 	else:
-		frame_data_type = "float"
+		frame_data_type = ["int", "float"]
 
 	column_map = {"norms": 6, "emotions": 5, "valence_continuous": 4, "arousal_continuous": 4, "changepoint": 3}
 	header_map = {"norms":{"file_id": "object","norm": "object","start": frame_data_type,"end": frame_data_type,"status": "object","llr": "float"},

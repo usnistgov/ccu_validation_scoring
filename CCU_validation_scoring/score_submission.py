@@ -16,6 +16,7 @@ def score_nd_submission_dir_cli(args):
 		scoring_index = pd.read_csv(args.scoring_index_file, usecols = ['file_id'], sep = "\t")
 	except Exception as e:
 		logger.error('{} is not a valid scoring index file'.format(args.scoring_index_file))
+		exit(1)
 
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "norms")
 	if args.norm_list_file:
@@ -45,6 +46,7 @@ def score_ed_submission_dir_cli(args):
 		scoring_index = pd.read_csv(args.scoring_index_file, usecols = ['file_id'], sep = "\t")
 	except Exception as e:
 		logger.error('{} is not a valid scoring index file'.format(args.scoring_index_file))
+		exit(1)
 
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "emotions")
 	if args.emotion_list_file:
@@ -67,6 +69,7 @@ def score_vd_submission_dir_cli(args):
 		scoring_index = pd.read_csv(args.scoring_index_file, usecols = ['file_id'], sep = "\t")
 	except Exception as e:
 		logger.error('{} is not a valid scoring index file'.format(args.scoring_index_file))
+		exit(1)
 
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "valence_continuous")
 	hyp = concatenate_submission_file(subm_dir = args.submission_dir, task = "valence_continuous")
@@ -84,6 +87,7 @@ def score_ad_submission_dir_cli(args):
 		scoring_index = pd.read_csv(args.scoring_index_file, usecols = ['file_id'], sep = "\t")
 	except Exception as e:
 		logger.error('{} is not a valid scoring index file'.format(args.scoring_index_file))
+		exit(1)
 
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "arousal_continuous")
 	hyp = concatenate_submission_file(subm_dir = args.submission_dir, task = "arousal_continuous")
@@ -100,6 +104,7 @@ def score_cd_submission_dir_cli(args):
 		scoring_index = pd.read_csv(args.scoring_index_file, usecols = ['file_id'], sep = "\t")
 	except Exception as e:
 		logger.error('{} is not a valid scoring index file'.format(args.scoring_index_file))
+		exit(1)
 
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "changepoint")
 	hyp = concatenate_submission_file(subm_dir = args.submission_dir, task = "changepoint")
