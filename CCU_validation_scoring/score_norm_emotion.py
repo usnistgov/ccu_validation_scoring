@@ -2,7 +2,6 @@ import os
 import logging
 import numpy as np
 import pandas as pd
-from joblib import Parallel, delayed
 from .utils import *
 
 logger = logging.getLogger('SCORING')
@@ -98,12 +97,13 @@ def compute_average_precision_tad(ref, hyp, iou_thresholds=[0.2]):
     # excluded from overall REF count.
     npos = len(ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False])    
     output, out = {}, []
+    alignment_df = pd.DataFrame()
 
     # No Class found.
     if hyp.empty:
         for iout in iou_thresholds:
             output[iout] = 0.0, [0.0, 0.0], [0.0, 1.0]
-        return output
+        return output,alignment_df
 
     # Compute IoU for all hyps incl. NO_SCORE_REGION
     for idx, myhyp in hyp.iterrows():
@@ -128,11 +128,15 @@ def compute_average_precision_tad(ref, hyp, iou_thresholds=[0.2]):
         fp = np.cumsum(ihyp.fp).astype(float)                      
         rec = (tp / npos).values
         prec = (tp / (tp + fp)).values
-        output[iout] = ap_interp(prec, rec), prec, rec   
-    return output
+        output[iout] = ap_interp(prec, rec), prec, rec
+
+        ihyp = ihyp[["Class","tp","fp","file_id","start_ref","end_ref","start_hyp","end_hyp","IoU","llr"]]
+        alignment_df = pd.concat([alignment_df, ihyp])
+
+    return output,alignment_df
 
 
-def compute_multiclass_iou_pr(ref, hyp, iou_thresholds=0.2, nb_jobs=-1, mapping_df = None):
+def compute_multiclass_iou_pr(ref, hyp, iou_thresholds=0.2, mapping_df = None):
     """ Compute average precision score (AP) and precision-recall curves for
     each class at a set of specific temp. intersection-over-union (tIoU)
     thresholds. If references have empty class they will be marked as
@@ -148,9 +152,6 @@ def compute_multiclass_iou_pr(ref, hyp, iou_thresholds=0.2, nb_jobs=-1, mapping_
         ['file_id', 'Class', 'start', 'end', 'llr']
     iou_thresholds: 1darray
         List of IoU levels to score at.
-    nb_jobs: int
-        Speed up using multi-processing. (-1 use one cpu, 0 use all cpu, N use n
-        cpu)
 
     Returns
     -------
@@ -165,27 +166,29 @@ def compute_multiclass_iou_pr(ref, hyp, iou_thresholds=0.2, nb_jobs=-1, mapping_
     # Iterate over all Classes treating them as a binary detection
     alist = ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False].Class.unique()        
 
-    if mapping_df is not None:
-        apScores = []
-        for idx, act in enumerate(alist):
+    apScores = []
+    alignment_df = pd.DataFrame()
+    for idx, act in enumerate(alist):
+
+        if mapping_df is not None:
             sub_mapping_df = mapping_df.loc[mapping_df.ref_norm == act]
             if not sub_mapping_df.empty:
                 final_sub_hyp = replace_hyp_norm_mapping(sub_mapping_df, hyp, act)
             else:
                 final_sub_hyp = hyp.loc[(hyp.Class == act)]
 
-            apScore = compute_average_precision_tad(
-                    ref=ref.loc[(ref.Class == act) | (ref.Class == 'NO_SCORE_REGION')].reset_index(drop=True),                        
-                    hyp=final_sub_hyp.reset_index(drop=True),
-                    iou_thresholds=iou_thresholds)
-                        
-            apScores.append(apScore)
+            hyp_scoring = final_sub_hyp.reset_index(drop=True)
+        
+        else:
+            hyp_scoring = hyp.loc[(hyp.Class == act)].reset_index(drop=True)
 
-    else:         
-        apScores = Parallel(n_jobs=nb_jobs)(delayed(compute_average_precision_tad)(
+        apScore, alignment = compute_average_precision_tad(
                 ref=ref.loc[(ref.Class == act) | (ref.Class == 'NO_SCORE_REGION')].reset_index(drop=True),                        
-                hyp=hyp.loc[(hyp.Class == act)].reset_index(drop=True),
-                iou_thresholds=iou_thresholds) for idx, act in enumerate(alist))
+                hyp=hyp_scoring,
+                iou_thresholds=iou_thresholds)
+                    
+        apScores.append(apScore)
+        alignment_df = pd.concat([alignment_df, alignment])
 
     for idx, act in enumerate(alist):
         for iout in iou_thresholds:            
@@ -259,7 +262,7 @@ def write_class_level_scores(output_dir, results, class_type):
     class_level_scores_sort = class_level_scores.sort_values(by=['Class'], ascending=True)
     class_level_scores_sort.to_csv(os.path.join(output_dir, "class_scores.csv"), index = None)
    
-def score_tad(ref, hyp, class_type, iou_thresholds, metrics, output_dir, nb_jobs, mapping_df):
+def score_tad(ref, hyp, class_type, iou_thresholds, metrics, output_dir, mapping_df):
     """ Score System output of Norm/Emotion Detection Task
  
     Parameters
@@ -278,9 +281,6 @@ def score_tad(ref, hyp, class_type, iou_thresholds, metrics, output_dir, nb_jobs
         Array of metrics to include
     output_dir: str
         Path to a directory (created on demand) for output files    
-    nb_jobs: int
-        Speed up using multi-processing. (-1 use one cpu, 0 use all cpu, N use n
-        cpu)
 
     Returns
     -------
@@ -295,9 +295,10 @@ def score_tad(ref, hyp, class_type, iou_thresholds, metrics, output_dir, nb_jobs
 
     # FIXME: Use a No score-region parameter
     tad_add_noscore_region(ref,hyp)
+    hyp_type = add_type_column(ref, hyp)
     
     if len(hyp) > 0:
-        pr_iou_scores = compute_multiclass_iou_pr(ref, hyp, iou_thresholds, nb_jobs, mapping_df)
+        pr_iou_scores = compute_multiclass_iou_pr(ref, hyp_type, iou_thresholds, mapping_df)
     else:
         pr_iou_scores = {}
         alist = ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False].Class.unique()

@@ -418,14 +418,14 @@ def preprocess_valence_arousal_reference_df(reference_df, class_type):
 
 	return result_df
 
-def preprocess_reference_dir(ref_dir, task):
+def preprocess_reference_dir(ref_dir, scoring_index, task):
 	"""
 	For each task, read and merge corresponding data file, segment file and index file(read this from reference directory for now) 
 	and then preprocess the merged data frame
 	"""
-
-	index_file = os.path.join(ref_dir,"docs","system_input.index.tab")
-	index_df = read_dedupe_reference_file(index_file)
+	file_info = pd.read_csv(os.path.join(ref_dir,"docs","file_info.tab"), sep = "\t")
+	index_df = file_info.merge(scoring_index, left_on = "file_uid", right_on = "file_id")
+	index_df.drop_duplicates(inplace = True)
 
 	if task == "norms" or task == "emotions":
 		data_file = os.path.join(ref_dir,"data","{}.tab".format(task))

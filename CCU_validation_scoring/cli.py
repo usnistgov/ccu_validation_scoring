@@ -63,9 +63,10 @@ def main():
     score_nd_parser = subs.add_parser('score-nd', description='Score a norm detection submission directory')
     score_nd_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a norm detection submission')
     score_nd_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
+    score_nd_parser.add_argument('-i','--scoring-index-file', type=str, required=True, help='Use to filter file from scoring (REF)')
     score_nd_parser.add_argument('-m','--mapping-submission-dir', type=str, help='Directory containing a norm mapping submission')
     score_nd_parser.add_argument('-n', '--norm_list_file', type=str, required=False, help="Use to filter norm from scoring (REF)")
-    score_nd_parser.add_argument("-i", "--iou_thresholds", nargs='?', default="0.2", help="A comma separated list of IoU thresholds.")
+    score_nd_parser.add_argument("-t", "--iou_thresholds", nargs='?', default="0.2", help="A comma separated list of IoU thresholds.")
     score_nd_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output the system level and class level score to a directory")
 
     score_nd_parser.set_defaults(func=score_submission.score_nd_submission_dir_cli)
@@ -73,8 +74,9 @@ def main():
     score_ed_parser = subs.add_parser('score-ed', description='Score a emotion detection submission directory')
     score_ed_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a emotion detection submission')
     score_ed_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
+    score_ed_parser.add_argument('-i','--scoring-index-file', type=str, required=True, help='Use to filter file from scoring (REF)')
     score_ed_parser.add_argument('-e', '--emotion_list_file', type=str, required=False, help="Use to filter emotion from scoring (REF)")
-    score_ed_parser.add_argument("-i", "--iou_thresholds", nargs='?', default="0.2", help="A comma separated list of IoU thresholds.")
+    score_ed_parser.add_argument("-t", "--iou_thresholds", nargs='?', default="0.2", help="A comma separated list of IoU thresholds.")
     score_ed_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output the system level and class level score to a directory")
 
     score_ed_parser.set_defaults(func=score_submission.score_ed_submission_dir_cli)
@@ -82,6 +84,7 @@ def main():
     score_vd_parser = subs.add_parser('score-vd', description='Score a valence diarization submission directory')
     score_vd_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a valence diarization submission')
     score_vd_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
+    score_vd_parser.add_argument('-i','--scoring-index-file', type=str, required=True, help='Use to filter file from scoring (REF)')
     score_vd_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output the system level score to a directory")
 
     score_vd_parser.set_defaults(func=score_submission.score_vd_submission_dir_cli)
@@ -89,6 +92,7 @@ def main():
     score_ad_parser = subs.add_parser('score-ad', description='Score an arousal diarization submission directory')
     score_ad_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing an arousal diarization submission')
     score_ad_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
+    score_ad_parser.add_argument('-i','--scoring-index-file', type=str, required=True, help='Use to filter file from scoring (REF)')
     score_ad_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output the system level score to a directory")
 
     score_ad_parser.set_defaults(func=score_submission.score_ad_submission_dir_cli)
@@ -96,8 +100,9 @@ def main():
     score_cd_parser = subs.add_parser('score-cd', description='Score a change detection submission directory')
     score_cd_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a change detection submission')
     score_cd_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
+    score_cd_parser.add_argument('-i','--scoring-index-file', type=str, required=True, help='Use to filter file from scoring (REF)')
     score_cd_parser.add_argument("-e", "--delta_cp_text_thresholds", nargs='?', default="100", help="A comma separated list of delta CP text thresholds.")
-    score_cd_parser.add_argument("-i", "--delta_cp_time_thresholds", nargs='?', default="10", help="A comma separated list of delta CP time thresholds.")
+    score_cd_parser.add_argument("-m", "--delta_cp_time_thresholds", nargs='?', default="10", help="A comma separated list of delta CP time thresholds.")
     score_cd_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output the system level score to a directory")
 
     score_cd_parser.set_defaults(func=score_submission.score_cd_submission_dir_cli)
