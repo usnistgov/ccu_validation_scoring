@@ -100,7 +100,6 @@ def change_continuous_non_text(df,step = 2):
 			else:
 				continue
 
-		# print(i,j,label_new)
 		if label_new != silence_string:
 			label_new = round(label_new/(j-i),3)
 		label_new_list.append(label_new)

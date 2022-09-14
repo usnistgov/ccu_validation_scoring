@@ -2,7 +2,6 @@ import os
 import logging
 import numpy as np
 import pandas as pd
-from joblib import Parallel, delayed
 from .utils import *
 
 logger = logging.getLogger('SCORING')
@@ -107,12 +106,13 @@ def compute_average_precision_cps(ref, hyp, delta_cp_thresholds):
     # excluded from overall REF count.
     npos = len(ref.loc[ref.Class != 'NO_SCORE_REGION'])    
     output, out = {}, []
+    alignment_df = pd.DataFrame()
 
     # No Class found.
     if hyp.empty:
         for iout in delta_cp_thresholds:
             output[iout] = 0.0, [0.0, 0.0], [0.0, 1.0]
-        return output
+        return output,alignment_df
  
     # Compute IoU for all hyps incl. NO_SCORE_REGION
     for idx, myhyp in hyp.iterrows():
@@ -132,16 +132,20 @@ def compute_average_precision_cps(ref, hyp, delta_cp_thresholds):
         ihyp.loc[~ihyp['Class_ref'].isna() & (ihyp['delta_cp'] <= iout), ['tp', 'fp']] = [ 1, 0 ]
         # Mark TP as FP for duplicate ref matches at lower CS
         nhyp = ihyp.duplicated(subset = ['file_id', 'Class_ref', 'tp'], keep='first')
-        ihyp.loc[ihyp.loc[nhyp == True].index, ['tp', 'fp']] = [ 0, 1 ]     
+        ihyp.loc[ihyp.loc[nhyp == True].index, ['tp', 'fp']] = [ 0, 1 ] 
         tp = np.cumsum(ihyp.tp).astype(float)
         fp = np.cumsum(ihyp.fp).astype(float)                  
         rec = (tp / npos).values
         prec = (tp / (tp + fp)).values
         output[iout] = ap_interp(prec, rec), prec, rec 
-    return output
+        
+        ihyp = ihyp[["tp","fp","file_id","type","Class_ref","Class_hyp","delta_cp","llr"]]
+        alignment_df = pd.concat([alignment_df, ihyp])
+
+    return output,alignment_df
 
 
-def compute_multiclass_cp_pr(ref, hyp, delta_cp_text_thresholds = 100, delta_cp_time_thresholds = 10, nb_jobs=-1):
+def compute_multiclass_cp_pr(ref, hyp, delta_cp_text_thresholds = 100, delta_cp_time_thresholds = 10):
 
     """ 
     Compute average precision score (AP) and precision-recall curves for
@@ -161,9 +165,6 @@ def compute_multiclass_cp_pr(ref, hyp, delta_cp_text_thresholds = 100, delta_cp_
         Text Delta Distance Thresholds (>=0)
     delta_cp_time_thresholds : 1darray
         Time Delta Distance Thresholds (>=0)
-    nb_jobs: int
-        Speed up using multi-processing. (-1 use one cpu, 0 use all cpu, N use n
-        cpu)
 
     Returns
     -------
@@ -178,17 +179,18 @@ def compute_multiclass_cp_pr(ref, hyp, delta_cp_text_thresholds = 100, delta_cp_
     # # Iterate over all Classes treating them as a binary detection
     alist = ref.loc[ref.Class != 'NO_SCORE_REGION'].type.unique()
 
-    delta_cp_thresholds = {}
+    delta_cp_thresholds = {"text": delta_cp_text_thresholds, "video": delta_cp_time_thresholds, "audio": delta_cp_time_thresholds}    
+    apScores = []
+    alignment_df = pd.DataFrame()
     for idx, act in enumerate(alist):
-        if act == "text":
-            delta_cp_thresholds[act] = delta_cp_text_thresholds
-        else:
-            delta_cp_thresholds[act] = delta_cp_time_thresholds
 
-    apScores = Parallel(n_jobs=nb_jobs)(delayed(compute_average_precision_cps)(
-            ref=ref.loc[(ref.type == act) | (ref.Class == 'NO_SCORE_REGION')].reset_index(drop=True),                        
-            hyp=hyp.loc[(hyp.type == act)].reset_index(drop=True),
-            delta_cp_thresholds=delta_cp_thresholds[act]) for idx, act in enumerate(alist))
+        apScore, alignment = compute_average_precision_cps(
+                ref=ref.loc[(ref.type == act) | (ref.Class == 'NO_SCORE_REGION')].reset_index(drop=True),                        
+                hyp=hyp.loc[(hyp.type == act)].reset_index(drop=True),
+                delta_cp_thresholds=delta_cp_thresholds[act])
+
+        apScores.append(apScore)
+        alignment_df = pd.concat([alignment_df, alignment])
 
     for idx, act in enumerate(alist):
         for iout in delta_cp_thresholds[act]:            
@@ -216,7 +218,7 @@ def write_type_level_scores(output_dir, results, delta_cp_text_thresholds, delta
     type_level_scores_sort = type_level_scores.sort_values(by=['Type'], ascending=True)
     type_level_scores_sort.to_csv(os.path.join(output_dir, "system_scores.csv"), index = None)
    
-def score_cp(ref, hyp, delta_cp_text_thresholds, delta_cp_time_thresholds, output_dir, nb_jobs):
+def score_cp(ref, hyp, delta_cp_text_thresholds, delta_cp_time_thresholds, output_dir):
     """ Score System output of Changepoint Detection Task
  
     Parameters
@@ -233,9 +235,6 @@ def score_cp(ref, hyp, delta_cp_text_thresholds, delta_cp_time_thresholds, outpu
         Time Delta Distance Thresholds (>=0)
     output_dir: str
         Path to a directory (created on demand) for output files    
-    nb_jobs: int
-        Speed up using multi-processing. (-1 use one cpu, 0 use all cpu, N use n
-        cpu)
 
     Returns
     -------
@@ -248,7 +247,7 @@ def score_cp(ref, hyp, delta_cp_text_thresholds, delta_cp_time_thresholds, outpu
     hyp_type = add_type_column(ref, hyp)
 
     if len(hyp) > 0:
-        pr_iou_scores = compute_multiclass_cp_pr(ref, hyp_type, delta_cp_text_thresholds, delta_cp_time_thresholds, nb_jobs)
+        pr_iou_scores = compute_multiclass_cp_pr(ref, hyp_type, delta_cp_text_thresholds, delta_cp_time_thresholds)
     else:
         alist = ref.loc[ref.Class != 'NO_SCORE_REGION'].type.unique()
         pr_iou_scores = generate_zero_scores_changepoint(alist, delta_cp_text_thresholds, delta_cp_time_thresholds)

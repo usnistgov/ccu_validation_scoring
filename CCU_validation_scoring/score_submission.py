@@ -12,7 +12,13 @@ logger = logging.getLogger('SCORING')
 
 def score_nd_submission_dir_cli(args):
 
-	ref = preprocess_reference_dir(ref_dir = args.reference_dir, task = "norms")
+	try:
+		scoring_index = pd.read_csv(args.scoring_index_file, usecols = ['file_id'], sep = "\t")
+	except Exception as e:
+		logger.error('{} is not a valid scoring index file'.format(args.scoring_index_file))
+		exit(1)
+
+	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "norms")
 	if args.norm_list_file:
 		ref = process_subset_norm_emotion(args.norm_list_file, ref)
 	hyp = concatenate_submission_file(subm_dir = args.submission_dir, task = "norms")
@@ -24,7 +30,7 @@ def score_nd_submission_dir_cli(args):
 		mapping_df = None
 
 	thresholds = [float(i) for i in args.iou_thresholds.split(',')]
-	score_tad(ref, hyp, "norm", iou_thresholds=thresholds, metrics=['map'], output_dir=args.output_dir, nb_jobs = -1, mapping_df = mapping_df)
+	score_tad(ref, hyp, "norm", iou_thresholds=thresholds, metrics=['map'], output_dir=args.output_dir, mapping_df = mapping_df)
 
 	print("Class Scores")
 	print("---------------")
@@ -36,12 +42,18 @@ def score_nd_submission_dir_cli(args):
 
 def score_ed_submission_dir_cli(args):
 
-	ref = preprocess_reference_dir(ref_dir = args.reference_dir, task = "emotions")
+	try:
+		scoring_index = pd.read_csv(args.scoring_index_file, usecols = ['file_id'], sep = "\t")
+	except Exception as e:
+		logger.error('{} is not a valid scoring index file'.format(args.scoring_index_file))
+		exit(1)
+
+	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "emotions")
 	if args.emotion_list_file:
 		ref = process_subset_norm_emotion(args.emotion_list_file, ref)
 	hyp = concatenate_submission_file(subm_dir = args.submission_dir, task = "emotions")
 	thresholds = [float(i) for i in args.iou_thresholds.split(',')]
-	score_tad(ref, hyp, "emotion", iou_thresholds=thresholds, metrics=['map'], output_dir=args.output_dir, nb_jobs = -1, mapping_df = None)
+	score_tad(ref, hyp, "emotion", iou_thresholds=thresholds, metrics=['map'], output_dir=args.output_dir, mapping_df = None)
 
 	print("Class Scores")
 	print("---------------")
@@ -53,7 +65,13 @@ def score_ed_submission_dir_cli(args):
 
 def score_vd_submission_dir_cli(args):
 
-	ref = preprocess_reference_dir(ref_dir = args.reference_dir, task = "valence_continuous")
+	try:
+		scoring_index = pd.read_csv(args.scoring_index_file, usecols = ['file_id'], sep = "\t")
+	except Exception as e:
+		logger.error('{} is not a valid scoring index file'.format(args.scoring_index_file))
+		exit(1)
+
+	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "valence_continuous")
 	hyp = concatenate_submission_file(subm_dir = args.submission_dir, task = "valence_continuous")
 
 	score_valence_arousal(ref, hyp, output_dir = args.output_dir, task = "valence_continuous")
@@ -65,7 +83,13 @@ def score_vd_submission_dir_cli(args):
 
 def score_ad_submission_dir_cli(args):
 
-	ref = preprocess_reference_dir(ref_dir = args.reference_dir, task = "arousal_continuous")
+	try:
+		scoring_index = pd.read_csv(args.scoring_index_file, usecols = ['file_id'], sep = "\t")
+	except Exception as e:
+		logger.error('{} is not a valid scoring index file'.format(args.scoring_index_file))
+		exit(1)
+
+	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "arousal_continuous")
 	hyp = concatenate_submission_file(subm_dir = args.submission_dir, task = "arousal_continuous")
 
 	score_valence_arousal(ref, hyp, output_dir = args.output_dir, task = "arousal_continuous")
@@ -76,11 +100,17 @@ def score_ad_submission_dir_cli(args):
 
 def score_cd_submission_dir_cli(args):
 
-	ref = preprocess_reference_dir(ref_dir = args.reference_dir, task = "changepoint")
+	try:
+		scoring_index = pd.read_csv(args.scoring_index_file, usecols = ['file_id'], sep = "\t")
+	except Exception as e:
+		logger.error('{} is not a valid scoring index file'.format(args.scoring_index_file))
+		exit(1)
+
+	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "changepoint")
 	hyp = concatenate_submission_file(subm_dir = args.submission_dir, task = "changepoint")
 	text_thresholds = [int(i) for i in args.delta_cp_text_thresholds.split(',')]
 	time_thresholds = [float(i) for i in args.delta_cp_time_thresholds.split(',')]
-	score_cp(ref, hyp, delta_cp_text_thresholds=text_thresholds, delta_cp_time_thresholds=time_thresholds, output_dir=args.output_dir, nb_jobs = -1)
+	score_cp(ref, hyp, delta_cp_text_thresholds=text_thresholds, delta_cp_time_thresholds=time_thresholds, output_dir=args.output_dir)
 
 	print("System Score")
 	print("-------------")

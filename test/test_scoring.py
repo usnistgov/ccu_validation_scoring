@@ -21,6 +21,7 @@ class TestScoreSubmission(unittest.TestCase):
         
         self.submissions_path = os.path.join(test_dir_path, 'pass_submissions')
         self.reference_path = os.path.join(test_dir_path, 'reference', 'LDC_reference_sample')
+        self.scoring_index_path = os.path.join(test_dir_path, 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab')
         self.score_path = os.path.join(test_dir_path, 'scores')
         self.tmp_dir = test_dir_path
 
@@ -39,7 +40,7 @@ class TestScoreSubmission(unittest.TestCase):
                 score_ref_system_file = os.path.join(self.score_path, dir, os.path.basename(subdir), "system_scores.csv")
 
                 sys.argv[1:] = ["score-{}".format(dir.lower()), "-ref", self.reference_path,
-                            "-s", subdir, "-o", self.tmp_dir]
+                            "-s", subdir, "-i", self.scoring_index_path, "-o", self.tmp_dir]
                 try:
                     cli.main()
                     self.assertTrue(filecmp.cmp(score_ref_system_file, tmp_system_file))
@@ -63,7 +64,7 @@ class TestScoreSubmission(unittest.TestCase):
                 score_ref_system_file = os.path.join(self.score_path, dir, os.path.basename(subdir), "system_scores.csv")
 
                 sys.argv[1:] = ["score-{}".format(dir.lower()), "-ref", self.reference_path,
-                            "-s", subdir, "-o", self.tmp_dir]
+                            "-s", subdir, "-i", self.scoring_index_path, "-o", self.tmp_dir]
                 try:
                     cli.main()
                     self.assertTrue(filecmp.cmp(score_ref_class_file, tmp_class_file))
@@ -85,7 +86,7 @@ class TestScoreSubmission(unittest.TestCase):
         score_ref_system_file = os.path.join(self.score_path, dir, nd_submission, "system_scores.csv")
 
         sys.argv[1:] = ["score-nd", "-ref", self.reference_path, "-s", "test/pass_submissions/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220531_050236",
-                    "-m", subdir, "-o", self.tmp_dir]
+                    "-m", subdir, "-i", self.scoring_index_path, "-o", self.tmp_dir]
         try:
             cli.main()
             self.assertTrue(filecmp.cmp(score_ref_class_file, tmp_class_file))
