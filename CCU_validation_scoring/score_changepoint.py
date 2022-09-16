@@ -14,11 +14,11 @@ def generate_zero_scores_changepoint(labels, delta_cp_text_thresholds, delta_cp_
         y_time = []
         for idx, act in enumerate(labels):
             if act == "text":
-                y_text.append( [ act, 0.0, [0.0, 0.0], [0.0, 1.0] ])
+                y_text.append( ["cp", act, 0.0, [0.0, 0.0], [0.0, 1.0] ])
             else:
-                y_time.append( [ act, 0.0, [0.0, 0.0], [0.0, 1.0] ])
-        df_text = pd.DataFrame(y_text, columns=['type', 'ap', 'precision', 'recall'])
-        df_time = pd.DataFrame(y_time, columns=['type', 'ap', 'precision', 'recall'])
+                y_time.append( ["cp", act, 0.0, [0.0, 0.0], [0.0, 1.0] ])
+        df_text = pd.DataFrame(y_text, columns=['Class', 'type', 'ap', 'precision', 'recall'])
+        df_time = pd.DataFrame(y_time, columns=['Class', 'type', 'ap', 'precision', 'recall'])
         pr_iou_scores = {}
         for iout in delta_cp_text_thresholds:
             pr_iou_scores[iout] = df_text
@@ -28,8 +28,8 @@ def generate_zero_scores_changepoint(labels, delta_cp_text_thresholds, delta_cp_
     else:
         y = []
         logger.error("No matching Types found in system output.")
-        y.append( [ 'no_macthing_Type', 0.0, [0.0, 0.0], [0.0, 1.0] ])
-        df_whole = pd.DataFrame(y, columns=['type', 'ap', 'precision', 'recall'])
+        y.append( [ "cp", 'no_macthing_Type', 0.0, [0.0, 0.0], [0.0, 1.0] ])
+        df_whole = pd.DataFrame(y, columns=['Class', 'type', 'ap', 'precision', 'recall'])
         pr_iou_scores = {}
         for iout in delta_cp_text_thresholds + delta_cp_time_thresholds:
             pr_iou_scores[iout] = df_whole
@@ -101,7 +101,6 @@ def compute_average_precision_cps(ref, hyp, delta_cp_thresholds):
         - **recall** (1darray)
             Recall values
     """
-        
     # REF has same amount of !score_regions for all runs, which need to be
     # excluded from overall REF count.
     npos = len(ref.loc[ref.Class != 'NO_SCORE_REGION'])    
@@ -112,27 +111,28 @@ def compute_average_precision_cps(ref, hyp, delta_cp_thresholds):
     if hyp.empty:
         for iout in delta_cp_thresholds:
             output[iout] = 0.0, [0.0, 0.0], [0.0, 1.0]
+        alignment_df = generate_all_fn_alignment_file(ref, "changepoint")
         return output,alignment_df
- 
+    
     # Compute IoU for all hyps incl. NO_SCORE_REGION
     for idx, myhyp in hyp.iterrows():
         out.append(compute_cps(myhyp, ref))
     ihyp = pd.concat(out)
-
+    
     # Exclude NO_SCORE_REGIONs but keep FP NA's
     ihyp = ihyp.loc[(ihyp.Class_ref != 'NO_SCORE_REGION') | ihyp.Class_ref.isna()]        
 
     # Sort by confidence score
     ihyp.sort_values(["llr"], ascending=False, inplace=True)        
     ihyp.reset_index(inplace=True, drop=True)        
-        
+    
     # Determine TP/FP @ IoU-Threshold
     for iout in delta_cp_thresholds:        
         ihyp[['tp', 'fp']] = [ 0, 1 ]        
         ihyp.loc[~ihyp['Class_ref'].isna() & (ihyp['delta_cp'] <= iout), ['tp', 'fp']] = [ 1, 0 ]
         # Mark TP as FP for duplicate ref matches at lower CS
         nhyp = ihyp.duplicated(subset = ['file_id', 'Class_ref', 'tp'], keep='first')
-        ihyp.loc[ihyp.loc[nhyp == True].index, ['tp', 'fp']] = [ 0, 1 ] 
+        ihyp.loc[ihyp.loc[nhyp == True].index, ['tp', 'fp']] = [ 0, 1 ]
         tp = np.cumsum(ihyp.tp).astype(float)
         fp = np.cumsum(ihyp.fp).astype(float)                  
         rec = (tp / npos).values
@@ -141,11 +141,12 @@ def compute_average_precision_cps(ref, hyp, delta_cp_thresholds):
         
         ihyp = ihyp[["tp","fp","file_id","type","Class_ref","Class_hyp","delta_cp","llr"]]
         alignment_df = pd.concat([alignment_df, ihyp])
+    final_alignment_df = generate_alignment_file(ref.loc[ref.Class != 'NO_SCORE_REGION'], alignment_df, "changepoint")
 
-    return output,alignment_df
+    return output,final_alignment_df
 
 
-def compute_multiclass_cp_pr(ref, hyp, delta_cp_text_thresholds = 100, delta_cp_time_thresholds = 10):
+def compute_multiclass_cp_pr(ref, hyp, delta_cp_text_thresholds = 100, delta_cp_time_thresholds = 10, class_type = None):
 
     """ 
     Compute average precision score (AP) and precision-recall curves for
@@ -182,7 +183,7 @@ def compute_multiclass_cp_pr(ref, hyp, delta_cp_text_thresholds = 100, delta_cp_
     delta_cp_thresholds = {"text": delta_cp_text_thresholds, "video": delta_cp_time_thresholds, "audio": delta_cp_time_thresholds}    
     apScores = []
     alignment_df = pd.DataFrame()
-    for idx, act in enumerate(alist):
+    for act in alist:
 
         apScore, alignment = compute_average_precision_cps(
                 ref=ref.loc[(ref.type == act) | (ref.Class == 'NO_SCORE_REGION')].reset_index(drop=True),                        
@@ -191,6 +192,8 @@ def compute_multiclass_cp_pr(ref, hyp, delta_cp_text_thresholds = 100, delta_cp_
 
         apScores.append(apScore)
         alignment_df = pd.concat([alignment_df, alignment])
+
+    final_alignment_df = alignment_df.drop_duplicates()
 
     for idx, act in enumerate(alist):
         for iout in delta_cp_thresholds[act]:            
@@ -201,22 +204,23 @@ def compute_multiclass_cp_pr(ref, hyp, delta_cp_text_thresholds = 100, delta_cp_
     for iout in delta_cp_text_thresholds + delta_cp_time_thresholds: 
         pr_scores[iout] = pd.DataFrame(scores[iout], columns = ['type', 'ap', 'precision', 'recall'])
 
-    return pr_scores
+    return pr_scores, final_alignment_df
 
 def write_type_level_scores(output_dir, results, delta_cp_text_thresholds, delta_cp_time_thresholds):
 
     type_level_scores = pd.DataFrame()
     for cp in delta_cp_text_thresholds + delta_cp_time_thresholds:
         result_cp = results[cp]
-        result_cp["Delta_CP"] = cp
-        result_cp.rename(columns={'ap': 'Score', 'type': 'Type'}, inplace = True)
-        result_cp['Metric'] = 'AP'
+        result_cp["correctness_criteria"] = "{delta_cp<=" + str(cp) + "}"
+        result_cp.rename(columns={'ap': 'value', 'type': 'genre'}, inplace = True)
+        result_cp['metric'] = 'AP'
+        result_cp["class"] = 'cp'
 
-        result_cp = result_cp[["Delta_CP", "Type", "Metric", "Score"]]
+        result_cp = result_cp[["class","genre","metric","value","correctness_criteria"]]
         type_level_scores = pd.concat([type_level_scores, result_cp])
 
-    type_level_scores_sort = type_level_scores.sort_values(by=['Type'], ascending=True)
-    type_level_scores_sort.to_csv(os.path.join(output_dir, "system_scores.csv"), index = None)
+    type_level_scores_sort = type_level_scores.sort_values(by=['genre'], ascending=True)
+    type_level_scores_sort.to_csv(os.path.join(output_dir, "scores_by_class.tab"), sep = "\t", index = None)
    
 def score_cp(ref, hyp, delta_cp_text_thresholds, delta_cp_time_thresholds, output_dir):
     """ Score System output of Changepoint Detection Task
@@ -247,10 +251,13 @@ def score_cp(ref, hyp, delta_cp_text_thresholds, delta_cp_time_thresholds, outpu
     hyp_type = add_type_column(ref, hyp)
 
     if len(hyp) > 0:
-        pr_iou_scores = compute_multiclass_cp_pr(ref, hyp_type, delta_cp_text_thresholds, delta_cp_time_thresholds)
+        pr_iou_scores, final_alignment_df = compute_multiclass_cp_pr(ref, hyp_type, delta_cp_text_thresholds, delta_cp_time_thresholds)
     else:
         alist = ref.loc[ref.Class != 'NO_SCORE_REGION'].type.unique()
         pr_iou_scores = generate_zero_scores_changepoint(alist, delta_cp_text_thresholds, delta_cp_time_thresholds)
+        final_alignment_df = generate_all_fn_alignment_file(ref, "changepoint")
 
     ensure_output_dir(output_dir)
+    final_alignment_df_sorted = final_alignment_df.sort_values(by=['class', 'file_id', 'ref', 'sys'])
+    final_alignment_df_sorted.to_csv(os.path.join(output_dir, "instance_aligment.tab"), index = False, quoting=3, sep="\t", escapechar="\t")
     write_type_level_scores(output_dir, pr_iou_scores, delta_cp_text_thresholds, delta_cp_time_thresholds)

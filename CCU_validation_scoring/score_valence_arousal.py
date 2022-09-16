@@ -1,3 +1,4 @@
+from ctypes import pointer
 import os
 import pandas as pd
 import numpy as np
@@ -113,15 +114,23 @@ def process_ref_hyp_time_series(ref, hyp, task):
 	"""
 	Convert the ref and hyp into discrete time-series that have the same length
 	"""
+	# Types = ref.loc[ref.Class != silence_string].type.unique()
 
-	ref_list = []
-	hyp_list = []
+	ref_dict = {}
+	hyp_dict = {}
+	Types = ref.loc[ref["Class"] != silence_string].type.unique()
 
+	for type in Types:
+		ref_dict[type] = {}
+		hyp_dict[type] = {}
+
+	segment_df = pd.DataFrame()
 	file_ids = get_unique_items_in_array(ref['file_id'])
 	for file_id in file_ids: 
 	
 		sub_ref = extract_df(ref, file_id)
 		sub_hyp = extract_df(hyp, file_id)
+		sub_type = list(sub_ref["type"])[0]
 
 		# Check file type
 		if list(sub_ref["type"])[0] == "text":
@@ -139,15 +148,29 @@ def process_ref_hyp_time_series(ref, hyp, task):
 				pruned_continue_hyp.rename(columns={"Class": "continue_hyp"}, inplace=True)
 
 				ref_hyp_continue = pd.merge(pruned_continue_ref, pruned_continue_hyp)
-				ref_list.extend(list(ref_hyp_continue["continue_ref"]))
-				hyp_list.extend(list(ref_hyp_continue["continue_hyp"]))
+				ref_dict[sub_type][file_id] = list(ref_hyp_continue["continue_ref"])
+				hyp_dict[sub_type][file_id] = list(ref_hyp_continue["continue_hyp"])
+
+				ref_hyp_continue["start"] = ref_hyp_continue["point"].astype(int)
+				ref_hyp_continue["end"] = ref_hyp_continue["point"].astype(int)
+
+				ref_hyp_continue = ref_hyp_continue[["start","end","continue_ref","file_id","continue_hyp"]]
 			else:
 				# If no output in hyp, add fake output 500 for valence and 1 for arousal
-				ref_list.extend(list(pruned_continue_ref["continue_ref"]))
+				ref_hyp_continue = pruned_continue_ref.copy()
 				if task == "valence_continuous":
-					hyp_list.extend([500]*len(list(pruned_continue_ref["continue_ref"])))
+					ref_hyp_continue["continue_hyp"] = 500
 				else:
-					hyp_list.extend([1]*len(list(pruned_continue_ref["continue_ref"])))
+					ref_hyp_continue["continue_hyp"] = 1
+
+				ref_dict[sub_type][file_id] = list(ref_hyp_continue["continue_ref"])
+				hyp_dict[sub_type][file_id] = list(ref_hyp_continue["continue_hyp"])
+
+				ref_hyp_continue["start"] = ref_hyp_continue["point"].astype(int)
+				ref_hyp_continue["end"] = ref_hyp_continue["point"].astype(int)
+
+				ref_hyp_continue = ref_hyp_continue[["start","end","continue_ref","file_id","continue_hyp"]]
+			segment_df = pd.concat([segment_df,ref_hyp_continue])
 
 		else:
 			continue_ref = change_continuous_non_text(sub_ref)
@@ -164,17 +187,25 @@ def process_ref_hyp_time_series(ref, hyp, task):
 				pruned_continue_hyp.rename(columns={"Class": "continue_hyp"}, inplace=True)
 
 				ref_hyp_continue = pd.merge(pruned_continue_ref, pruned_continue_hyp)
-				ref_list.extend(list(ref_hyp_continue["continue_ref"]))
-				hyp_list.extend(list(ref_hyp_continue["continue_hyp"]))
+				ref_dict[sub_type][file_id] = list(ref_hyp_continue["continue_ref"])
+				hyp_dict[sub_type][file_id] = list(ref_hyp_continue["continue_hyp"])
+
+				ref_hyp_continue = ref_hyp_continue[["start","end","continue_ref","file_id","continue_hyp"]]
 			else:
 				# If no output in hyp, add fake output 500 for valence and 1 for arousal
-				ref_list.extend(list(pruned_continue_ref["continue_ref"]))
+				ref_hyp_continue = pruned_continue_ref.copy()
 				if task == "valence_continuous":
-					hyp_list.extend([500]*len(list(pruned_continue_ref["continue_ref"])))
+					ref_hyp_continue["continue_hyp"] = 500
 				else:
-					hyp_list.extend([1]*len(list(pruned_continue_ref["continue_ref"])))
+					ref_hyp_continue["continue_hyp"] = 1
 
-	return(ref_list, hyp_list)
+				ref_dict[sub_type][file_id] = list(ref_hyp_continue["continue_ref"])
+				hyp_dict[sub_type][file_id] = list(ref_hyp_continue["continue_hyp"])
+
+				ref_hyp_continue = ref_hyp_continue[["start","end","continue_ref","file_id","continue_hyp"]]
+			segment_df = pd.concat([segment_df,ref_hyp_continue])
+
+	return ref_dict, hyp_dict, segment_df
 
 def apply_level_label(list, task):
 	"""
@@ -223,24 +254,66 @@ def ccc(x,y):
 
     return rhoc
 
-def write_valence_arousal_scores(output_dir, CCC_result, kappa_result):
+def score_genre(ref_dict, hyp_dict):
 
-	result_df = pd.DataFrame({"Metric": ["CCC","Kappa"], "Score": [round(CCC_result,5), round(kappa_result,5)]})
-	result_df.to_csv(os.path.join(output_dir, "system_scores.csv"), index = None)
+	result = {}
+	ref = []
+	hyp = []
+	for genre in sorted(ref_dict.keys()):
+		ref_genre = []
+		hyp_genre = []
+		for file_id in ref_dict[genre]:
+			ref.extend(ref_dict[genre][file_id])
+			hyp.extend(hyp_dict[genre][file_id])
+			ref_genre.extend(ref_dict[genre][file_id])
+			hyp_genre.extend(hyp_dict[genre][file_id])
+		result[genre] = ccc(ref_genre, hyp_genre)
+	result["all"] = ccc(ref, hyp)
+
+	return result
+
+def write_segment(segment_df, output_dir, task):
+
+	if task == "valence_continuous":
+		label = "valence"
+	if task == "arousal_continuous":
+		label = "arousal"
+	
+	segment_df["class"] = label
+	segment_df["ref"] = segment_df["continue_ref"]
+	segment_df["sys"] = segment_df["continue_hyp"]
+	segment_df["parameters"] = "{}"
+	segment_df["window"] = "{start=" + segment_df["start"].astype(str) + ",end=" + segment_df["end"].astype(str) + "}"
+
+	segment_df = segment_df[["class","file_id","window","ref","sys","parameters"]]
+	segment_df_sorted = segment_df.sort_values(by=['class', 'file_id', 'sys', 'ref'])
+	segment_df_sorted.to_csv(os.path.join(output_dir, "instance_aligment.tab"), index = False, quoting=3, sep="\t", escapechar="\t")
+
+def write_valence_arousal_scores(output_dir, CCC_result, task):
+
+	result_df = pd.DataFrame(columns=["task","genre","metric","value","correctness_criteria"])
+	index = 0
+	if task == "valence_continuous":
+		label = "vd"
+	if task == "arousal_continuous":
+		label = "ad"
+	for genre, value in CCC_result.items():
+		result_df.loc[len(result_df.index)] = [label, genre, "CCC", round(value,3), "{}"]
+		index = index + 1
+	result_df_sorted = result_df.sort_values("genre")
+	result_df_sorted.to_csv(os.path.join(output_dir, "scores_aggregated.tab"), sep = "\t", index = None)
 
 def score_valence_arousal(ref, hyp, output_dir, task):
 	"""
 	The wrapper
 	"""
-	ref_list, hyp_list = process_ref_hyp_time_series(ref, hyp, task)
-	CCC_result = ccc(ref_list, hyp_list)
-
-	ref_level = apply_level_label(ref_list, task)
-	hyp_level = apply_level_label(hyp_list, task)
-	kappa_result = kappa(ref_level, hyp_level)
+	hyp_type = add_type_column(ref, hyp)
+	ref_dict, hyp_dict, segment_df = process_ref_hyp_time_series(ref, hyp_type, task)
+	CCC_result = score_genre(ref_dict, hyp_dict)
 	
 	ensure_output_dir(output_dir)
-	write_valence_arousal_scores(output_dir, CCC_result, kappa_result)
+	write_segment(segment_df, output_dir, task)
+	write_valence_arousal_scores(output_dir, CCC_result, task)
 
 
 

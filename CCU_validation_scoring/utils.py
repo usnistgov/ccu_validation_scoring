@@ -118,9 +118,89 @@ def replace_hyp_norm_mapping(sub_mapping_df, hyp, act):
 	sys_norm_list = list(sub_mapping_df.sys_norm)
 	sub_hyp = hyp[hyp.Class.isin(sys_norm_list)]
 	new_sub_hyp = sub_mapping_df.merge(sub_hyp, left_on='sys_norm', right_on='Class')
-	new_sub_hyp = new_sub_hyp[["file_id","ref_norm","start","end","status","llr"]]
+	new_sub_hyp = new_sub_hyp[["file_id","ref_norm","start","end","status","llr","type"]]
 	new_sub_hyp.rename(columns={"ref_norm": "Class"}, inplace=True)
 	new_sub_hyp.drop_duplicates(inplace = True)
 	final_sub_hyp = pd.concat([new_sub_hyp, hyp.loc[(hyp.Class == act)]])
 
 	return final_sub_hyp
+
+def generate_alignment_file(ref, hyp, task):
+
+	def categorise(row):
+		if row['tp'] == 1 and row['fp'] == 0:
+			return 'mapped'
+		return 'unmapped'
+
+	hyp["eval"] = hyp.apply(lambda row: categorise(row), axis=1)
+
+	if task in ["norm","emotion"]:
+		hyp["ref"] = "{start=" + hyp["start_ref"].astype(str) + ",end=" + hyp["end_ref"].astype(str) + "}"
+		hyp["sys"] = "{start=" + hyp["start_hyp"].astype(str) + ",end=" + hyp["end_hyp"].astype(str) + "}"
+		hyp["parameters"] = '{iou=' + round(hyp["IoU"],3).astype(str) + '}'
+
+		hyp.loc[hyp["eval"] == "unmapped", "ref"] = "{}"
+		hyp.loc[hyp["eval"] == "unmapped", "parameters"] = "{}"
+
+		hyp = hyp[["Class","file_id","eval","ref","sys","llr","parameters"]]
+		ref_new = ref.copy()
+		ref_new["ref"] = "{start=" + ref["start"].astype(str) + ",end=" + ref["end"].astype(str) + "}"
+		ref_new = ref_new[["file_id","Class","ref"]]
+		ref_new = ref_new.loc[~(ref_new["ref"].isin(hyp["ref"]))]
+		ref_new["eval"] = "unmapped"
+		ref_new["sys"] = "{}"
+		ref_new["parameters"] = "{}"
+		ref_new["llr"] = np.nan
+
+		alignment = pd.concat([hyp, ref_new])
+		alignment = alignment.rename(columns={'Class':'class'})
+
+	if task == "changepoint":
+		hyp["ref"] = '{timestamp=' + hyp["Class_ref"].astype(str) + '}'
+		hyp["sys"] = '{timestamp=' + hyp["Class_hyp"].astype(str) + '}'
+		hyp["parameters"] = '{delta_cp=' + hyp["delta_cp"].astype(str) + '}'
+
+		hyp.loc[hyp["eval"] == "unmapped", "ref"] = "{}"
+		hyp.loc[hyp["eval"] == "unmapped", "parameters"] = "{}"
+		hyp["Class"] = "cp"
+
+		hyp = hyp[["Class","file_id","eval","ref","sys","llr","parameters"]]
+		ref_new = ref.copy()
+		ref_new["ref"] = '{timestamp=' + ref["Class"].astype(str) + '}'
+		ref_new["Class"] = "cp"
+		ref_new = ref_new[["file_id","Class","ref"]]
+		ref_new = ref_new.loc[~(ref_new["ref"].isin(hyp["ref"]))]
+		ref_new["eval"] = "unmapped"
+		ref_new["sys"] = "{}"
+		ref_new["parameters"] = "{}"
+		ref_new["llr"] = np.nan
+
+		alignment = pd.concat([hyp, ref_new])
+		alignment = alignment.rename(columns={'Class':'class'})
+
+	return alignment
+
+def generate_all_fn_alignment_file(ref, task):
+
+	if task in ["norm","emotion"]:
+		ref_new = ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False].copy()
+		ref_new["ref"] = "{start=" + ref["start"].astype(str) + ",end=" + ref["end"].astype(str) + "}"
+		ref_new = ref_new[["file_id","Class","ref"]]
+		ref_new["eval"] = "unmapped"
+		ref_new["sys"] = "{}"
+		ref_new["parameters"] = "{}"
+		ref_new["llr"] = np.nan
+		ref_new = ref_new.rename(columns={'Class':'class'})
+		ref_new = ref_new[["class","file_id","eval","ref","sys","llr","parameters"]]
+	if task == "changepoint":
+		ref_new = ref.loc[ref.Class != 'NO_SCORE_REGION'].copy()
+		ref_new["ref"] = '{timestamp=' + ref["Class"].astype(str) + '}'
+		ref_new = ref_new[["file_id","Class","ref"]]
+		ref_new["eval"] = "unmapped"
+		ref_new["sys"] = "{}"
+		ref_new["parameters"] = "{}"
+		ref_new["llr"] = np.nan
+		ref_new["class"] = "cp"
+		ref_new = ref_new[["class","file_id","eval","ref","sys","llr","parameters"]]
+
+		return ref_new
