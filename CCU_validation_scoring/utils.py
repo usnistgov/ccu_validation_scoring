@@ -6,6 +6,13 @@ import numpy as np
 
 silence_string = "nospeech"
 
+def is_float(value):
+	try: 
+		float(value)
+		return True
+	except ValueError:
+		return False
+		
 def tad_add_noscore_region(ref,hyp):
 	""" 
 	Convert nospeech class into NO_SCORE_REGION in ref and remove nospeech class in hyp
