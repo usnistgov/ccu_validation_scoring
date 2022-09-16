@@ -113,6 +113,12 @@ def change_class_type(df, class_type):
 
 	return new_df
 
+def formatNumber(num):
+  if num % 1 == 0:
+    return str(int(num))
+  else:
+    return str(num)
+
 def replace_hyp_norm_mapping(sub_mapping_df, hyp, act):
 
 	sys_norm_list = list(sub_mapping_df.sys_norm)
@@ -135,56 +141,80 @@ def generate_alignment_file(ref, hyp, task):
 	hyp["eval"] = hyp.apply(lambda row: categorise(row), axis=1)
 
 	if task in ["norm","emotion"]:
-		hyp["ref"] = "{start=" + hyp["start_ref"].astype(str) + ",end=" + hyp["end_ref"].astype(str) + "}"
-		hyp["sys"] = "{start=" + hyp["start_hyp"].astype(str) + ",end=" + hyp["end_hyp"].astype(str) + "}"
-		hyp["parameters"] = '{iou=' + round(hyp["IoU"],3).astype(str) + '}'
 
-		hyp.loc[hyp["eval"] == "unmapped", "ref"] = "{}"
-		hyp.loc[hyp["eval"] == "unmapped", "parameters"] = "{}"
+		ref_format = ref.copy()
+		ref_format['start'] = [formatNumber(x) for x in ref['start']]
+		ref_format['end'] = [formatNumber(x) for x in ref['end']]
+		
+		hyp_format = hyp.copy()
+		hyp_format['start_ref'] = [formatNumber(x) for x in hyp['start_ref']]
+		hyp_format['end_ref'] = [formatNumber(x) for x in hyp['end_ref']]
+		hyp_format['start_hyp'] = [formatNumber(x) for x in hyp['start_hyp']]
+		hyp_format['end_hyp'] = [formatNumber(x) for x in hyp['end_hyp']]
 
-		hyp = hyp[["Class","file_id","eval","ref","sys","llr","parameters"]]
-		ref_new = ref.copy()
-		ref_new["ref"] = "{start=" + ref["start"].astype(str) + ",end=" + ref["end"].astype(str) + "}"
+		hyp_format["ref"] = "{start=" + hyp_format["start_ref"].astype(str) + ",end=" + hyp_format["end_ref"].astype(str) + "}"
+		hyp_format["sys"] = "{start=" + hyp_format["start_hyp"].astype(str) + ",end=" + hyp_format["end_hyp"].astype(str) + "}"
+		hyp_format["IoU_format"] = hyp_format["IoU"].apply(lambda x: "{:,.3f}".format(x))
+		hyp_format["parameters"] = '{iou=' + hyp_format["IoU_format"] + '}'
+
+		hyp_format.loc[hyp_format["eval"] == "unmapped", "ref"] = "{}"
+		hyp_format.loc[hyp_format["eval"] == "unmapped", "parameters"] = "{}"
+
+		hyp_format = hyp_format[["Class","file_id","eval","ref","sys","llr","parameters"]]
+		ref_new = ref_format.copy()
+		ref_new["ref"] = "{start=" + ref_format["start"].astype(str) + ",end=" + ref_format["end"].astype(str) + "}"
 		ref_new = ref_new[["file_id","Class","ref"]]
-		ref_new = ref_new.loc[~(ref_new["ref"].isin(hyp["ref"]))]
+		ref_new = ref_new.loc[~(ref_new["ref"].isin(hyp_format["ref"]))]
 		ref_new["eval"] = "unmapped"
 		ref_new["sys"] = "{}"
 		ref_new["parameters"] = "{}"
 		ref_new["llr"] = np.nan
 
-		alignment = pd.concat([hyp, ref_new])
+		alignment = pd.concat([hyp_format, ref_new])
 		alignment = alignment.rename(columns={'Class':'class'})
 
 	if task == "changepoint":
-		hyp["ref"] = '{timestamp=' + hyp["Class_ref"].astype(str) + '}'
-		hyp["sys"] = '{timestamp=' + hyp["Class_hyp"].astype(str) + '}'
-		hyp["parameters"] = '{delta_cp=' + hyp["delta_cp"].astype(str) + '}'
 
-		hyp.loc[hyp["eval"] == "unmapped", "ref"] = "{}"
-		hyp.loc[hyp["eval"] == "unmapped", "parameters"] = "{}"
-		hyp["Class"] = "cp"
+		ref_format = ref.copy()
+		ref_format['Class'] = [formatNumber(x) for x in ref['Class']]
+		
+		hyp_format = hyp.copy()
+		hyp_format['Class_ref'] = [formatNumber(x) for x in hyp['Class_ref']]
+		hyp_format['Class_hyp'] = [formatNumber(x) for x in hyp['Class_hyp']]
 
-		hyp = hyp[["Class","file_id","eval","ref","sys","llr","parameters"]]
-		ref_new = ref.copy()
-		ref_new["ref"] = '{timestamp=' + ref["Class"].astype(str) + '}'
+		hyp_format["ref"] = '{timestamp=' + hyp_format["Class_ref"].astype(str) + '}'
+		hyp_format["sys"] = '{timestamp=' + hyp_format["Class_hyp"].astype(str) + '}'
+		hyp_format["parameters"] = '{delta_cp=' + hyp_format["delta_cp"].astype(str) + '}'
+
+		hyp_format.loc[hyp_format["eval"] == "unmapped", "ref"] = "{}"
+		hyp_format.loc[hyp_format["eval"] == "unmapped", "parameters"] = "{}"
+		hyp_format["Class"] = "cp"
+
+		hyp_format = hyp_format[["Class","file_id","eval","ref","sys","llr","parameters"]]
+		ref_new = ref_format.copy()
+		ref_new["ref"] = '{timestamp=' + ref_format["Class"].astype(str) + '}'
 		ref_new["Class"] = "cp"
 		ref_new = ref_new[["file_id","Class","ref"]]
-		ref_new = ref_new.loc[~(ref_new["ref"].isin(hyp["ref"]))]
+		ref_new = ref_new.loc[~(ref_new["ref"].isin(hyp_format["ref"]))]
 		ref_new["eval"] = "unmapped"
 		ref_new["sys"] = "{}"
 		ref_new["parameters"] = "{}"
 		ref_new["llr"] = np.nan
 
-		alignment = pd.concat([hyp, ref_new])
+		alignment = pd.concat([hyp_format, ref_new])
 		alignment = alignment.rename(columns={'Class':'class'})
 
 	return alignment
 
 def generate_all_fn_alignment_file(ref, task):
 
+	ref_format = ref.copy()
+	ref_format['start'] = [formatNumber(x) for x in ref['start']]
+	ref_format['end'] = [formatNumber(x) for x in ref['end']]
+	
 	if task in ["norm","emotion"]:
-		ref_new = ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False].copy()
-		ref_new["ref"] = "{start=" + ref["start"].astype(str) + ",end=" + ref["end"].astype(str) + "}"
+		ref_new = ref_format.loc[ref_format.Class.str.contains('NO_SCORE_REGION')==False].copy()
+		ref_new["ref"] = "{start=" + ref_format["start"].astype(str) + ",end=" + ref_format["end"].astype(str) + "}"
 		ref_new = ref_new[["file_id","Class","ref"]]
 		ref_new["eval"] = "unmapped"
 		ref_new["sys"] = "{}"
@@ -203,4 +233,4 @@ def generate_all_fn_alignment_file(ref, task):
 		ref_new["class"] = "cp"
 		ref_new = ref_new[["class","file_id","eval","ref","sys","llr","parameters"]]
 
-		return ref_new
+	return ref_new

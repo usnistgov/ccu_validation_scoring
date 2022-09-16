@@ -4,6 +4,7 @@ from re import M
 import numpy as np
 import pandas as pd
 from .utils import *
+import pdb
 
 logger = logging.getLogger('SCORING')
 
@@ -57,7 +58,11 @@ def compute_ious(row, ref):
             columns=['Class', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU'])
     else:        
         refs['IoU'] = segment_iou(row.start, row.end, [refs.start, refs.end])
-        rmax = refs.loc[refs.IoU == refs.IoU.max()]
+        if (len(refs.loc[refs.IoU > 0]) > 1) & ("NO_SCORE_REGION" in refs.loc[refs.IoU == refs.IoU.max()].Class.values):
+            #If the class of highest iou is no score region, then pick the second highest
+            rmax = refs.loc[refs.IoU == refs.loc[refs.Class != "NO_SCORE_REGION"].IoU.max()]
+        else:
+            rmax = refs.loc[refs.IoU == refs.IoU.max()]
         rout = rmax.rename(columns={'start':'start_ref', 'end':'end_ref'})
         rout[['start_hyp', 'end_hyp', 'llr']] = row.start, row.end, row.llr
         return rout
@@ -118,14 +123,14 @@ def compute_average_precision_tad(ref, hyp, iou_thresholds=[0.2], task=None):
     # Sort by confidence score
     ihyp.sort_values(["llr"], ascending=False, inplace=True)        
     ihyp.reset_index(inplace=True, drop=True)
-         
+
     # Determine TP/FP @ IoU-Threshold
     for iout in iou_thresholds:        
         ihyp[['tp', 'fp']] = [ 0, 1 ]        
         ihyp.loc[~ihyp['start_ref'].isna() & (ihyp['IoU'] >= iout), ['tp', 'fp']] = [ 1, 0 ]
         # Mark TP as FP for duplicate ref matches at lower CS
         nhyp = ihyp.duplicated(subset = ['file_id', 'start_ref', 'end_ref', 'tp'], keep='first')
-        ihyp.loc[ihyp.loc[nhyp == True].index, ['tp', 'fp']] = [ 0, 1 ]       
+        ihyp.loc[ihyp.loc[nhyp == True].index, ['tp', 'fp']] = [ 0, 1 ]      
         tp = np.cumsum(ihyp.tp).astype(float)
         fp = np.cumsum(ihyp.fp).astype(float)                      
         rec = (tp / npos).values
