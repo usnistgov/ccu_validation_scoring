@@ -1,0 +1,5 @@
+task	genre	metric	value	correctness_criteria
+vd	all	CCC	1.0	{}
+vd	audio	CCC	1.0	{}
+vd	text	CCC	1.0	{}
+vd	video	CCC	1.0	{}

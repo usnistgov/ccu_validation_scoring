@@ -259,5 +259,5 @@ def score_cp(ref, hyp, delta_cp_text_thresholds, delta_cp_time_thresholds, outpu
 
     ensure_output_dir(output_dir)
     final_alignment_df_sorted = final_alignment_df.sort_values(by=['class', 'file_id', 'ref', 'sys'])
-    final_alignment_df_sorted.to_csv(os.path.join(output_dir, "instance_aligment.tab"), index = False, quoting=3, sep="\t", escapechar="\t")
+    final_alignment_df_sorted.to_csv(os.path.join(output_dir, "instance_alignment.tab"), index = False, quoting=3, sep="\t", escapechar="\t")
     write_type_level_scores(output_dir, pr_iou_scores, delta_cp_text_thresholds, delta_cp_time_thresholds)

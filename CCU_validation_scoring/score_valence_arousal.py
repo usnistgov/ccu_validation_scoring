@@ -50,7 +50,6 @@ def change_continuous_non_text(df,step = 2):
 	doc1	0     1   (1*1)/1.0=1
 	doc1	1     2   (2*1.0)/1.0=2
 	"""
-
 	start = list(df["start"])
 	end = list(df["end"])
 	label_list = list(df["Class"])
@@ -280,14 +279,17 @@ def write_segment(segment_df, output_dir, task):
 		label = "arousal"
 	
 	segment_df["class"] = label
-	segment_df["ref"] = segment_df["continue_ref"]
-	segment_df["sys"] = segment_df["continue_hyp"]
+	segment_df["ref"] = segment_df["continue_ref"].astype(int)
+	segment_df["sys"] = segment_df["continue_hyp"].astype(int)
 	segment_df["parameters"] = "{}"
-	segment_df["window"] = "{start=" + segment_df["start"].astype(str) + ",end=" + segment_df["end"].astype(str) + "}"
+	segment_df_format = segment_df.copy()
+	segment_df_format["start"] = [formatNumber(x) for x in segment_df["start"]]
+	segment_df_format["end"] = [formatNumber(x) for x in segment_df["end"]]
+	segment_df_format["window"] = "{start=" + segment_df_format["start"].astype(str) + ",end=" + segment_df_format["end"].astype(str) + "}"
 
-	segment_df = segment_df[["class","file_id","window","ref","sys","parameters"]]
-	segment_df_sorted = segment_df.sort_values(by=['class', 'file_id', 'sys', 'ref'])
-	segment_df_sorted.to_csv(os.path.join(output_dir, "instance_aligment.tab"), index = False, quoting=3, sep="\t", escapechar="\t")
+	segment_df_format = segment_df_format[["class","file_id","window","ref","sys","parameters"]]
+	segment_df_sorted = segment_df_format.sort_values(by=['class', 'file_id', 'window'])
+	segment_df_sorted.to_csv(os.path.join(output_dir, "segment_diarization.tab"), index = False, quoting=3, sep="\t", escapechar="\t")
 
 def write_valence_arousal_scores(output_dir, CCC_result, task):
 

@@ -1,0 +1,21 @@
+class	file_id	eval	ref	sys	llr	parameters
+anger	M010015BY	unmapped	{start=1104.567,end=1119.567}	{}		{}
+anger	M010015BY	unmapped	{start=1374.567,end=1404.567}	{}		{}
+anger	M010029SP	unmapped	{start=200,end=215}	{}		{}
+anger	M010029SP	unmapped	{start=276,end=290}	{}		{}
+anticipation	M010029SP	unmapped	{start=291,end=305}	{}		{}
+disgust	M010015BY	unmapped	{start=1224.567,end=1239.567}	{}		{}
+disgust	M010029SP	unmapped	{start=306,end=320}	{}		{}
+fear	M010005QD	unmapped	{start=45.2,end=60.2}	{}		{}
+fear	M010005QD	unmapped	{start=75.2,end=90.2}	{}		{}
+fear	M010015BY	unmapped	{start=1224.567,end=1254.567}	{}		{}
+fear	M010029SP	unmapped	{start=276,end=290}	{}		{}
+joy	M010015BY	unmapped	{start=1164.567,end=1179.567}	{}		{}
+joy	M010015BY	unmapped	{start=1299.567,end=1314.567}	{}		{}
+joy	M010029SP	unmapped	{start=246,end=260}	{}		{}
+sadness	M010005QD	unmapped	{start=45.2,end=60.2}	{}		{}
+sadness	M010015BY	unmapped	{start=1209.567,end=1224.567}	{}		{}
+sadness	M010015BY	unmapped	{start=1269.567,end=1284.567}	{}		{}
+sadness	M010029SP	unmapped	{start=200,end=215}	{}		{}
+surprise	M010015BY	unmapped	{start=1314.567,end=1359.567}	{}		{}
+surprise	M010029SP	unmapped	{start=246,end=260}	{}		{}

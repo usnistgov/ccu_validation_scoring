@@ -207,12 +207,13 @@ def generate_alignment_file(ref, hyp, task):
 	return alignment
 
 def generate_all_fn_alignment_file(ref, task):
-
-	ref_format = ref.copy()
-	ref_format['start'] = [formatNumber(x) for x in ref['start']]
-	ref_format['end'] = [formatNumber(x) for x in ref['end']]
 	
 	if task in ["norm","emotion"]:
+
+		ref_format = ref.copy()
+		ref_format['start'] = [formatNumber(x) for x in ref['start']]
+		ref_format['end'] = [formatNumber(x) for x in ref['end']]
+
 		ref_new = ref_format.loc[ref_format.Class.str.contains('NO_SCORE_REGION')==False].copy()
 		ref_new["ref"] = "{start=" + ref_format["start"].astype(str) + ",end=" + ref_format["end"].astype(str) + "}"
 		ref_new = ref_new[["file_id","Class","ref"]]
@@ -223,8 +224,12 @@ def generate_all_fn_alignment_file(ref, task):
 		ref_new = ref_new.rename(columns={'Class':'class'})
 		ref_new = ref_new[["class","file_id","eval","ref","sys","llr","parameters"]]
 	if task == "changepoint":
-		ref_new = ref.loc[ref.Class != 'NO_SCORE_REGION'].copy()
-		ref_new["ref"] = '{timestamp=' + ref["Class"].astype(str) + '}'
+
+		ref_format = ref.copy()
+		ref_format['Class'] = [formatNumber(x) for x in ref['Class']]
+
+		ref_new = ref_format.loc[ref_format.Class != 'NO_SCORE_REGION'].copy()
+		ref_new["ref"] = '{timestamp=' + ref_format['Class'].astype(str) + '}'
 		ref_new = ref_new[["file_id","Class","ref"]]
 		ref_new["eval"] = "unmapped"
 		ref_new["sys"] = "{}"

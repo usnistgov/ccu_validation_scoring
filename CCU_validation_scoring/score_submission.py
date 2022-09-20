@@ -33,7 +33,7 @@ def score_nd_submission_dir_cli(args):
 
 	print("Alignment")
 	print("---------------")
-	print(open(os.path.join(args.output_dir, 'instance_aligment.tab')).read())
+	print(open(os.path.join(args.output_dir, 'instance_alignment.tab')).read())
 	print("Class Scores")
 	print("---------------")
 	print(open(os.path.join(args.output_dir, 'scores_by_class.tab')).read())
@@ -59,7 +59,7 @@ def score_ed_submission_dir_cli(args):
 
 	print("Alignment")
 	print("---------------")
-	print(open(os.path.join(args.output_dir, 'instance_aligment.tab')).read())
+	print(open(os.path.join(args.output_dir, 'instance_alignment.tab')).read())
 	print("Class Scores")
 	print("---------------")
 	print(open(os.path.join(args.output_dir, 'scores_by_class.tab')).read())
@@ -81,9 +81,9 @@ def score_vd_submission_dir_cli(args):
 
 	score_valence_arousal(ref, hyp, output_dir = args.output_dir, task = "valence_continuous")
 
-	print("Alignment")
+	print("Diarization")
 	print("---------------")
-	print(open(os.path.join(args.output_dir, 'instance_aligment.tab')).read())
+	print(open(os.path.join(args.output_dir, 'segment_diarization.tab')).read())
 	print("Aggregated Scores")
 	print("-------------")
 	print(open(os.path.join(args.output_dir, 'scores_aggregated.tab')).read())
@@ -102,9 +102,9 @@ def score_ad_submission_dir_cli(args):
 
 	score_valence_arousal(ref, hyp, output_dir = args.output_dir, task = "arousal_continuous")
 
-	print("Alignment")
+	print("Diarization")
 	print("---------------")
-	print(open(os.path.join(args.output_dir, 'instance_aligment.tab')).read())
+	print(open(os.path.join(args.output_dir, 'segment_diarization.tab')).read())
 	print("Aggregated Scores")
 	print("-------------")
 	print(open(os.path.join(args.output_dir, 'scores_aggregated.tab')).read())
@@ -125,7 +125,7 @@ def score_cd_submission_dir_cli(args):
 
 	print("Alignment")
 	print("---------------")
-	print(open(os.path.join(args.output_dir, 'instance_aligment.tab')).read())
+	print(open(os.path.join(args.output_dir, 'instance_alignment.tab')).read())
 	print("Class Scores")
 	print("---------------")
 	print(open(os.path.join(args.output_dir, 'scores_by_class.tab')).read())

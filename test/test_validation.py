@@ -20,15 +20,17 @@ class TestValidateSubmission(unittest.TestCase):
 
         self.pass_submissions_path = os.path.join(test_dir_path, 'pass_submissions')
         self.fail_submissions_path = os.path.join(test_dir_path, 'fail_submissions')
-        self.scoring_index_path = os.path.join(test_dir_path, 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab')
+        self.reference_path = os.path.join(test_dir_path, 'reference')
         self.hidden_norm_path = os.path.join(test_dir_path, 'hidden_norms.txt')
-        self.reference_path = os.path.join(test_dir_path, 'reference', 'LDC_reference_sample')
 
     def test_valid_submissions(self):
 
         dirs = ["AD", "CD", "ED", "ND", "NDMAP", "VD"]
         for dir in dirs:
-            subdirs = glob.glob(os.path.join(self.pass_submissions_path, dir, '*'))
+
+            refdir = os.path.join(self.reference_path, 'LDC_reference_sample')
+            self.scoring_index_path = os.path.join(refdir, 'index_files', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab')
+            subdirs = glob.glob(os.path.join(self.pass_submissions_path, "pass_submissions_LDC_reference_sample", dir, '*'))
 
             assert len(subdirs) > 0
 
@@ -37,7 +39,7 @@ class TestValidateSubmission(unittest.TestCase):
                     sys.argv[1:] = ["validate-{}".format(dir.lower()),
                                     "-s", subdir, "-n", self.hidden_norm_path]
                 else:
-                    sys.argv[1:] = ["validate-{}".format(dir.lower()), "-ref", self.reference_path,
+                    sys.argv[1:] = ["validate-{}".format(dir.lower()), "-ref", refdir,
                                     "-s", subdir, "-i", self.scoring_index_path]
                 try:
                     cli.main()
@@ -50,7 +52,10 @@ class TestValidateSubmission(unittest.TestCase):
 
         dirs = ["AD", "ED", "ND", "NDMAP", "VD"]
         for dir in dirs:
-            subdirs = glob.glob(os.path.join(self.fail_submissions_path, dir, '*'))
+
+            refdir = os.path.join(self.reference_path, 'LDC_reference_sample')
+            self.scoring_index_path = os.path.join(refdir, 'index_files', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab')
+            subdirs = glob.glob(os.path.join(self.fail_submissions_path, "fail_submissions_LDC_reference_sample", dir, '*'))
 
             assert len(subdirs) > 0
 
@@ -59,7 +64,7 @@ class TestValidateSubmission(unittest.TestCase):
                     sys.argv[1:] = ["validate-{}".format(dir.lower()),
                                     "-s", subdir, "-n", self.hidden_norm_path]
                 else:
-                    sys.argv[1:] = ["validate-{}".format(dir.lower()), "-ref", self.reference_path,
+                    sys.argv[1:] = ["validate-{}".format(dir.lower()), "-ref", refdir,
                                     "-s", subdir, "-i", self.scoring_index_path]
                 with self.assertRaises(SystemExit):
                     cli.main()

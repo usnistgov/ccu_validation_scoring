@@ -315,7 +315,7 @@ def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df):
 
     ensure_output_dir(output_dir)
     final_alignment_df_sorted = final_alignment_df.sort_values(by=['class', 'file_id', 'sys', 'ref'])
-    final_alignment_df_sorted.to_csv(os.path.join(output_dir, "instance_aligment.tab"), index = False, quoting=3, sep="\t", escapechar="\t")
+    final_alignment_df_sorted.to_csv(os.path.join(output_dir, "instance_alignment.tab"), index = False, quoting=3, sep="\t", escapechar="\t")
     sumup_tad_system_level_scores(pr_iou_scores, iou_thresholds, class_type, output_dir)
     sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir)
 

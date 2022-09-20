@@ -1,0 +1,6 @@
+class	file_id	eval	ref	sys	llr	parameters
+cp	M010005QD	mapped	{timestamp=90.203}	{timestamp=90.203}	1.5	{delta_cp=0.0}
+cp	M010015BY	unmapped	{timestamp=1160.2}	{}		{}
+cp	M010015BY	unmapped	{timestamp=1287.678}	{}		{}
+cp	M010019QD	unmapped	{timestamp=90}	{}		{}
+cp	M010029SP	unmapped	{timestamp=288}	{}		{}
