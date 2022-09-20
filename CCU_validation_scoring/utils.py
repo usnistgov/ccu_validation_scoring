@@ -4,11 +4,11 @@ import logging
 import pandas as pd
 import numpy as np
 
-silence_string = "nospeech"
+silence_string = "noann"
 
 def tad_add_noscore_region(ref,hyp):
 	""" 
-	Convert nospeech class into NO_SCORE_REGION in ref and remove nospeech class in hyp
+	Convert noann class into NO_SCORE_REGION in ref and remove noann class in hyp
 	"""    
 	gtnan = ref[ref.Class == silence_string]
 	gtnanl = len(gtnan)

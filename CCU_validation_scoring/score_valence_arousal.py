@@ -6,7 +6,7 @@ from sklearn.metrics import cohen_kappa_score
 from .utils import *
 from .preprocess_reference import *
 
-silence_string = "nospeech"
+silence_string = "noann"
 
 def change_continuous_text(df):
 		"""
@@ -279,10 +279,11 @@ def write_segment(segment_df, output_dir, task):
 		label = "arousal"
 	
 	segment_df["class"] = label
-	segment_df["ref"] = segment_df["continue_ref"].astype(int)
-	segment_df["sys"] = segment_df["continue_hyp"].astype(int)
-	segment_df["parameters"] = "{}"
 	segment_df_format = segment_df.copy()
+	segment_df_format["ref"] = [formatNumber(x) for x in segment_df["continue_ref"]]
+	segment_df_format["sys"] = [formatNumber(x) for x in segment_df["continue_hyp"]]
+
+	segment_df_format["parameters"] = "{}"
 	segment_df_format["start"] = [formatNumber(x) for x in segment_df["start"]]
 	segment_df_format["end"] = [formatNumber(x) for x in segment_df["end"]]
 	segment_df_format["window"] = "{start=" + segment_df_format["start"].astype(str) + ",end=" + segment_df_format["end"].astype(str) + "}"

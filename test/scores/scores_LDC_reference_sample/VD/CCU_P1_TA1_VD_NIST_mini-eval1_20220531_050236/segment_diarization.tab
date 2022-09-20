@@ -6,7 +6,7 @@ valence	M010005QD	{start=51.2,end=53.2}	344	344	{}
 valence	M010005QD	{start=53.2,end=55.2}	344	344	{}
 valence	M010005QD	{start=55.2,end=57.2}	344	344	{}
 valence	M010005QD	{start=57.2,end=59.2}	344	344	{}
-valence	M010005QD	{start=59.2,end=61.2}	250	250	{}
+valence	M010005QD	{start=59.2,end=61.2}	250.5	250.5	{}
 valence	M010005QD	{start=61.2,end=63.2}	157	157	{}
 valence	M010005QD	{start=63.2,end=65.2}	157	157	{}
 valence	M010005QD	{start=65.2,end=67.2}	157	157	{}
@@ -28,7 +28,7 @@ valence	M010015BY	{start=1110.567,end=1112.567}	586	586	{}
 valence	M010015BY	{start=1112.567,end=1114.567}	586	586	{}
 valence	M010015BY	{start=1114.567,end=1116.567}	586	586	{}
 valence	M010015BY	{start=1116.567,end=1118.567}	586	586	{}
-valence	M010015BY	{start=1118.567,end=1120.567}	711	711	{}
+valence	M010015BY	{start=1118.567,end=1120.567}	711.5	711.5	{}
 valence	M010015BY	{start=1120.567,end=1122.567}	837	837	{}
 valence	M010015BY	{start=1122.567,end=1124.567}	837	837	{}
 valence	M010015BY	{start=1124.567,end=1126.567}	837	837	{}
@@ -65,7 +65,7 @@ valence	M010015BY	{start=1200.567,end=1202.567}	345	345	{}
 valence	M010015BY	{start=1202.567,end=1204.567}	345	345	{}
 valence	M010015BY	{start=1204.567,end=1206.567}	345	345	{}
 valence	M010015BY	{start=1206.567,end=1208.567}	345	345	{}
-valence	M010015BY	{start=1208.567,end=1210.567}	310	310	{}
+valence	M010015BY	{start=1208.567,end=1210.567}	310.5	310.5	{}
 valence	M010015BY	{start=1210.567,end=1212.567}	276	276	{}
 valence	M010015BY	{start=1212.567,end=1214.567}	276	276	{}
 valence	M010015BY	{start=1214.567,end=1216.567}	276	276	{}
@@ -80,7 +80,7 @@ valence	M010015BY	{start=1230.567,end=1232.567}	193	193	{}
 valence	M010015BY	{start=1232.567,end=1234.567}	193	193	{}
 valence	M010015BY	{start=1234.567,end=1236.567}	193	193	{}
 valence	M010015BY	{start=1236.567,end=1238.567}	193	193	{}
-valence	M010015BY	{start=1238.567,end=1240.567}	121	121	{}
+valence	M010015BY	{start=1238.567,end=1240.567}	121.5	121.5	{}
 valence	M010015BY	{start=1240.567,end=1242.567}	50	50	{}
 valence	M010015BY	{start=1242.567,end=1244.567}	50	50	{}
 valence	M010015BY	{start=1244.567,end=1246.567}	50	50	{}
@@ -95,7 +95,7 @@ valence	M010015BY	{start=1260.567,end=1262.567}	101	101	{}
 valence	M010015BY	{start=1262.567,end=1264.567}	101	101	{}
 valence	M010015BY	{start=1264.567,end=1266.567}	101	101	{}
 valence	M010015BY	{start=1266.567,end=1268.567}	101	101	{}
-valence	M010015BY	{start=1268.567,end=1270.567}	79	79	{}
+valence	M010015BY	{start=1268.567,end=1270.567}	79.5	79.5	{}
 valence	M010015BY	{start=1270.567,end=1272.567}	58	58	{}
 valence	M010015BY	{start=1272.567,end=1274.567}	58	58	{}
 valence	M010015BY	{start=1274.567,end=1276.567}	58	58	{}
@@ -125,7 +125,7 @@ valence	M010015BY	{start=1320.567,end=1322.567}	837	837	{}
 valence	M010015BY	{start=1322.567,end=1324.567}	837	837	{}
 valence	M010015BY	{start=1324.567,end=1326.567}	837	837	{}
 valence	M010015BY	{start=1326.567,end=1328.567}	837	837	{}
-valence	M010015BY	{start=1328.567,end=1330.567}	783	783	{}
+valence	M010015BY	{start=1328.567,end=1330.567}	783.5	783.5	{}
 valence	M010015BY	{start=1330.567,end=1332.567}	730	730	{}
 valence	M010015BY	{start=1332.567,end=1334.567}	730	730	{}
 valence	M010015BY	{start=1334.567,end=1336.567}	730	730	{}

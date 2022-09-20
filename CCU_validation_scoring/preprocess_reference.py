@@ -3,7 +3,7 @@ from time import time
 import pandas as pd
 from .utils import *
 
-silence_string = "nospeech"
+silence_string = "noann"
 
 def process_subset_norm_emotion(list_file, ref):
 	""" 
