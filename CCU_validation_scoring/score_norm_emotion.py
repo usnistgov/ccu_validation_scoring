@@ -62,7 +62,8 @@ def compute_ious(row, ref):
             #If the class of highest iou is no score region, then pick the second highest
             rmax = refs.loc[refs.IoU == refs.loc[refs.Class != "NO_SCORE_REGION"].IoU.max()]
         else:
-            rmax = refs.loc[refs.IoU == refs.IoU.max()]
+            rmax_candidate = refs.loc[refs.IoU == refs.IoU.max()]
+            rmax = rmax_candidate.loc[rmax_candidate.start == rmax_candidate.start.min()]
         rout = rmax.rename(columns={'start':'start_ref', 'end':'end_ref'})
         rout[['start_hyp', 'end_hyp', 'llr']] = row.start, row.end, row.llr
         return rout
@@ -98,7 +99,6 @@ def compute_average_precision_tad(ref, hyp, iou_thresholds=[0.2], task=None):
         - **recall** (1darray)
             Recall values
     """
-        
     # REF has same amount of !score_regions for all runs, which need to be
     # excluded from overall REF count.
     npos = len(ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False])    
@@ -132,7 +132,7 @@ def compute_average_precision_tad(ref, hyp, iou_thresholds=[0.2], task=None):
         nhyp = ihyp.duplicated(subset = ['file_id', 'start_ref', 'end_ref', 'tp'], keep='first')
         ihyp.loc[ihyp.loc[nhyp == True].index, ['tp', 'fp']] = [ 0, 1 ]      
         tp = np.cumsum(ihyp.tp).astype(float)
-        fp = np.cumsum(ihyp.fp).astype(float)                      
+        fp = np.cumsum(ihyp.fp).astype(float)                 
         rec = (tp / npos).values
         prec = (tp / (tp + fp)).values
         output[iout] = ap_interp(prec, rec), prec, rec

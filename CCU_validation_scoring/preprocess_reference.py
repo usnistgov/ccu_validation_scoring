@@ -308,7 +308,7 @@ def get_average_score_based_on_time(data_frame):
 				value = time_dict[time_key]
 				if row['user_id'] != value['user_id']:
 					voter_count = voter_count + 1
-				if row['Class'] != silence_string:
+				if row['Class'] != silence_string and value['Class'] != silence_string:
 					cur_valence = float(row['Class'])
 					value['Class'] = value['Class'] + cur_valence
 					time_dict[time_key]=value
