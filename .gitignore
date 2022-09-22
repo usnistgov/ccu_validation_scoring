@@ -11,6 +11,3 @@ __pycache__/
 test/.swp**
 test/.DS_Store
 test/__pycache__/
-hidden_norms.txt
-known_norms.txt
-*.scoring.index.tab

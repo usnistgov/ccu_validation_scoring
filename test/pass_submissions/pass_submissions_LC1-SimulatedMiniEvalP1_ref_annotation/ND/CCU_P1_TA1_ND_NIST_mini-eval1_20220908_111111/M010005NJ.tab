@@ -1,0 +1,7 @@
+file_id	norm	start	end	status	llr
+M010005NJ	001	1	4	adhere	0.6
+M010005NJ	001	6	10	violate	0.8
+M010005NJ	001	12	16	adhere	0.9
+M010005NJ	001	23	31	violate	0.9
+M010005NJ	001	43	47	adhere	0.7
+M010005NJ	001	48	50	violate	0.9

@@ -1,8 +1,10 @@
 import os
 import logging
+from re import M
 import numpy as np
 import pandas as pd
 from .utils import *
+import pdb
 
 logger = logging.getLogger('SCORING')
 
@@ -10,12 +12,12 @@ logger = logging.getLogger('SCORING')
 def generate_zero_scores_norm_emotion(labels):
     y = []
     if len(labels)>0:
-        for i in labels:
-            y.append( [ i, 0.0, [0.0, 0.0], [0.0, 1.0] ])
+        for i in range(len(labels)):
+            y.append( [labels.loc[i, "Class"], labels.loc[i, "type"], 0.0, [0.0, 0.0], [0.0, 1.0] ])
     else:
-        logger.error("No matching Classes found in system output.")
-        y.append( [ 'no_macthing_Class', 0.0, [0.0, 0.0], [0.0, 1.0] ]) 
-    return pd.DataFrame(y, columns=['Class', 'ap', 'precision', 'recall'])
+        logger.error("No matching Classes and types found in system output.")
+        y.append( [ 'no_macthing_class', 'no_macthing_type', 0.0, [0.0, 0.0], [0.0, 1.0] ]) 
+    return pd.DataFrame(y, columns=['Class', 'type', 'ap', 'precision', 'recall'])
 
 
 def segment_iou(ref_start, ref_end, tgts):
@@ -56,12 +58,16 @@ def compute_ious(row, ref):
             columns=['Class', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU'])
     else:        
         refs['IoU'] = segment_iou(row.start, row.end, [refs.start, refs.end])
-        rmax = refs.loc[refs.IoU == refs.IoU.max()]
+        if (len(refs.loc[refs.IoU > 0]) > 1) & ("NO_SCORE_REGION" in refs.loc[refs.IoU == refs.IoU.max()].Class.values):
+            #If the class of highest iou is no score region, then pick the second highest
+            rmax = refs.loc[refs.IoU == refs.loc[refs.Class != "NO_SCORE_REGION"].IoU.max()]
+        else:
+            rmax = refs.loc[refs.IoU == refs.IoU.max()]
         rout = rmax.rename(columns={'start':'start_ref', 'end':'end_ref'})
         rout[['start_hyp', 'end_hyp', 'llr']] = row.start, row.end, row.llr
         return rout
 
-def compute_average_precision_tad(ref, hyp, iou_thresholds=[0.2]):
+def compute_average_precision_tad(ref, hyp, iou_thresholds=[0.2], task=None):
     """ 
     Compute average precision and precision-recall curve at specific IoU
     thresholds between ground truth and predictions data frames. If multiple
@@ -103,6 +109,7 @@ def compute_average_precision_tad(ref, hyp, iou_thresholds=[0.2]):
     if hyp.empty:
         for iout in iou_thresholds:
             output[iout] = 0.0, [0.0, 0.0], [0.0, 1.0]
+        alignment_df = generate_all_fn_alignment_file(ref, task)
         return output,alignment_df
 
     # Compute IoU for all hyps incl. NO_SCORE_REGION
@@ -116,27 +123,29 @@ def compute_average_precision_tad(ref, hyp, iou_thresholds=[0.2]):
     # Sort by confidence score
     ihyp.sort_values(["llr"], ascending=False, inplace=True)        
     ihyp.reset_index(inplace=True, drop=True)
-         
+
     # Determine TP/FP @ IoU-Threshold
     for iout in iou_thresholds:        
         ihyp[['tp', 'fp']] = [ 0, 1 ]        
         ihyp.loc[~ihyp['start_ref'].isna() & (ihyp['IoU'] >= iout), ['tp', 'fp']] = [ 1, 0 ]
         # Mark TP as FP for duplicate ref matches at lower CS
         nhyp = ihyp.duplicated(subset = ['file_id', 'start_ref', 'end_ref', 'tp'], keep='first')
-        ihyp.loc[ihyp.loc[nhyp == True].index, ['tp', 'fp']] = [ 0, 1 ]        
+        ihyp.loc[ihyp.loc[nhyp == True].index, ['tp', 'fp']] = [ 0, 1 ]      
         tp = np.cumsum(ihyp.tp).astype(float)
         fp = np.cumsum(ihyp.fp).astype(float)                      
         rec = (tp / npos).values
         prec = (tp / (tp + fp)).values
         output[iout] = ap_interp(prec, rec), prec, rec
 
-        ihyp = ihyp[["Class","tp","fp","file_id","start_ref","end_ref","start_hyp","end_hyp","IoU","llr"]]
+        ihyp = ihyp[["Class","type","tp","fp","file_id","start_ref","end_ref","start_hyp","end_hyp","IoU","llr"]]
         alignment_df = pd.concat([alignment_df, ihyp])
 
-    return output,alignment_df
+    final_alignment_df = generate_alignment_file(ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False], alignment_df, task)
+
+    return output,final_alignment_df
 
 
-def compute_multiclass_iou_pr(ref, hyp, iou_thresholds=0.2, mapping_df = None):
+def compute_multiclass_iou_pr(ref, hyp, iou_thresholds=0.2, mapping_df = None, class_type = None):
     """ Compute average precision score (AP) and precision-recall curves for
     each class at a set of specific temp. intersection-over-union (tIoU)
     thresholds. If references have empty class they will be marked as
@@ -164,105 +173,96 @@ def compute_multiclass_iou_pr(ref, hyp, iou_thresholds=0.2, mapping_df = None):
     [ scores.setdefault(iout, []) for iout in iou_thresholds ]
     
     # Iterate over all Classes treating them as a binary detection
-    alist = ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False].Class.unique()        
+    unique_combo = ref[["Class", "type"]].value_counts().reset_index()
+    unique_combo_pruned = unique_combo.loc[unique_combo.Class != 'NO_SCORE_REGION']
+    unique_all = ref[["Class"]].value_counts().reset_index()
+    unique_all["type"] = "all"
+    unique_all_pruned = unique_all.loc[unique_all.Class != 'NO_SCORE_REGION']
+    
+    combine_combo_pruned = pd.concat([unique_combo_pruned, unique_all_pruned])
+    combine_combo_pruned.sort_values(["Class", "type"], inplace=True)
+
+    final_combo_pruned = combine_combo_pruned.reset_index()
+    final_combo_pruned = final_combo_pruned[["Class","type"]]  
 
     apScores = []
     alignment_df = pd.DataFrame()
-    for idx, act in enumerate(alist):
+    for i in range(len(final_combo_pruned)):
+
+        if final_combo_pruned.loc[i, "type"] == "all":
+            match_type = ["audio","text","video"]
+        else:
+            match_type = [final_combo_pruned.loc[i, "type"]]
 
         if mapping_df is not None:
-            sub_mapping_df = mapping_df.loc[mapping_df.ref_norm == act]
+            sub_mapping_df = mapping_df.loc[mapping_df.ref_norm == final_combo_pruned.loc[i, "Class"]]
             if not sub_mapping_df.empty:
-                final_sub_hyp = replace_hyp_norm_mapping(sub_mapping_df, hyp, act)
+                final_sub_hyp = replace_hyp_norm_mapping(sub_mapping_df, hyp, final_combo_pruned.loc[i, "Class"])
+                final_sub_hyp_type = final_sub_hyp.loc[(final_sub_hyp.type.isin(match_type))]
             else:
-                final_sub_hyp = hyp.loc[(hyp.Class == act)]
+                final_sub_hyp_type = hyp.loc[(hyp.Class == final_combo_pruned.loc[i, "Class"]) & (hyp.type.isin(match_type))]
 
-            hyp_scoring = final_sub_hyp.reset_index(drop=True)
+            hyp_scoring = final_sub_hyp_type.reset_index(drop=True)
         
         else:
-            hyp_scoring = hyp.loc[(hyp.Class == act)].reset_index(drop=True)
+            hyp_scoring = hyp.loc[(hyp.Class == final_combo_pruned.loc[i, "Class"]) & (hyp.type.isin(match_type))].reset_index(drop=True)
 
         apScore, alignment = compute_average_precision_tad(
-                ref=ref.loc[(ref.Class == act) | (ref.Class == 'NO_SCORE_REGION')].reset_index(drop=True),                        
+                ref=ref.loc[((ref.Class == final_combo_pruned.loc[i, "Class"]) | (ref.Class == 'NO_SCORE_REGION')) & (ref.type.isin(match_type))].reset_index(drop=True),                        
                 hyp=hyp_scoring,
-                iou_thresholds=iou_thresholds)
+                iou_thresholds=iou_thresholds,
+                task=class_type)
                     
         apScores.append(apScore)
         alignment_df = pd.concat([alignment_df, alignment])
 
-    for idx, act in enumerate(alist):
+    final_alignment_df = alignment_df.drop_duplicates()
+
+    for i in range(len(final_combo_pruned)):
         for iout in iou_thresholds:            
-            scores[iout].append([act, apScores[idx][iout][0], apScores[idx][iout][1], apScores[idx][iout][2]])        
-        
+            scores[iout].append([final_combo_pruned.loc[i, "Class"], final_combo_pruned.loc[i, "type"], apScores[i][iout][0], apScores[i][iout][1], apScores[i][iout][2]])
+
     # Build results for all            
     pr_scores = {}
     for iout in iou_thresholds: 
-        pr_scores[iout] = pd.DataFrame(scores[iout], columns = ['Class', 'ap', 'precision', 'recall'])
+        pr_scores[iout] = pd.DataFrame(scores[iout], columns = ['Class', 'type', 'ap', 'precision', 'recall'])
 
-    return pr_scores
+    return pr_scores, final_alignment_df
 
-def _sumup_tad_system_level_scores(metrics, pr_iou_scores, iou_thresholds):
+def sumup_tad_system_level_scores(pr_iou_scores, iou_thresholds, class_type, output_dir):
     """ Map internal to public representation. """
-    ciou = {}
-    for iout in iou_thresholds:
+    map_scores_threshold = pd.DataFrame()
+    for iout in sorted(iou_thresholds):
         pr_scores = pr_iou_scores[iout]
-        co = {}
-        if 'map'         in metrics: co['mAP']        = round(np.mean(pr_scores.ap), 4)        
-        ciou[iout] = co
-    return ciou
+        map_scores = pr_scores.groupby('type')['ap'].mean().reset_index()
+        map_scores.ap = map_scores.ap.round(3)
+        map_scores["metric"] = "mAP"
+        map_scores["correctness_criteria"] = "{iou>=%s}" % iout
+        if class_type == "norm":
+            map_scores["task"] = "nd"
+        if class_type == "emotion":
+            map_scores["task"] = "ed"
+        map_scores = map_scores.rename(columns={'type': 'genre', 'ap': 'value'})
+        map_scores = map_scores[["task","genre","metric","value","correctness_criteria"]]
+        map_scores_threshold = pd.concat([map_scores, map_scores_threshold])
+    
+    map_scores_threshold.to_csv(os.path.join(output_dir, "scores_aggregated.tab"), sep = "\t", index = None)
         
-def _sumup_tad_class_level_scores(metrics, pr_iou_scores, iou_thresholds):
-    """ Map internal to public representation. Scores per Class and IoU Level """  
-    act = {}    
-    for iout in iou_thresholds:        
-        prs = pr_iou_scores[iout]        
-        for index, row in prs.iterrows():            
-            co = {}
-            if 'map'         in metrics: co[        "AP"] = round(row['ap'], 4)
-            Class = row['Class']
-            if Class not in act.keys():
-                act[Class] = {}
-            act[Class][iout] = co
-    return act
-
-def write_system_level_scores(output_dir, results):
-
-    ious = []
-    metrics = []
-    scores = []
-
-    for iou, values in results.items():
-        for metric, value in values.items():
-            ious.append(iou)
-            metrics.append(metric)
-            scores.append(value)
-
-    system_level_scores = pd.DataFrame({"IoU": ious, "Metric": metrics, "Score": scores})
-    system_level_scores.to_csv(os.path.join(output_dir, "system_scores.csv"), index = None)
-
-
-def write_class_level_scores(output_dir, results, class_type):
-
-    classes = []
-    ious = []
-    metrics = []
-    scores = []
-
-    for Class, values in results.items():
-        for iou, value in values.items():
-            for metric, score in value.items():
-                classes.append(Class)
-                ious.append(iou)
-                metrics.append(metric)
-                scores.append(score)
-
-    class_level_scores = pd.DataFrame({"Class": classes, "IoU": ious, "Metric": metrics, "Score": scores})
-    class_level_scores["Class_type"] = class_type
-    class_level_scores = class_level_scores[["Class_type", "Class", "IoU", "Metric", "Score"]]
-    class_level_scores_sort = class_level_scores.sort_values(by=['Class'], ascending=True)
-    class_level_scores_sort.to_csv(os.path.join(output_dir, "class_scores.csv"), index = None)
+def sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir):
+    """ Map internal to public representation. Scores per Class and IoU Level """
+    prs_threshold = pd.DataFrame()   
+    for iout in sorted(iou_thresholds):        
+        prs = pr_iou_scores[iout]
+        prs.ap = prs.ap.round(3)
+        prs["metric"] = "AP"        
+        prs["correctness_criteria"] = "{iou>=%s}" % iout
+        prs = prs.rename(columns={'Class': 'class', 'type': 'genre', 'ap': 'value'})
+        prs = prs[["class","genre","metric","value","correctness_criteria"]]
+        prs_threshold = pd.concat([prs, prs_threshold])
+    
+    prs_threshold.to_csv(os.path.join(output_dir, "scores_by_class.tab"), sep = "\t", index = None)
    
-def score_tad(ref, hyp, class_type, iou_thresholds, metrics, output_dir, mapping_df):
+def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df):
     """ Score System output of Norm/Emotion Detection Task
  
     Parameters
@@ -277,8 +277,6 @@ def score_tad(ref, hyp, class_type, iou_thresholds, metrics, output_dir, mapping
         string that indicates task name. e.g. norm/emotion
     iou_thresholds: 1darray [int]
         List of IoU levels to score at.
-    metrics: list[str] 
-        Array of metrics to include
     output_dir: str
         Path to a directory (created on demand) for output files    
 
@@ -296,19 +294,29 @@ def score_tad(ref, hyp, class_type, iou_thresholds, metrics, output_dir, mapping
     # FIXME: Use a No score-region parameter
     tad_add_noscore_region(ref,hyp)
     hyp_type = add_type_column(ref, hyp)
-    
+
     if len(hyp) > 0:
-        pr_iou_scores = compute_multiclass_iou_pr(ref, hyp_type, iou_thresholds, mapping_df)
+        pr_iou_scores, final_alignment_df = compute_multiclass_iou_pr(ref, hyp_type, iou_thresholds, mapping_df, class_type)
     else:
         pr_iou_scores = {}
-        alist = ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False].Class.unique()
-        [ pr_iou_scores.setdefault(iout, generate_zero_scores_norm_emotion(alist)) for iout in iou_thresholds ]
+        unique_combo = ref[["Class", "type"]].value_counts().reset_index()
+        unique_combo_pruned = unique_combo.loc[unique_combo.Class != 'NO_SCORE_REGION']
+        unique_all = ref[["Class"]].value_counts().reset_index()
+        unique_all["type"] = "all"
+        unique_all_pruned = unique_all.loc[unique_all.Class != 'NO_SCORE_REGION']
+        
+        combine_combo_pruned = pd.concat([unique_combo_pruned, unique_all_pruned])
+        combine_combo_pruned.sort_values(["Class", "type"], inplace=True)
 
-    results = _sumup_tad_system_level_scores(metrics, pr_iou_scores, iou_thresholds)
-    al_results = _sumup_tad_class_level_scores(metrics, pr_iou_scores, iou_thresholds)
+        final_combo_pruned = combine_combo_pruned.reset_index()
+        final_combo_pruned = final_combo_pruned[["Class","type"]]
+        [ pr_iou_scores.setdefault(iout, generate_zero_scores_norm_emotion(final_combo_pruned)) for iout in iou_thresholds ]
+        final_alignment_df = generate_all_fn_alignment_file(ref, class_type)
 
     ensure_output_dir(output_dir)
-    write_system_level_scores(output_dir, results)
-    write_class_level_scores(output_dir, al_results, class_type)
+    final_alignment_df_sorted = final_alignment_df.sort_values(by=['class', 'file_id', 'sys', 'ref'])
+    final_alignment_df_sorted.to_csv(os.path.join(output_dir, "instance_alignment.tab"), index = False, quoting=3, sep="\t", escapechar="\t")
+    sumup_tad_system_level_scores(pr_iou_scores, iou_thresholds, class_type, output_dir)
+    sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir)
 
 

@@ -1,0 +1,5 @@
+task	genre	metric	value	correctness_criteria
+ed	all	mAP	1.0	{iou>=0.2}
+ed	audio	mAP	1.0	{iou>=0.2}
+ed	text	mAP	1.0	{iou>=0.2}
+ed	video	mAP	1.0	{iou>=0.2}
