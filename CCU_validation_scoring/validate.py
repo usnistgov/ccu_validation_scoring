@@ -250,7 +250,7 @@ def check_start_small_end(file):
 	df = pd.read_csv(file, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
 	if df.shape[0] != 0:
 		for i in range(df.shape[0]):
-			if df.iloc[i]["start"] >= df.iloc[i]["end"]:
+			if df.iloc[i]["start"] > df.iloc[i]["end"]:
 				logger.error('Invalid file {}:'.format(file))
 				logger.error("Start is equal to /higher than end in {}".format(file))
 				return False
