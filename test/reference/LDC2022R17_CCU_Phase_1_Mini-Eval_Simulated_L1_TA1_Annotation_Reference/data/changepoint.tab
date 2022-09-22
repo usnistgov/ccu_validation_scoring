@@ -1,0 +1,14 @@
+user_id	file_id	timestamp	impact_scalar	comment
+42284	M01000000	358.4	2	tone of the conversation gets really heavy at this point (as opposed to joking before)
+42284	M01000001	198.44	4	speaker B hasn't been paying much attention before this point but now she starts to really engage
+47702	M01000003	574	2	bringing up a difficult subject
+47702	M01000003	1185	4	trying to change the topic
+1783	M01000004	6187	5	starts to get really excited
+66629	M01000006	2315	2	the people arguing are talking over each other which makes the converseation feel like it is leaning toward disrespectful
+66629	M01000006	2490.22	1	an unwelcome question, he gets really defensive 
+1818	M0100000A	1540.87	4	older woman gives a little speech about helping others which uplifts the rest of the conversation
+66629	M0100000B	485.23	4	talking about a difficult past moment, you can see real affection and kindness between speakers and they seem more relaxed for rest of conversation
+42284	M01003MIP	418	2	nasty remark starts making other people respond in kind
+42284	M01003MIP	791	2	sarcastic and disdainful, conversation takes a fairly snotty tone after this point
+47702	M01003MIQ	3980	3	strong reaction
+47702	M01003MIS	602	2	this sparks a bunch of reactionary comments
