@@ -66,10 +66,10 @@ def validate_ref_submission_dir_cli(args):
 					check_start_small_end(file_path))
 					error_count += 1 if file_checks != True else 0
 
-	# if error_count > 0:
-	# 	logger.error("\nVALIDATION FAILED\n")
-	# 	logger.error("{} error(s) found in {} directory".format(error_count, ref_dir))
-	# else:
-	# 	print("\nVALIDATION SUCCEEDED\n")
+	if error_count > 0:
+		logger.error("\nVALIDATION FAILED\n")
+		logger.error("{} error(s) found in {} directory".format(error_count, ref_dir))
+	else:
+		print("\nVALIDATION SUCCEEDED\n")
 	
 	
