@@ -6,8 +6,8 @@ import pandas as pd
 
 class NormDiscoveryTests(unittest.TestCase):
     #  For norm discovery, since there is only one annotation pass,
-    # only "Instance Merging" is performed
-    def test_merge_vote_time_periods(self,input_file_path="test/scores/unittests/mergeInputFile1.txt", expected_path_file="test/scores/unittests/mergeExpectedFile1.txt"):
+    # only "Instance Merging" is performed test/scores/unittests/mergeInputFile1.txt
+    def test_merge_vote_time_periods(self,input_file_path="scores/unittests//mergeInputFile1.txt", expected_path_file="scores/unittests/mergeExpectedFile1.txt"): # /Users/cnc30/Documents/VisualStudioProjects/ccu_validation_scoring/test/scores/unittests/mergeInputFile1.txt
         # Test Case: merge_vote_time_periods correctly merges time periods if gap is appropriate
 
         # Create an input dict
@@ -30,13 +30,11 @@ class NormDiscoveryTests(unittest.TestCase):
                 self.assertEqual(generated_list[i]['range'], expected_list[i]['range'], msg=str(generated_list[i]['range']) + " does not equal " + str(expected_list[i]['range']))
                 self.assertEqual(generated_list[i]['Class'], expected_list[i]['Class'], msg=str(generated_list[i]['Class']) + " does not equal " + str(expected_list[i]['Class']))
 
-
-
 class EmotionDetectionTests(unittest.TestCase):
     # For emotion detection, since there are more than one annotation passes (up to 3),
     # "Judgment Collapsing by Majority Voting" will be applied, followed by "Instance Merging"
 
-    def test_get_highest_vote_input_processing(self, input_file_path='test/scores/unittests/inputeFile1GetHighestVote.csv', expected_file_path='test/scores/unittests/expectedFile1GetHighestVote.csv'):
+    def test_get_highest_vote_input_processing(self, input_file_path='scores/unittests/inputeFile1GetHighestVote.csv', expected_file_path='scores/unittests/expectedFile1GetHighestVote.csv'):
         # Test Case: Tests that get_highest_vote_based_on_time reads in data frame correctly,
         # & returns valid dict w/ expected keys and values
 
@@ -89,13 +87,11 @@ class EmotionDetectionTests(unittest.TestCase):
                     msg = "Emotion is inaccurate"
                 self.assertEqual(generated_df[column_name][j], expected_df[column_name][j], msg)
 
-
-
 class ArousalAndValenceTests(unittest.TestCase):
     # For arousal and valence detection, since there are more than one annotation passes (up tp 3).
     # "Judgment Averaging" will be applied, followed by converting it into time series
 
-    def test_get_average_score_input_processing(self, input_file_path='test/scores/unittests/inputFile1GetAvgScore.csv', expected_file_path='test/scores/unittests/expectedFile1GetAvgScore.csv'):
+    def test_get_average_score_input_processing(self, input_file_path='scores/unittests/inputFile1GetAvgScore.csv', expected_file_path='scores/unittests/expectedFile1GetAvgScore.csv'):
         # Test Case: Tests whether or not get_average_score_based_on_time reads in data_frame correctly, 
         # & returns valid dict w/ appropriate keys and values
 
@@ -158,15 +154,14 @@ class ArousalAndValenceTests(unittest.TestCase):
         counter = 0
 
         while counter < len(generated_df.index):
-            self.assertEqual(generated_df[key][counter], expected_df[key][counter])
-            self.assertEqual(generated_df[file_id][counter], expected_df[file_id][counter])
-            self.assertEqual(generated_df[segment_id][counter], expected_df[segment_id][counter])
-            self.assertEqual(generated_df[start][counter], expected_df[start][counter])
-            self.assertEqual(generated_df[end][counter], expected_df[end][counter])
-            self.assertEqual(generated_df[user_id][counter], expected_df[user_id][counter])
-            self.assertEqual(generated_df[class_var][counter], expected_df[class_var][counter])
+            self.assertAlmostEqual(generated_df[key][counter], expected_df[key][counter])
+            self.assertAlmostEqual(generated_df[file_id][counter], expected_df[file_id][counter])
+            self.assertAlmostEqual(generated_df[segment_id][counter], expected_df[segment_id][counter])
+            self.assertAlmostEqual(generated_df[start][counter], expected_df[start][counter])
+            self.assertAlmostEqual(generated_df[end][counter], expected_df[end][counter])
+            self.assertAlmostEqual(generated_df[user_id][counter], expected_df[user_id][counter])
+            self.assertAlmostEqual(generated_df[class_var][counter], expected_df[class_var][counter])
             counter = counter + 1
-
 
 if __name__ == '__main__':
     unittest.main() 
