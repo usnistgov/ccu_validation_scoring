@@ -64,7 +64,8 @@ def compute_cps(row, ref):
             columns=['type', 'file_id', 'Class_ref', 'Class_hyp', 'llr', 'delta_cp'])
     else:        
         refs['delta_cp'] = segment_cp(row.Class, [refs.Class])
-        rmin = refs.loc[refs.delta_cp == refs.delta_cp.min()]
+        rmin_candidate = refs.loc[refs.delta_cp == refs.delta_cp.min()]
+        rmin = rmin_candidate.loc[rmin_candidate.Class == rmin_candidate.Class.min()]
         rout = rmin.rename(columns={'Class':'Class_ref'})
         rout[['Class_hyp', 'llr']] = row.Class, row.llr
 
@@ -258,6 +259,6 @@ def score_cp(ref, hyp, delta_cp_text_thresholds, delta_cp_time_thresholds, outpu
         final_alignment_df = generate_all_fn_alignment_file(ref, "changepoint")
 
     ensure_output_dir(output_dir)
-    final_alignment_df_sorted = final_alignment_df.sort_values(by=['class', 'file_id', 'ref', 'sys'])
+    final_alignment_df_sorted = final_alignment_df.sort_values(by=['class', 'file_id', 'sys', 'ref'])
     final_alignment_df_sorted.to_csv(os.path.join(output_dir, "instance_alignment.tab"), index = False, quoting=3, sep="\t", escapechar="\t")
     write_type_level_scores(output_dir, pr_iou_scores, delta_cp_text_thresholds, delta_cp_time_thresholds)
