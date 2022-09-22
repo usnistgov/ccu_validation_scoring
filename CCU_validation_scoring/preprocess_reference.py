@@ -155,7 +155,7 @@ def get_highest_vote_based_on_time(data_frame):
 		Returns
 		-------
 		emo_dict: dictionary which key is norm/emotion and value is start and end time
-	"""   
+	"""  
 	time_dict = {}
 	emo_dict = {}
 	pre_key = ''
@@ -170,7 +170,7 @@ def get_highest_vote_based_on_time(data_frame):
 			value = time_dict[time_key]
 			if row['user_id'] != value['user_id']:
 				voter_count = voter_count + 1
-			cur_classes = row['Class'].split(', ')
+			cur_classes = row['Class'].replace(" ", "").split(",")
 			for e in cur_classes:
 				if e in value['Class']:
 					value['Class'][e] += 1
@@ -187,7 +187,7 @@ def get_highest_vote_based_on_time(data_frame):
 				elif voter_count == 1:
 					# Only one voter, count his/her votes as result
 					highest_vote_class = list(pre_value['Class'].keys())
-				time_dict[pre_key]['Class'] = highest_vote_class 
+				time_dict[pre_key]['Class'] = highest_vote_class
 				for emo in highest_vote_class:
 					pre = pre_key.split(' - ')
 					if emo not in emo_dict:
@@ -197,7 +197,7 @@ def get_highest_vote_based_on_time(data_frame):
 			pre_key = time_key
 			voter_count = 1
 			# Compose new key value pair
-			cur_classes = row['Class'].split(', ')
+			cur_classes = row['Class'].replace(" ", "").split(",")
 			value = {'file_id':row['file_id'], 'segment_id': row['segment_id'], 'start':row['start'], 'end':row['end'], 'user_id':row['user_id'] }
 			value['Class'] = {}
 			for e in cur_classes:
@@ -215,9 +215,9 @@ def get_highest_vote_based_on_time(data_frame):
 				highest_vote_class = list(cur_value['Class'].keys())
 			time_dict[time_key]['Class'] = highest_vote_class  
 			for emo in highest_vote_class:
-					if emo not in emo_dict:
-						emo_dict[emo] = []
-					emo_dict[emo].append({'start' : row['start'], 'end' : row['end'] })
+				if emo not in emo_dict:
+					emo_dict[emo] = []
+				emo_dict[emo].append({'start' : row['start'], 'end' : row['end'] })
 
 	return emo_dict  
 	
