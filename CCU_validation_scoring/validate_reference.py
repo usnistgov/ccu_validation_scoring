@@ -1,85 +1,75 @@
-# python3 validate_reference.py <directory type = data or docs> <directory path> 
-# For example:
-# python3 validate_reference.py data /Users/cnc30/Documents/VisualStudioProjects/ccu_validation_scoring/test/reference/LDC_reference_sample/data /Users/cnc30/Documents/VisualStudioProjects/ccu_validation_scoring/test/reference/LDC_reference_sample/index_files /Users/cnc30/Documents/VisualStudioProjects/ccu_validation_scoring/test/reference/LDC_reference_sample/docs
-# python3 validate_reference.py docs /Users/cnc30/Documents/VisualStudioProjects/ccu_validation_scoring/test/reference/LDC_reference_sample/docs /Users/cnc30/Documents/VisualStudioProjects/ccu_validation_scoring/test/reference/LDC_reference_sample/index_files
 import os
 import pandas as pd
 import logging
 import sys
 from CCU_validation_scoring.validate import *
-from CCU_validation_scoring.reference_validation import *
 
 logger = logging.getLogger('VALIDATION')
 
-def validate_data_ref_dir_cli(args):
-	
-	# Store directory type (data, docs, or index), directory path, & the path to the index file directory
-	if args[0] == "docs" and len(args) == 3:
-		dir_type = args[0]
-		dir_path = args[1]
-		index_dir = args[2]
-	elif args[0] == "data" and len(args) == 4:
-		dir_type = args[0]
-		dir_path = args[1]
-		index_dir = args[2]
-		docs_dir = args[3]
-	else: 
-		logger.error("Invalid arguments")
-		logger.error("Command to validate data directory: python3 validate_reference.py data <path to data directory> <path to index directory> <path to docs directory>")
-		logger.error("Command to validate docs directory: python3 validate_reference.py docs <path to docs directory> <path to index directory>")
+def validate_ref_submission_dir_cli(args):
+		
+	ref_dir = args.reference_dir
 
 	# Validate directory path
-	is_directory = os.path.isdir(dir_path)
+	is_directory = os.path.isdir(ref_dir)
 	if is_directory != True:
-		logger.error("Invalid directory: {} is not a directory".format(dir_path))
+		logger.error("Invalid directory: {} is not a directory".format(ref_dir))
 		exit(1)
-	
-	# Validates changepoint.tab, emotions.tab, norms.tab, valence_arousal.tab, and segments.tab
+
+	# Iterate through directory & validate each file
 	file_checks = False
 	error_count = 0
-	file_list = os.listdir(dir_path)
-	for file in file_list:
-		full_file_path = os.path.join(dir_path, file)
+	data_dir_files = []
+	for root, dirs, files in os.walk(ref_dir, topdown=True):
+		if root.endswith("data"):
+			for file in files:
+					
+				# Retrieve file path
+				file_path = os.path.join(root, file)
+				# Retrieve paths to other index and docs directories
+				docs_dir = os.path.join(root, '..',"docs")
+				index_dir = os.path.join(root, '..',"index_files")
+				error_count += 1 if file_checks != True else 0
+				# Call file-specific checks
+				if file == "valence_arousal.tab":
+					file_checks = (global_ref_file_checks(file_path, index_dir) and 
+					check_valence_arousal_range(file_path) and
+					check_ref_fileid_segmentid_match(file_path, docs_dir) and
+					check_noann_all_columns(file_path))
+					error_count += 1 if file_checks != True else 0
+				elif file == "emotion.tab": # CHANGE TO emotions.tab
+					file_checks = (global_ref_file_checks(file_path, index_dir) and 
+					check_empty_na(file_path, "emotions") and 
+					check_duplicate_emotions(file_path) and 
+					check_valid_emotions(file_path) and
+					check_noann_all_columns(file_path) and 
+					check_ref_fileid_segmentid_match(file_path, docs_dir))
+					error_count += 1 if file_checks != True else 0
+				elif file == "norms.tab":
+					file_checks = (global_ref_file_checks(file_path, index_dir) and 
+					check_empty_na(file_path, "norms") and 
+					check_norm_range(file_path) and 
+					check_ref_fileid_segmentid_match(file_path, docs_dir))
+					error_count += 1 if file_checks != True else 0
+				elif file == "changepoint.tab":
+					file_checks = (global_ref_file_checks(file_path, index_dir))
+					error_count += 1 if file_checks != True else 0
+		elif root.endswith("docs"):
+			for file in files:
+				if file == "segments.tab":
+					# Retrieve file path
+					file_path = os.path.join(root, file)
+					# Retrieve path to index directory
+					index_dir = os.path.join(root, '..', "index_files")
+					file_checks = (global_ref_file_checks(file_path, index_dir) and 
+					check_start_end_types(file_path, root) and
+					check_start_small_end(file_path))
+					error_count += 1 if file_checks != True else 0
 
-		if dir_type == "data":
-			# Call global checks
-			file_checks = global_checks(full_file_path, index_dir)
-			# Call file-specific checks
-			if file == "valence_arousal.tab":
-				file_checks = (check_nospeech_all_annotators(full_file_path) and 
-				check_valence_arousal_range(full_file_path) and
-				check_fileid_segmentid_match(full_file_path, docs_dir))
-				error_count += 1 if file_checks != True else 0
-			if file == "emotions.tab":
-				file_checks = (check_empty_na(full_file_path, "emotions") and 
-				check_duplicate_emotions(full_file_path) and 
-				check_valid_emotions(full_file_path) and
-				check_fileid_segmentid_match(full_file_path, docs_dir))
-				error_count += 1 if file_checks != True else 0
-			if file == "norms.tab":
-				file_checks = (check_empty_na(full_file_path, "norms") and 
-				check_norm_range(full_file_path) and 
-				check_fileid_segmentid_match(full_file_path, docs_dir))
-				error_count += 1 if file_checks != True else 0
-		elif dir_type == "docs":
-			if file == 'segments.tab':
-				file_checks = (global_checks(full_file_path, index_dir) and 
-				check_start_small_end(full_file_path) and
-				check_start_end_types(full_file_path, dir_path))
-				error_count += 1 if file_checks != True else 0
+	# if error_count > 0:
+	# 	logger.error("\nVALIDATION FAILED\n")
+	# 	logger.error("{} error(s) found in {} directory".format(error_count, ref_dir))
+	# else:
+	# 	print("\nVALIDATION SUCCEEDED\n")
 	
-	if error_count > 0:
-		logger.error("{} error(s) found in {} directory".format(error_count, dir_path))
-		return False
-	else:
-		return True
-
-if __name__ == "__main__":
-
-	file_checks = validate_data_ref_dir_cli(sys.argv[1:])
-
-	if file_checks != True:
-		logger.error("\nVALIDATION FAILED\n")
-	else: 
-		print("\nVALIDATION SUCCEEDED\n")
 	
