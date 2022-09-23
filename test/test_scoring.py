@@ -177,6 +177,36 @@ class TestScoreSubmission(unittest.TestCase):
                 except Exception:
                     self.fail("Scorer test failed on submission {} with reference {}".format(subdir, self.reference_path))
 
+        dirs = ["CD"]
+        for dir in dirs:
+
+            refdir = os.path.join(self.reference_path, 'LC1-SimulatedMiniEvalP1_ref_annotation')
+            self.scoring_index_path = os.path.join(refdir, 'index_files', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab')
+            subdirs = glob.glob(os.path.join(self.submissions_path, "pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation", dir, '*'))
+            
+            assert len(subdirs) > 0
+
+            for subdir in subdirs:
+
+                tmp_alignment_file = os.path.join(self.tmp_dir, "instance_alignment.tab")
+
+                score_ref_alignment_file = os.path.join(self.score_path, "scores_LC1-SimulatedMiniEvalP1_ref_annotation", dir, os.path.basename(subdir), "instance_alignment.tab")
+                score_ref_alignment_df = pd.read_csv(score_ref_alignment_file, dtype={"class": object}, sep = "\t")
+                score_ref_alignment_df_sorted = score_ref_alignment_df.sort_values(by=['class', 'file_id', 'sys', 'ref'])
+                score_ref_alignment_df_sorted.to_csv(os.path.join(self.tmp_dir, "instance_alignment_ref.tab"), index = False, quoting=3, sep="\t", escapechar="\t")
+
+                sys.argv[1:] = ["score-{}".format(dir.lower()), "-ref", refdir,
+                            "-s", subdir, "-i", self.scoring_index_path, "-o", self.tmp_dir]
+                try:
+                    cli.main()
+                    self.assertTrue(filecmp.cmp(os.path.join(self.tmp_dir, "instance_alignment_ref.tab"), tmp_alignment_file))
+                    os.remove(tmp_alignment_file)
+                    os.remove(os.path.join(self.tmp_dir, "scores_by_class.tab"))
+                    os.remove(os.path.join(self.tmp_dir, "instance_alignment_ref.tab"))
+
+                except Exception:
+                    self.fail("Scorer test failed on submission {} with reference {}".format(subdir, self.reference_path))
+
 if __name__ == '__main__':
     unittest.main()
 

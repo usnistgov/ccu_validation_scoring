@@ -4,8 +4,8 @@ check:
 	pytest
 
 check-scoring:
-	pytest -k test/test_scoring.py
+	pytest -k test_scoring.py
 
 check-unittest:
-	pytest -k test/test_unittests.py
+	pytest -k test_unittests.py
 

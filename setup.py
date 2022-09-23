@@ -38,8 +38,7 @@ setup(name=PACKAGE_NAME,
         'pathlib',
         'numpy',
         'sklearn',
-        'pytest',
-        'unittest'
+        'pytest'
     ],
       version=CCU_validation_scoring.__version__,
       entry_points='''
