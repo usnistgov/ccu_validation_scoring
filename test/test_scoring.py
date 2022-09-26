@@ -27,12 +27,17 @@ def byte_compare_file(generated, expected):
     if (not tst and (os.environ.get("CCUTEST_UPDATE_SCORES") == "update_failed_file")):
         # The use said to update the file, go ahead.  git will show the difference
         subprocess.check_call(f"cp {generated} {expected}", shell=True)
+        #os.remove(generated)
     else:
         if not tst:
             print(f"Files differ.  Use the command:\ndiff {generated}\\\n   {expected}")
             assert tst, "Files differ"
+        #else:
+        #    os.remove(generated)
+            
 
 def run_scorer():
+    print("Scoring Command: CCU_scoring " + " ".join(sys.argv[1:]))
     try:
         cli.main()
         
@@ -46,7 +51,7 @@ def run_scorer():
                           ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'ND', ''),
                           ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'ED', ''),
                           ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'CD', ''),
-                          ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'NDMAP', ''),
+                          ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'NDMAP', 'CCU_P1_TA1_ND_NIST_mini-eval1_20220531_050236'),
 
                           ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'ND', ''),
                           ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'CD', '')                        
@@ -101,7 +106,11 @@ def test_run_score_submissions(dataset, system_input_index, system_dir, task, op
         assert len(subdirs) > 0
         
         for subdir in subdirs:
-            sys.argv[1:] = ["score-nd", "-ref", refdir, "-s", subdir,
+            orig_system = glob.glob(os.path.join(submissions_path + "/" + system_dir, "ND", opt1))
+            print(f"Original System from {submissions_path}/{system_dir}/ND/{opt1}:" + str(orig_system))
+            assert (len(orig_system) == 1), "Error:  NDMAP system is not uniq"
+                    
+            sys.argv[1:] = ["score-nd", "-ref", refdir, "-s", orig_system[0],
                             "-m", subdir, "-i", scoring_index_path, "-o", tmp_dir]
             run_scorer()
             
