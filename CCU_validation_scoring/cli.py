@@ -19,11 +19,13 @@ def main():
     version_parser = subs.add_parser('version', description='Print package version')
     version_parser.set_defaults(func=print_package_version)
 
-    # validate_ref_parser = subs.add_parser('validate-ref', description='Validate the reference directory')
-    # validate_ref_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
+    validate_ref_parser = subs.add_parser('validate-ref', description='Validate the reference directory')
+    validate_ref_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
 
-    # validate_ref_parser.set_defaults(func=validate_reference.validate_ref_submission_dir_cli)
-
+    validate_ref_parser.set_defaults(func=validate_reference.validate_ref_submission_dir_cli)
+   
+    # ADD ANOTHER SUBCOMMAND FOR INDEX FILE
+    
     validate_nd_parser = subs.add_parser('validate-nd', description='Validate a norm detection submission directory')
     validate_nd_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a norm detection submission')
     validate_nd_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')

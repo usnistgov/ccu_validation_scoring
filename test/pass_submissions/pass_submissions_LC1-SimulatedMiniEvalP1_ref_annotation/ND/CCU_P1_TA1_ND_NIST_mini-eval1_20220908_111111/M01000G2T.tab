@@ -1,0 +1,9 @@
+file_id	norm	start	end	status	llr
+M01000G2T	002	1	4	adhere	0.6
+M01000G2T	002	6	10	violate	0.5
+M01000G2T	002	10.5	15	adhere	0.4
+M01000G2T	002	15.5	21	violate	0.9
+M01000G2T	002	23.5	27	adhere	0.8
+M01000G2T	002	28	32	violate	0.9
+M01000G2T	002	36	40	violate	0.6
+M01000G2T	002	44	47	adhere	0.7

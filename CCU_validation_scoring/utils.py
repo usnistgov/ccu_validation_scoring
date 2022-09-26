@@ -6,6 +6,13 @@ import numpy as np
 
 silence_string = "noann"
 
+def is_float(value):
+	try: 
+		float(value)
+		return True
+	except ValueError:
+		return False
+		
 def tad_add_noscore_region(ref,hyp):
 	""" 
 	Convert noann class into NO_SCORE_REGION in ref and remove noann class in hyp

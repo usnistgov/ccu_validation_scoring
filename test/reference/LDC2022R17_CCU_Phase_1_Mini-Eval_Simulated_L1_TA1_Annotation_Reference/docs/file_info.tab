@@ -1,0 +1,12 @@
+catalog_id	version	file_uid	data_type	url	lang_id_manual	wrapped_md5	unwrapped_md5	download_date	content_date	status_in_corpus	legacy_catalog_id	original_file_id	type	file_path	length
+LDC2022R17	V1.0	M01000000	na	na	cmn	na	na	na	na	present	na	na	audio	na	na
+LDC2022R17	V1.0	M01000001	na	na	cmn	na	na	na	na	present	na	na	audio	na	na
+LDC2022R17	V1.0	M01000002	na	na	cmn	na	na	na	na	present	na	na	audio	na	na
+LDC2022R17	V1.0	M01000003	na	na	cmn	na	na	na	na	present	na	na	text	na	na
+LDC2022R17	V1.0	M01000004	na	na	cmn	na	na	na	na	present	na	na	text	na	na
+LDC2022R17	V1.0	M01000006	na	na	cmn	na	na	na	na	present	na	na	video	na	na
+LDC2022R17	V1.0	M0100000A	na	na	cmn	na	na	na	na	present	na	na	video	na	na
+LDC2022R17	V1.0	M0100000B	na	na	cmn	na	na	na	na	present	na	na	video	na	na
+LDC2022R17	V1.0	M01003MIP	na	na	cmn	na	na	na	na	present	na	na	text	na	na
+LDC2022R17	V1.0	M01003MIQ	na	na	cmn	na	na	na	na	present	na	na	text	na	na
+LDC2022R17	V1.0	M01003MIS	na	na	cmn	na	na	na	na	present	na	na	text	na	na
