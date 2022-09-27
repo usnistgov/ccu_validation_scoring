@@ -1,5 +1,6 @@
 *.eggs/
 tmp/
+tmp*
 *.egg-info/
 CCU_validation_scoring/__pycache__/
 __pycache__/

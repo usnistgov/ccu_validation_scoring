@@ -252,7 +252,7 @@ def check_start_small_end(file):
 		for i in range(df.shape[0]):
 			if df.iloc[i]["start"] > df.iloc[i]["end"]:
 				logger.error('Invalid file {}:'.format(file))
-				logger.error("Start is equal to /higher than end in {}".format(file))
+				logger.error("Start is higher than end in {}".format(file))
 				return False
 	return True
 

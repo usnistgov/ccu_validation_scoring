@@ -1,5 +1,6 @@
 import os
 from time import time
+from unittest import result
 import pandas as pd
 from .utils import *
 
@@ -16,18 +17,9 @@ def process_subset_norm_emotion(list_file, ref):
 	
 	return pruned_ref
 
-def read_dedupe_reference_file(path):
+def extend_gap_segment(ref):
 	"""
-	Read file and remove duplicate records 
-	"""
-	df = pd.read_csv(path, sep = "\t")
-	df.drop_duplicates(inplace = True)
-
-	return df
-
-def delete_gap_segment(segment_df, gap = 0.001):
-	"""
-	Remove the gap between end of previous segment and start of next segment in LDC segments.tab. The gap is set to 0.001 by default
+	Extend the gap between end of previous segment and start of next segment in LDC segments.tab.
 
 	e.g.
 	From
@@ -36,8 +28,8 @@ def delete_gap_segment(segment_df, gap = 0.001):
 	Seg2 60.201 75.201
 	To result
 	Seg  Start  End
-	Seg1 45.2   60.2
-	Seg2 60.2   75.2
+	Seg1 45.2   60.201
+	Seg2 60.201   75.201
 
 	Parameters
 	----------
@@ -49,25 +41,75 @@ def delete_gap_segment(segment_df, gap = 0.001):
 
 	"""
 
-	new_start = list(segment_df["start"])
-	new_end = list(segment_df["end"])
+	gap_map = {"text": 10, "audio": 1, "video": 1}
+	class_type = list(ref["Class_type"])[0]
+	for i in range(1,ref.shape[0]):
+		if ref.iloc[i]["file_id"] == ref.iloc[i-1]["file_id"]:
+			diff = round(ref.iloc[i]["start"] - ref.iloc[i-1]["end"],3)
+			gap = gap_map[ref.iloc[i]["type"]]
 
-	for i in range(1,segment_df.shape[0]):
+			if ref.iloc[i]["type"] == "text":
+				if diff < gap:
+					ref.iloc[i-1, ref.columns.get_loc('end')] = ref.iloc[i]["start"] - 1
+				else:
+					ref.loc[len(ref.index)] = [ref.iloc[i]["file_id"], silence_string, ref.iloc[i-1, ref.columns.get_loc('end')] + 1, ref.iloc[i]["start"] - 1, class_type, ref.iloc[i]["type"], ref.iloc[i]["length"]]
+			elif ref.iloc[i]["type"] in ["audio", "video"]:
+				if diff < gap:
+					ref.iloc[i-1, ref.columns.get_loc('end')] = ref.iloc[i]["start"]
+				else:
+					ref.loc[len(ref.index)] = [ref.iloc[i]["file_id"], silence_string, ref.iloc[i-1, ref.columns.get_loc('end')], ref.iloc[i]["start"], class_type, ref.iloc[i]["type"], ref.iloc[i]["length"]]
 
-		diff = round(segment_df.iloc[i]["start"] - segment_df.iloc[i-1]["end"],3)
-		if diff == gap and segment_df.iloc[i]["file_id"] == segment_df.iloc[i-1]["file_id"]:
-			new_start[i] = round(new_end[i-1],3)
-			step = segment_df.iloc[i]["end"] - segment_df.iloc[i]["start"]
-			new_end[i] = round(new_start[i]+step,3)
+	ref_sorted = ref.sort_values(by=["file_id","start","end"]).reset_index(drop=True)
+	return ref_sorted
 
-	segment_df["new_start"] = new_start
-	segment_df["new_end"] = new_end
+def fill_start_end(ref):
+	
+	class_type = list(ref["Class_type"])[0]
+	file_ids = get_unique_items_in_array(ref['file_id'])
+	for i in file_ids:
+		sub_ref = extract_df(ref, i)
+		type = list(sub_ref["type"])[0]
+		length = list(sub_ref["length"])[0]
+		start = min(list(sub_ref["start"]))
+		end = max(list(sub_ref["end"]))
 
-	segment_df = segment_df[["file_id","segment_id","new_start","new_end"]]
-	new_segment_df = segment_df.rename(columns={"new_start": "start", "new_end": "end"})
+		if type == "text":
+			if start > 1:
+				ref.loc[len(ref.index)] = [i, silence_string, 1, start - 1, class_type, type, length]
+			if end < length:
+				ref.loc[len(ref.index)] = [i, silence_string, end + 1, length, class_type, type, length]
 
-	return new_segment_df
+		if type in ["audio","video"]:
+			if start > 0:
+				ref.loc[len(ref.index)] = [i, silence_string, 0, start, class_type, type, length]
+			if end < length:
+				ref.loc[len(ref.index)] = [i, silence_string, end, length, class_type, type, length]
+	
+	ref_sorted = ref.sort_values(by=["file_id","start","end"]).reset_index(drop=True)
+	return ref_sorted
 
+def check_remove_start_end_same(ref):
+
+	label_lists = []
+	for i in range(0,ref.shape[0]):
+		if ref.iloc[i]["start"] == ref.iloc[i]["end"]:
+			if ref.iloc[i]["type"] == "text":
+				pass
+			elif ref.iloc[i]["type"] in ["audio","video"]:
+				label_lists.append(i)
+
+	ref.drop(labels=label_lists, inplace = True)
+
+	return ref
+
+def read_dedupe_file(path):
+	"""
+	Read file and remove duplicate records 
+	"""
+	df = pd.read_csv(path, sep = "\t")
+	df.drop_duplicates(inplace = True)
+
+	return df
 
 def get_unique_items_in_array(file_id_array):
 	"""
@@ -83,7 +125,7 @@ def get_unique_items_in_array(file_id_array):
 	"""
 	return list(set(file_id_array))
 
-def get_raw_file_id_dict(file_ids, data_frame):
+def get_raw_file_id_dict(file_ids, data_frame, class_type):
 	"""
 		Generate a dictionary based on file_id
 		
@@ -100,7 +142,7 @@ def get_raw_file_id_dict(file_ids, data_frame):
 	result_dict = {}
 	for file_id in file_ids:
 		sorted_df = extract_df(data_frame, file_id) 
-		class_count_vote_dict = get_highest_vote_based_on_time(sorted_df)
+		class_count_vote_dict = get_highest_vote_based_on_time(sorted_df, class_type)
 		# Check file type to determine the gap of merging
 		if list(sorted_df["type"])[0] == "text":
 			gap = 10
@@ -128,10 +170,11 @@ def get_highest_class_vote(class_dict):
 	for key in class_dict:
 		if class_dict[key] >= high_bar:
 			result_array.append(key)
+	if len(result_array) == 0:
+		result_array.append('none')
 	return result_array    
-			
-		
-def get_highest_vote_based_on_time(data_frame):
+
+def get_highest_vote_based_on_time(data_frame, class_type):
 	"""
 		Reference Norm/Emotion Instances (after applying Judgment Collapsing by Majority Voting)
 		This function should combine class vote in column of "class" in passed in data frame.
@@ -185,8 +228,12 @@ def get_highest_vote_based_on_time(data_frame):
 					# More than one voter, need to get highest voted class
 					highest_vote_class = get_highest_class_vote(pre_value['Class'])
 				elif voter_count == 1:
-					# Only one voter, count his/her votes as result
-					highest_vote_class = list(pre_value['Class'].keys())
+					if class_type == "emotion":
+						# Only one voter, translate into noann
+						highest_vote_class = [silence_string]
+					if class_type == "norm":
+						# Only one voter, count his/her votes as result
+						highest_vote_class = list(pre_value['Class'].keys())
 				time_dict[pre_key]['Class'] = highest_vote_class
 				for emo in highest_vote_class:
 					pre = pre_key.split(' - ')
@@ -211,8 +258,12 @@ def get_highest_vote_based_on_time(data_frame):
 				# More than one voter, need to get highest voted class
 				highest_vote_class = get_highest_class_vote(cur_value['Class'])
 			elif voter_count == 1:
-				# Only one voter, count his/her votes as result
-				highest_vote_class = list(cur_value['Class'].keys())
+				if class_type == "emotion":
+					# Only one voter, translate into noann
+					highest_vote_class = [silence_string]
+				if class_type == "norm":
+					# Only one voter, count his/her votes as result
+					highest_vote_class = list(cur_value['Class'].keys())
 			time_dict[time_key]['Class'] = highest_vote_class  
 			for emo in highest_vote_class:
 				if emo not in emo_dict:
@@ -317,9 +368,12 @@ def get_average_score_based_on_time(data_frame):
 			else:
 				if pre_key in time_dict:
 					pre_value = time_dict[pre_key]
-					if pre_value['Class'] != silence_string:
-						averaged_valence = float(pre_value['Class']) / voter_count
-					else:
+					if voter_count > 1:
+						if pre_value['Class'] != silence_string:
+							averaged_valence = float(pre_value['Class']) / voter_count
+						else:
+							averaged_valence = silence_string
+					elif voter_count == 1:
 						averaged_valence = silence_string
 					time_dict[pre_key]['Class'] = averaged_valence
 				# update pre_key
@@ -337,10 +391,13 @@ def get_average_score_based_on_time(data_frame):
 			# By the end, add last collected vote to count
 			if counted_items == len(data_frame.index):
 				cur_value = time_dict[time_key]
-				if cur_value['Class'] != silence_string:
-					averaged_valence = float(cur_value['Class']) / voter_count
-					time_dict[pre_key]['Class'] = averaged_valence
-				else:
+				if voter_count > 1:
+					if cur_value['Class'] != silence_string:
+						averaged_valence = float(cur_value['Class']) / voter_count
+						time_dict[pre_key]['Class'] = averaged_valence
+					else:
+						time_dict[time_key]['Class'] = silence_string
+				elif voter_count == 1:
 					time_dict[time_key]['Class'] = silence_string
 		return time_dict  
 
@@ -397,7 +454,7 @@ def preprocess_norm_emotion_reference_df(reference_df, class_type):
 	# Split input_file into parts based on file_id column
 	file_ids = get_unique_items_in_array(new_reference_df['file_id'])
 	# Generate file_id map for vote processing
-	result = get_raw_file_id_dict(file_ids, new_reference_df)
+	result = get_raw_file_id_dict(file_ids, new_reference_df, class_type)
 	# Convert the result dictionary into dataframe
 	result_df = convert_norm_emotion_dict_df(result, class_type)
 
@@ -426,38 +483,43 @@ def preprocess_reference_dir(ref_dir, scoring_index, task):
 	file_info = pd.read_csv(os.path.join(ref_dir,"docs","file_info.tab"), sep = "\t")
 	index_df = file_info.merge(scoring_index, left_on = "file_uid", right_on = "file_id")
 	index_df.drop_duplicates(inplace = True)
+	index_df = index_df[["file_id", "type", "length"]]
 
 	if task == "norms" or task == "emotions":
 		data_file = os.path.join(ref_dir,"data","{}.tab".format(task))
-		data_df = read_dedupe_reference_file(data_file)  
+		data_df = read_dedupe_file(data_file)  
 		segment_file = os.path.join(ref_dir,"docs","segments.tab")
-		segment_df = read_dedupe_reference_file(segment_file)
-		segment_prune = delete_gap_segment(segment_df)
-		reference_df = data_df.merge(segment_prune.merge(index_df))
+		segment_df = read_dedupe_file(segment_file)
+		reference_df = data_df.merge(segment_df.merge(index_df))
+		reference_prune = check_remove_start_end_same(reference_df)
 		column_name = task.replace("s","")
-		ref = preprocess_norm_emotion_reference_df(reference_df, column_name)
-		ref = ref[ref.Class != "none"]
-		ref = ref.merge(index_df)
+		ref = preprocess_norm_emotion_reference_df(reference_prune, column_name)
+		ref.drop_duplicates(inplace = True)
+		ref_inter = ref.merge(index_df)
+		ref_final = fill_start_end(ref_inter)
+		ref_final = ref_final[ref_final.Class != "none"]
 
 	if task == "valence_continuous" or task == "arousal_continuous":
 		data_file = os.path.join(ref_dir,"data","valence_arousal.tab")
-		data_df = read_dedupe_reference_file(data_file)  
+		data_df = read_dedupe_file(data_file)  
 		segment_file = os.path.join(ref_dir,"docs","segments.tab")
-		segment_df = read_dedupe_reference_file(segment_file)
-		segment_prune = delete_gap_segment(segment_df)
-		reference_df = data_df.merge(segment_prune.merge(index_df))
+		segment_df = read_dedupe_file(segment_file)
+		reference_df = data_df.merge(segment_df.merge(index_df))
+		reference_prune = check_remove_start_end_same(reference_df)
 		column_name = task
-		ref = preprocess_valence_arousal_reference_df(reference_df, column_name)
+		ref = preprocess_valence_arousal_reference_df(reference_prune, column_name)
 		ref = ref.merge(index_df)
+		ref_inter = extend_gap_segment(ref)
+		ref_final = fill_start_end(ref_inter)
 
 	if task == "changepoint":
 		data_file = os.path.join(ref_dir,"data","{}.tab".format(task))
-		data_df = read_dedupe_reference_file(data_file)  
+		data_df = read_dedupe_file(data_file)  
 		ref = data_df.merge(index_df)
 		ref = ref[ref.timestamp != "none"]
-		ref = change_class_type(ref, convert_task_column(task))
+		ref_final = change_class_type(ref, convert_task_column(task))
 
-	return ref
+	return ref_final
 
 
 
