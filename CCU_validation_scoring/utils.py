@@ -152,12 +152,14 @@ def generate_alignment_file(ref, hyp, task):
 		ref_format = ref.copy()
 		ref_format['start'] = [formatNumber(x) for x in ref['start']]
 		ref_format['end'] = [formatNumber(x) for x in ref['end']]
+		ref_format['sort'] = [x for x in ref['start']]
 		
 		hyp_format = hyp.copy()
 		hyp_format['start_ref'] = [formatNumber(x) for x in hyp['start_ref']]
 		hyp_format['end_ref'] = [formatNumber(x) for x in hyp['end_ref']]
 		hyp_format['start_hyp'] = [formatNumber(x) for x in hyp['start_hyp']]
 		hyp_format['end_hyp'] = [formatNumber(x) for x in hyp['end_hyp']]
+		hyp_format['sort'] = [x for x in hyp['start_hyp']]
 
 		hyp_format["ref"] = "{start=" + hyp_format["start_ref"].astype(str) + ",end=" + hyp_format["end_ref"].astype(str) + "}"
 		hyp_format["sys"] = "{start=" + hyp_format["start_hyp"].astype(str) + ",end=" + hyp_format["end_hyp"].astype(str) + "}"
@@ -167,10 +169,10 @@ def generate_alignment_file(ref, hyp, task):
 		hyp_format.loc[hyp_format["eval"] == "unmapped", "ref"] = "{}"
 		hyp_format.loc[hyp_format["eval"] == "unmapped", "parameters"] = "{}"
 
-		hyp_format = hyp_format[["Class","file_id","eval","ref","sys","llr","parameters"]]
+		hyp_format = hyp_format[["Class","file_id","eval","ref","sys","llr","parameters","sort"]]
 		ref_new = ref_format.copy()
 		ref_new["ref"] = "{start=" + ref_format["start"].astype(str) + ",end=" + ref_format["end"].astype(str) + "}"
-		ref_new = ref_new[["file_id","Class","ref"]]
+		ref_new = ref_new[["file_id","Class","ref","sort"]]
 		ref_new = ref_new.loc[~(ref_new["ref"].isin(hyp_format["ref"]))]
 		ref_new["eval"] = "unmapped"
 		ref_new["sys"] = "{}"
@@ -179,7 +181,7 @@ def generate_alignment_file(ref, hyp, task):
 
 		alignment = pd.concat([hyp_format, ref_new])
 		alignment = alignment.rename(columns={'Class':'class'})
-
+		print(alignment)
 	if task == "changepoint":
 
 		ref_format = ref.copy()
@@ -220,6 +222,7 @@ def generate_all_fn_alignment_file(ref, task):
 		ref_format = ref.copy()
 		ref_format['start'] = [formatNumber(x) for x in ref['start']]
 		ref_format['end'] = [formatNumber(x) for x in ref['end']]
+		ref_format['sort'] = [x for x in ref['start']]
 
 		ref_new = ref_format.loc[ref_format.Class.str.contains('NO_SCORE_REGION')==False].copy()
 		ref_new["ref"] = "{start=" + ref_format["start"].astype(str) + ",end=" + ref_format["end"].astype(str) + "}"
@@ -228,8 +231,9 @@ def generate_all_fn_alignment_file(ref, task):
 		ref_new["sys"] = "{}"
 		ref_new["parameters"] = "{}"
 		ref_new["llr"] = np.nan
+		ref_new["sort"] = ref_format['sort']
 		ref_new = ref_new.rename(columns={'Class':'class'})
-		ref_new = ref_new[["class","file_id","eval","ref","sys","llr","parameters"]]
+		ref_new = ref_new[["class","file_id","eval","ref","sys","llr","parameters","sort"]]
 	if task == "changepoint":
 
 		ref_format = ref.copy()
