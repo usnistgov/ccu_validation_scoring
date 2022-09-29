@@ -93,11 +93,15 @@ def concatenate_submission_file(subm_dir, task):
 		else:
 			submission_df = pd.read_csv(os.path.join(subm_dir,subm_file_path), dtype={'norm': object}, sep='\t')
 
-		submission_df_sorted = submission_df.sort_values(by=['start','end'])
-
-		submission_df_filled = fill_epsilon_submission(submission_df_sorted)
-
-		submission_dfs = pd.concat([submission_dfs, submission_df_filled])
+		if task == "norms" or task == "emotions":
+			submission_df_sorted = submission_df.sort_values(by=['start','end'])
+			submission_dfs = pd.concat([submission_dfs, submission_df_sorted])
+		if task == "valence_continuous" or task == "arousal_continuous":
+			submission_df_sorted = submission_df.sort_values(by=['start','end'])
+			submission_df_filled = fill_epsilon_submission(submission_df_sorted)
+			submission_dfs = pd.concat([submission_dfs, submission_df_filled])
+		if task == "changepoint":
+			submission_dfs = pd.concat([submission_dfs, submission_df])
 
 	submission_dfs.drop_duplicates(inplace = True)
 	submission_dfs = submission_dfs.reset_index(drop=True)
@@ -109,7 +113,7 @@ def concatenate_submission_file(subm_dir, task):
 def fill_epsilon_submission(sys):
 
 	for i in range(sys.shape[0]-1):
-		if sys.iloc[i]["end"] != sys.iloc[i+1]["start"] and abs(sys.iloc[i]["end"] - sys.iloc[i+1]["start"]) < 0.001:
+		if sys.iloc[i]["end"] != sys.iloc[i+1]["start"] and abs(sys.iloc[i]["end"] - sys.iloc[i+1]["start"]) < 0.02:
 			sys.iloc[i+1, sys.columns.get_loc('start')] = sys.iloc[i]["end"]
 	
 	return sys

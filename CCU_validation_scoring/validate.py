@@ -280,7 +280,7 @@ def check_time_no_gap(file, ref):
 		
 		if ref["type"].unique()[0] == "audio" or ref["type"].unique()[0] == "video":
 			for i in range(df_sorted.shape[0]-1):
-				if abs(df_sorted.iloc[i]["end"] - df_sorted.iloc[i+1]["start"]) >= 0.001:
+				if abs(df_sorted.iloc[i]["end"] - df_sorted.iloc[i+1]["start"]) >= 0.02:
 					logger.error('Invalid file {}:'.format(file))
 					logger.error("There are some gaps in timestamp of {}".format(file))
 					return False
