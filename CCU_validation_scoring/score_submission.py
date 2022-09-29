@@ -79,6 +79,8 @@ def score_vd_submission_dir_cli(args):
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "valence_continuous")
 	hyp = concatenate_submission_file(subm_dir = args.submission_dir, task = "valence_continuous")
 
+	# ref = ref[["file_id", "start", "end", "Class"]]
+	# ref.to_csv("tmp.csv", sep = "\t", index = None)
 	score_valence_arousal(ref, hyp, output_dir = args.output_dir, task = "valence_continuous")
 
 	print("Diarization")
@@ -119,6 +121,7 @@ def score_cd_submission_dir_cli(args):
 
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "changepoint")
 	hyp = concatenate_submission_file(subm_dir = args.submission_dir, task = "changepoint")
+
 	text_thresholds = [int(i) for i in args.delta_cp_text_thresholds.split(',')]
 	time_thresholds = [float(i) for i in args.delta_cp_time_thresholds.split(',')]
 	score_cp(ref, hyp, delta_cp_text_thresholds=text_thresholds, delta_cp_time_thresholds=time_thresholds, output_dir=args.output_dir)

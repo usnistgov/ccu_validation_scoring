@@ -34,6 +34,7 @@ def change_continuous_text(df):
 		
 		point_new = [int(x) for x in point]
 		df_new = pd.DataFrame({"file_id": doc, "Class": label_new, "point": point_new})
+		df_new.drop_duplicates(inplace = True)
 
 		return df_new
 
