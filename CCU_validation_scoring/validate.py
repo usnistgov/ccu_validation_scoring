@@ -61,7 +61,7 @@ def global_file_checks(task, reference_dir, submission_dir, scoring_index_file):
 
 	return ref, subm_file_dict
 
-def individual_file_check(task, subm_file_path, column_map, header_map, processed_label, subm_file, length, ref_df, norm_list):
+def individual_file_check(task, type, subm_file_path, column_map, header_map, processed_label, subm_file, length, ref_df, norm_list):
 	
 	if task == "norms":
 		file_checks = (check_valid_tab(subm_file_path) and
@@ -70,7 +70,7 @@ def individual_file_check(task, subm_file_path, column_map, header_map, processe
 			check_output_records(subm_file_path, task, processed_label) and
 			check_data_type(subm_file_path, header_map[task]) and
 			check_fileid_index_match(subm_file_path, subm_file) and
-			check_start_small_end(subm_file_path) and
+			check_start_small_end(subm_file_path, type) and
 			check_start_end_timestamp_within_length(subm_file_path, task, length))
 	
 	if task == "emotions":
@@ -81,7 +81,7 @@ def individual_file_check(task, subm_file_path, column_map, header_map, processe
 			check_data_type(subm_file_path, header_map[task]) and
 			check_fileid_index_match(subm_file_path, subm_file) and
 			check_emotion_id(subm_file_path) and
-			check_start_small_end(subm_file_path) and
+			check_start_small_end(subm_file_path, type) and
 			check_start_end_timestamp_within_length(subm_file_path, task, length))
 
 	if task == "valence_continuous" or task == "arousal_continuous":
@@ -91,8 +91,9 @@ def individual_file_check(task, subm_file_path, column_map, header_map, processe
 			check_output_records(subm_file_path, task, processed_label) and
 			check_data_type(subm_file_path, header_map[task]) and
 			check_fileid_index_match(subm_file_path, subm_file) and
-			check_start_small_end(subm_file_path) and
+			check_start_small_end(subm_file_path, type) and
 			check_time_no_gap(subm_file_path, ref_df) and
+			check_duration_cover(subm_file_path, length) and
 			check_duration_equal(subm_file_path, ref_df) and
 			check_start_end_timestamp_within_length(subm_file_path, task, length) and
 			check_value_range(subm_file_path, task))
@@ -245,37 +246,60 @@ def check_emotion_id(file):
 			return False
 	return True
 
-def check_start_small_end(file):
+def check_start_small_end(file, type):
 
 	df = pd.read_csv(file, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
 	if df.shape[0] != 0:
-		for i in range(df.shape[0]):
-			if df.iloc[i]["start"] > df.iloc[i]["end"]:
-				logger.error('Invalid file {}:'.format(file))
-				logger.error("Start is higher than end in {}".format(file))
-				return False
+		if type == "text":	
+			for i in range(df.shape[0]):
+				if df.iloc[i]["start"] > df.iloc[i]["end"]:
+					logger.error('Invalid file {}:'.format(file))
+					logger.error("Start is higher than end in text {}".format(file))
+					return False
+		if type != "text":	
+			for i in range(df.shape[0]):
+				if df.iloc[i]["start"] >= df.iloc[i]["end"]:
+					logger.error('Invalid file {}:'.format(file))
+					logger.error("Start is equal to/higher than end in audio/video {}".format(file))
+					return False
 	return True
 
 def check_time_no_gap(file, ref):
 
 	df = pd.read_csv(file, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
-	df_sorted = df.sort_values(by=['start','end'])
+	if df.shape[0] != 0:
+		df_sorted = df.sort_values(by=['start','end'])
 
-	if ref["type"].unique()[0] == "text":
-		for i in range(df_sorted.shape[0]-1):
-			if df_sorted.iloc[i]["end"] + 1 != df_sorted.iloc[i+1]["start"]:
-				logger.error('Invalid file {}:'.format(file))
-				logger.error("There are some gaps in timestamp of {}".format(file))
-				return False
-		return True
-	
-	if ref["type"].unique()[0] == "audio" or ref["type"].unique()[0] == "video":
-		for i in range(df_sorted.shape[0]-1):
-			if df_sorted.iloc[i]["end"] != df_sorted.iloc[i+1]["start"]:
-				logger.error('Invalid file {}:'.format(file))
-				logger.error("There are some gaps in timestamp of {}".format(file))
-				return False
-		return True
+		if ref["type"].unique()[0] == "text":
+			for i in range(df_sorted.shape[0]-1):
+				if df_sorted.iloc[i]["end"] + 1 != df_sorted.iloc[i+1]["start"]:
+					logger.error('Invalid file {}:'.format(file))
+					logger.error("There are some gaps in timestamp of {}".format(file))
+					return False
+			return True
+		
+		if ref["type"].unique()[0] == "audio" or ref["type"].unique()[0] == "video":
+			for i in range(df_sorted.shape[0]-1):
+				if abs(df_sorted.iloc[i]["end"] - df_sorted.iloc[i+1]["start"]) >= 0.001:
+					logger.error('Invalid file {}:'.format(file))
+					logger.error("There are some gaps in timestamp of {}".format(file))
+					return False
+	return True
+
+def check_duration_cover(file, length):
+
+	df = pd.read_csv(file, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
+	if df.shape[0] != 0:
+		start = min(list(df["start"]))
+		end = max(list(df["end"]))	
+
+		if start == 0 and end == length:
+			return True
+
+		logger.error('Invalid file {}:'.format(file))
+		logger.error("The duration of {} is different from the duration of source".format(file))
+		return False
+	return True
 
 def check_duration_equal(file, ref_df):
 
@@ -324,7 +348,7 @@ def check_index_get_submission_files(ref, subm_dir):
 	column_map = {"index": 4}
 	header_map = {"index":{"file_id": "object","is_processed": "bool","message": "object","file_path": "object"}}
 
-	if individual_file_check("index", index_file_path, column_map, header_map, processed_label=None, subm_file=None, length=None, ref_df=None, norm_list=None):
+	if individual_file_check("index", None, index_file_path, column_map, header_map, processed_label=None, subm_file=None, length=None, ref_df=None, norm_list=None):
 		index_df = pd.read_csv(index_file_path, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
 
 		# Then check if file_id in reference is equal to file_id in index file

@@ -74,8 +74,8 @@ def fill_start_end(ref):
 		end = max(list(sub_ref["end"]))
 
 		if type == "text":
-			if start > 1:
-				ref.loc[len(ref.index)] = [i, silence_string, 1, start - 1, class_type, type, length]
+			if start > 0:
+				ref.loc[len(ref.index)] = [i, silence_string, 0, start - 1, class_type, type, length]
 			if end < length:
 				ref.loc[len(ref.index)] = [i, silence_string, end + 1, length, class_type, type, length]
 
@@ -110,20 +110,6 @@ def read_dedupe_file(path):
 	df.drop_duplicates(inplace = True)
 
 	return df
-
-def get_unique_items_in_array(file_id_array):
-	"""
-		Extract unique items from an array and return in array format
-	 
-		Parameters
-		----------
-		file_id_array : array
- 
-		Returns
-		-------
-		list
-	"""
-	return list(set(file_id_array))
 
 def get_raw_file_id_dict(file_ids, data_frame, class_type):
 	"""
