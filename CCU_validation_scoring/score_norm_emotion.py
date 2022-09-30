@@ -214,7 +214,8 @@ def compute_multiclass_iou_pr(ref, hyp, iou_thresholds=0.2, mapping_df = None, c
                 task=class_type)
                     
         apScores.append(apScore)
-        alignment_df = pd.concat([alignment_df, alignment])
+        if final_combo_pruned.loc[i, "type"] == "all":
+            alignment_df = pd.concat([alignment_df, alignment])
 
     final_alignment_df = alignment_df.drop_duplicates()
 

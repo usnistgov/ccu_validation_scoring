@@ -52,6 +52,20 @@ def ensure_output_dir(output_dir):
 	if not os.path.exists(output_dir):
 		os.makedirs(output_dir)
 
+def get_unique_items_in_array(file_id_array):
+	"""
+		Extract unique items from an array and return in array format
+	 
+		Parameters
+		----------
+		file_id_array : array
+ 
+		Returns
+		-------
+		list
+	"""
+	return list(set(file_id_array))
+
 def load_list(fn):
 	try:
 		fh = open(fn, "r")
@@ -79,7 +93,15 @@ def concatenate_submission_file(subm_dir, task):
 		else:
 			submission_df = pd.read_csv(os.path.join(subm_dir,subm_file_path), dtype={'norm': object}, sep='\t')
 
-		submission_dfs = pd.concat([submission_dfs, submission_df])
+		if task == "norms" or task == "emotions":
+			submission_df_sorted = submission_df.sort_values(by=['start','end'])
+			submission_dfs = pd.concat([submission_dfs, submission_df_sorted])
+		if task == "valence_continuous" or task == "arousal_continuous":
+			submission_df_sorted = submission_df.sort_values(by=['start','end'])
+			submission_df_filled = fill_epsilon_submission(submission_df_sorted)
+			submission_dfs = pd.concat([submission_dfs, submission_df_filled])
+		if task == "changepoint":
+			submission_dfs = pd.concat([submission_dfs, submission_df])
 
 	submission_dfs.drop_duplicates(inplace = True)
 	submission_dfs = submission_dfs.reset_index(drop=True)
@@ -87,6 +109,14 @@ def concatenate_submission_file(subm_dir, task):
 	new_submission_dfs = change_class_type(submission_dfs, convert_task_column(task))
 
 	return new_submission_dfs
+
+def fill_epsilon_submission(sys):
+
+	for i in range(sys.shape[0]-1):
+		if sys.iloc[i]["end"] != sys.iloc[i+1]["start"] and abs(sys.iloc[i]["end"] - sys.iloc[i+1]["start"]) < 0.02:
+			sys.iloc[i+1, sys.columns.get_loc('start')] = sys.iloc[i]["end"]
+	
+	return sys
 
 def convert_task_column(task):
 
