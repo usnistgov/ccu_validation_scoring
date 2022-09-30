@@ -1,0 +1,13 @@
+file_id	emotion	start	end	llr
+M010005NJ	joy	1	4	0.6
+M010005NJ	joy	6	10	0.8
+M010005NJ	joy	12	16	0.9
+M010005NJ	joy	23	31	0.9
+M010005NJ	joy	43	47	0.7
+M010005NJ	joy	48	50	0.9
+M010005NJ	surprise	1	4	0.6
+M010005NJ	surprise	6	10	0.8
+M010005NJ	surprise	12	16	0.9
+M010005NJ	surprise	23	31	0.9
+M010005NJ	surprise	43	47	0.7
+M010005NJ	surprise	48	50	0.9

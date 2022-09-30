@@ -110,6 +110,7 @@ def compute_average_precision_tad(ref, hyp, iou_thresholds=[0.2], task=None):
         for iout in iou_thresholds:
             output[iout] = 0.0, [0.0, 0.0], [0.0, 1.0]
         alignment_df = generate_all_fn_alignment_file(ref, task)
+        print("Gen all 2a")
         return output,alignment_df
 
     # Compute IoU for all hyps incl. NO_SCORE_REGION
@@ -313,10 +314,12 @@ def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df):
         final_combo_pruned = final_combo_pruned[["Class","type"]]
         [ pr_iou_scores.setdefault(iout, generate_zero_scores_norm_emotion(final_combo_pruned)) for iout in iou_thresholds ]
         final_alignment_df = generate_all_fn_alignment_file(ref, class_type)
+        print("Gen alkk 1")
 
     ensure_output_dir(output_dir)
-    final_alignment_df_sorted = final_alignment_df.sort_values(by=['class', 'file_id', 'sys', 'ref'])
-    final_alignment_df_sorted.to_csv(os.path.join(output_dir, "instance_alignment.tab"), index = False, quoting=3, sep="\t", escapechar="\t")
+    final_alignment_df_sorted = final_alignment_df.sort_values(by=['class', 'file_id', 'sort'])
+    final_alignment_df_sorted.to_csv(os.path.join(output_dir, "instance_alignment.tab"), index = False, quoting=3, sep="\t", escapechar="\t",
+                                     columns = ["class","file_id","eval","ref","sys","llr","parameters"])
     sumup_tad_system_level_scores(pr_iou_scores, iou_thresholds, class_type, output_dir)
     sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir)
 
