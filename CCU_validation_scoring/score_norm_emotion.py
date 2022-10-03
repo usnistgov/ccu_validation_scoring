@@ -10,6 +10,9 @@ logger = logging.getLogger('SCORING')
 
 
 def generate_zero_scores_norm_emotion(labels):
+    """
+    Generate the result when no match was founded
+    """
     y = []
     if len(labels)>0:
         for i in range(len(labels)):
@@ -51,6 +54,9 @@ def segment_iou(ref_start, ref_end, tgts):
 
 
 def compute_ious(row, ref):
+    """
+    Compute the ref/hyp matching table
+    """
     refs = ref.loc[ ref['file_id'] == row.file_id ].copy()    
     # If there are no references for this hypothesis it's IoU is 0/FP
     if len(refs) == 0:
@@ -86,11 +92,13 @@ def compute_average_precision_tad(ref, hyp, iou_thresholds=[0.2], task=None):
         Data frame containing the prediction instances. Required fields:
         ['file_id', 'Class', 'llr']
     iou_thresholds : 1darray, optional
-        Temporal IoU Threshold (>=0)        
+        Temporal IoU Threshold (>=0)
+    task:
+        string that indicates task name. e.g. norm/emotion        
 
     Returns
     -------
-    dict 
+    output: 
         Values are tuples [ap, precision, recall]. Keys are tIoU thr.
         - **ap** (float)
             Average precision score.
@@ -98,6 +106,8 @@ def compute_average_precision_tad(ref, hyp, iou_thresholds=[0.2], task=None):
             Precision values
         - **recall** (1darray)
             Recall values
+
+    final_alignment_df: instance alignment dataframe
     """
     # REF has same amount of !score_regions for all runs, which need to be
     # excluded from overall REF count.
@@ -162,12 +172,18 @@ def compute_multiclass_iou_pr(ref, hyp, iou_thresholds=0.2, mapping_df = None, c
         ['file_id', 'Class', 'start', 'end', 'llr']
     iou_thresholds: 1darray
         List of IoU levels to score at.
+    mapping_df:
+        norm mapping dataframe
+    class_type:
+        string that indicates task name. e.g. norm/emotion
 
     Returns
     -------
-    results: dict [ds]
+    pr_scores: dict [ds]
         Dict of Dataframe w/ class,ap,prec,rec columns w/ IoU-Thresholds as
         keys.
+
+    final_alignment_df: instance alignment dataframe
     """
     # Initialize
     scores = {}
@@ -232,7 +248,9 @@ def compute_multiclass_iou_pr(ref, hyp, iou_thresholds=0.2, mapping_df = None, c
     return pr_scores, final_alignment_df
 
 def sumup_tad_system_level_scores(pr_iou_scores, iou_thresholds, class_type, output_dir):
-    """ Map internal to public representation. """
+    """
+    Write aggregate result into a file
+    """
     map_scores_threshold = pd.DataFrame()
     for iout in sorted(iou_thresholds):
         pr_scores = pr_iou_scores[iout]
@@ -251,7 +269,9 @@ def sumup_tad_system_level_scores(pr_iou_scores, iou_thresholds, class_type, out
     map_scores_threshold.to_csv(os.path.join(output_dir, "scores_aggregated.tab"), sep = "\t", index = None)
         
 def sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir):
-    """ Map internal to public representation. Scores per Class and IoU Level """
+    """
+    Write class level result into a file
+    """
     prs_threshold = pd.DataFrame()   
     for iout in sorted(iou_thresholds):        
         prs = pr_iou_scores[iout]
@@ -280,17 +300,9 @@ def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df):
     iou_thresholds: 1darray [int]
         List of IoU levels to score at.
     output_dir: str
-        Path to a directory (created on demand) for output files    
-
-    Returns
-    -------
-    Tuple with following values:
-        - **pr_iou_scores** (dict of df)
-            multi-class pr for all classes and ious
-        - **results** (df)
-            metrics for system level
-        - **al_results** (df)
-            metrics for class level
+        Path to a directory (created on demand) for output files   
+    mapping_df:
+        norm mapping dataframe 
     """    
 
     # FIXME: Use a No score-region parameter
@@ -314,7 +326,6 @@ def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df):
         final_combo_pruned = final_combo_pruned[["Class","type"]]
         [ pr_iou_scores.setdefault(iout, generate_zero_scores_norm_emotion(final_combo_pruned)) for iout in iou_thresholds ]
         final_alignment_df = generate_all_fn_alignment_file(ref, class_type)
-        print("Gen alkk 1")
 
     ensure_output_dir(output_dir)
     final_alignment_df_sorted = final_alignment_df.sort_values(by=['class', 'file_id', 'sort'])

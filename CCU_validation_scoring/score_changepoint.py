@@ -8,7 +8,9 @@ logger = logging.getLogger('SCORING')
 
 
 def generate_zero_scores_changepoint(labels, delta_cp_text_thresholds, delta_cp_time_thresholds):
-
+    """
+    Generate the result when no match was founded
+    """
     if len(labels)>0:
         y_text = []
         y_time = []
@@ -57,6 +59,9 @@ def segment_cp(ref_class, tgts):
 
 
 def compute_cps(row, ref):
+    """
+    Compute the ref/hyp matching table
+    """
     refs = ref.loc[ ref['file_id'] == row.file_id ].copy()    
     # If there are no references for this hypothesis it's IoU is 0/FP
     if len(refs) == 0:
@@ -93,7 +98,7 @@ def compute_average_precision_cps(ref, hyp, delta_cp_thresholds):
 
     Returns
     -------
-    dict 
+    output:
         Values are tuples [ap, precision, recall]. Keys are Text/Time Delta Distance Thresholds.
         - **ap** (float)
             Average precision score.
@@ -101,6 +106,8 @@ def compute_average_precision_cps(ref, hyp, delta_cp_thresholds):
             Precision values
         - **recall** (1darray)
             Recall values
+
+    final_alignment_df: instance alignment dataframe
     """
     # REF has same amount of !score_regions for all runs, which need to be
     # excluded from overall REF count.
@@ -147,7 +154,7 @@ def compute_average_precision_cps(ref, hyp, delta_cp_thresholds):
     return output,final_alignment_df
 
 
-def compute_multiclass_cp_pr(ref, hyp, delta_cp_text_thresholds = 100, delta_cp_time_thresholds = 10, class_type = None):
+def compute_multiclass_cp_pr(ref, hyp, delta_cp_text_thresholds = 100, delta_cp_time_thresholds = 10):
 
     """ 
     Compute average precision score (AP) and precision-recall curves for
@@ -170,9 +177,11 @@ def compute_multiclass_cp_pr(ref, hyp, delta_cp_text_thresholds = 100, delta_cp_
 
     Returns
     -------
-    results: dict [ds]
+    pr_scores: dict [ds]
         Dict of Dataframe w/ type,ap,prec,rec columns w/ Delta-Thresholds as
         keys.
+
+    final_alignment_df: instance alignment dataframe
     """
     # Initialize
     scores = {}
@@ -208,7 +217,9 @@ def compute_multiclass_cp_pr(ref, hyp, delta_cp_text_thresholds = 100, delta_cp_
     return pr_scores, final_alignment_df
 
 def write_type_level_scores(output_dir, results, delta_cp_text_thresholds, delta_cp_time_thresholds):
-
+    """
+    Write class level result into a file
+    """
     type_level_scores = pd.DataFrame()
     for cp in delta_cp_text_thresholds + delta_cp_time_thresholds:
         result_cp = results[cp]
@@ -240,12 +251,6 @@ def score_cp(ref, hyp, delta_cp_text_thresholds, delta_cp_time_thresholds, outpu
         Time Delta Distance Thresholds (>=0)
     output_dir: str
         Path to a directory (created on demand) for output files    
-
-    Returns
-    -------
-    Tuple with following values:
-        - **pr_iou_scores** (dict of df)
-            multi-type pr for all types
     """    
     # Add text/audio/video info to hyp   
     tad_add_noscore_region(ref,hyp)

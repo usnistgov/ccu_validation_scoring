@@ -255,7 +255,9 @@ def ccc(x,y):
     return rhoc
 
 def score_genre(ref_dict, hyp_dict):
-
+	"""
+	Generate CCC metric by genre
+	"""
 	result = {}
 	ref = []
 	hyp = []
@@ -273,7 +275,9 @@ def score_genre(ref_dict, hyp_dict):
 	return result
 
 def write_segment(segment_df, output_dir, task):
-
+	"""
+  Write segment diarization result into a file
+  """
 	if task == "valence_continuous":
 		label = "valence"
 	if task == "arousal_continuous":
@@ -294,7 +298,9 @@ def write_segment(segment_df, output_dir, task):
 	segment_df_sorted.to_csv(os.path.join(output_dir, "segment_diarization.tab"), index = False, quoting=3, sep="\t", escapechar="\t")
 
 def write_valence_arousal_scores(output_dir, CCC_result, task):
-
+	"""
+  Write aggregate result into a file
+  """
 	result_df = pd.DataFrame(columns=["task","genre","metric","value","correctness_criteria"])
 	index = 0
 	if task == "valence_continuous":
