@@ -41,10 +41,11 @@ def byte_compare_file(generated, expected):
 def run_scorer():
     print("Scoring Command: CCU_scoring " + " ".join(sys.argv[1:]))
     try:
-        cli.main()
+        rtn = cli.main()
         
     except Exception:
-        print("Scorer test failed with command")
+        print("Scorer execution threw and exception")
+        exit(1)
 
     
 @pytest.mark.parametrize("dataset, system_input_index, system_dir, task, opt1",
