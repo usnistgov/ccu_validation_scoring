@@ -54,14 +54,15 @@ def run_scorer():
                           ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'ED', ''),
                           ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'CD', ''),
                           ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'NDMAP', 'CCU_P1_TA1_ND_NIST_mini-eval1_20220531_050236'),
-
+                          
                           ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'ND', ''),
                           ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'CD', ''),
                           ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'ED', ''),                        
+                          ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'VD', ''),                        
 
                           ('ActEV-SmoothCurve', 'ActEV-SmoothCurve.scoring.index.tab', 'pass_submissions_ActEV-SmoothCurve', 'ND', '')                        
-
                           ])
+
 def test_run_score_submissions(dataset, system_input_index, system_dir, task, opt1):
     current_path = os.path.abspath(__file__)
     test_dir_path = os.path.dirname(current_path)
@@ -86,7 +87,8 @@ def test_run_score_submissions(dataset, system_input_index, system_dir, task, op
                             "-s", subdir, "-i", scoring_index_path, "-o", tmp_dir]
             run_scorer()
 
-            for filename in ["scores_aggregated.tab", "segment_diarization.tab"]:
+#            for filename in ["scores_aggregated.tab", "segment_diarization.tab"]:
+            for filename in ["segment_diarization.tab"]:                
                 tmp_file = os.path.join(tmp_dir, filename)
                 byte_compare_file(tmp_file,
                                   os.path.join(score_path, "scores_" + dataset, task, os.path.basename(subdir), filename))
