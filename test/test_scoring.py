@@ -16,6 +16,8 @@ def byte_compare_file(generated, expected):
     ### If update is set and the file is missing, add the generated file
     if (not os.path.exists(expected)):
         if (os.environ.get("CCUTEST_UPDATE_SCORES") == "add_missing_file"):
+            if (not os.path.exists(os.path.dirname(expected))):
+                subprocess.check_call("mkdir -p {}".format(os.path.dirname(expected)), shell=True)
             subprocess.check_call(f"cp {generated} {expected}", shell=True)
 
     if (not os.path.exists(generated)):
@@ -55,7 +57,9 @@ def run_scorer():
 
                           ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'ND', ''),
                           ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'CD', ''),
-                          ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'ED', '')                        
+                          ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'ED', ''),                        
+
+                          ('ActEV-SmoothCurve', 'ActEV-SmoothCurve.scoring.index.tab', 'pass_submissions_ActEV-SmoothCurve', 'ND', '')                        
 
                           ])
 def test_run_score_submissions(dataset, system_input_index, system_dir, task, opt1):
