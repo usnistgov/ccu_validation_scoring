@@ -5,7 +5,8 @@ import numpy as np
 from sklearn.metrics import cohen_kappa_score
 from .utils import *
 from .preprocess_reference import *
-
+import errno
+         
 silence_string = "noann"
 
 def change_continuous_text(df):
@@ -285,17 +286,34 @@ def write_segment(segment_df, output_dir, task):
 	
 	segment_df["class"] = label
 	segment_df_format = segment_df.copy()
-	segment_df_format["ref"] = [formatNumber(x) for x in segment_df["continue_ref"]]
-	segment_df_format["sys"] = [formatNumber(x) for x in segment_df["continue_hyp"]]
+	segment_df_format["ref"] = ["{:.3f}".format(x) for x in segment_df["continue_ref"]]
+	segment_df_format["sys"] = ["{:.3f}".format(x) for x in segment_df["continue_hyp"]]
+	segment_df_format["sort"] = [float(x) for  x in segment_df["start"]]
 
 	segment_df_format["parameters"] = "{}"
 	segment_df_format["start"] = [formatNumber(x) for x in segment_df["start"]]
 	segment_df_format["end"] = [formatNumber(x) for x in segment_df["end"]]
 	segment_df_format["window"] = "{start=" + segment_df_format["start"].astype(str) + ",end=" + segment_df_format["end"].astype(str) + "}"
 
-	segment_df_format = segment_df_format[["class","file_id","window","ref","sys","parameters"]]
-	segment_df_sorted = segment_df_format.sort_values(by=['class', 'file_id', 'window'])
-	segment_df_sorted.to_csv(os.path.join(output_dir, "segment_diarization.tab"), index = False, quoting=3, sep="\t", escapechar="\t")
+	#segment_df_format = segment_df_format[["class","file_id","window","ref","sys","parameters"]]
+	segment_df_sorted = segment_df_format.sort_values(by=['class', 'file_id', 'sort'])
+
+	segment_df_sorted.to_csv(os.path.join(output_dir, "segment_diarization.tab"), index = False, quoting=3, sep="\t", escapechar="\t",
+                                 columns=['class', 'file_id','window','ref','sys','parameters'])
+        ### Write the file minimized
+	#fname= os.path.join(output_dir, "segment_diarization.tab")
+	#columns=['class', 'file_id','window','ref','sys','parameters']
+	#try:
+	#	f = open(fname, 'w')
+	#except OSError as e:
+	#	print(f"Cannot oppen file (errno: { e.errno } ):", fname, file=sys.stderr)
+	#	sys.exit(os.EX_OSFILE)
+	#with f:
+	#	print('\t'.join(columns), file=f)
+	#	for index, row in segment_df_format.iterrows():
+	#		print('\t'.join(row[columns]), file=f)
+	#	f.close()
+
 
 def write_valence_arousal_scores(output_dir, CCC_result, task):
 	"""
