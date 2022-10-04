@@ -37,7 +37,6 @@ setup(name=PACKAGE_NAME,
         'pandas',
         'pathlib',
         'numpy',
-        'sklearn',
         'pytest'
     ],
       version=CCU_validation_scoring.__version__,

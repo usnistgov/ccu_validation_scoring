@@ -1,4 +1,3 @@
-from functools import partial
 import os
 import pandas as pd
 from pathlib import Path

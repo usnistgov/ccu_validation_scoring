@@ -1,8 +1,6 @@
-from ctypes import pointer
 import os
 import pandas as pd
 import numpy as np
-from sklearn.metrics import cohen_kappa_score
 from .utils import *
 from .preprocess_reference import *
 
@@ -240,19 +238,13 @@ def apply_level_label(list, task):
 			labels.append(label)
 
 	return labels
-
-def kappa(x,y):
-	'''Cohen’s kappa'''
-	result = cohen_kappa_score(x,y)
-
-	return result
 			
 def ccc(x,y):
-    ''' Concordance Correlation Coefficient'''
-    sxy = np.sum((x - np.mean(x))*(y - np.mean(y)))/len(x)
-    rhoc = 2*sxy / (np.var(x) + np.var(y) + (np.mean(x) - np.mean(y))**2)
-
-    return rhoc
+  ''' Concordance Correlation Coefficient'''
+  sxy = np.sum((x - np.mean(x))*(y - np.mean(y)))/len(x)
+  rhoc = 2*sxy / (np.var(x) + np.var(y) + (np.mean(x) - np.mean(y))**2)
+	
+  return rhoc
 
 def score_genre(ref_dict, hyp_dict):
 	"""
