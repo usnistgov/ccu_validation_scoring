@@ -82,13 +82,31 @@ class EmotionDetectionTests(unittest.TestCase):
              # Create input data frame
             input_df = pd.read_csv(input_file_path)
             input_df.user_id = input_df.user_id.astype(str)
-            input_df.multi_speaker = input_df.multi_speaker.astype(str) # str or bool?
             input_df.start = input_df.start.astype(str)
             input_df.end = input_df.end.astype(str)
             input_df.Class = input_df.Class.astype(str)
       
             # Call get_highest_vote_based_on_time w/ input data frame
-            emo_dict = get_highest_vote_based_on_time(input_df)
+            is_emotion = False
+            id_counter = 0
+            last_segment_id = ""
+            for index, row in input_df.iterrows():
+                current_segment_id = row['segment_id']
+                if current_segment_id == last_segment_id:
+                    continue
+                else:
+                    partial_df = input_df[input_df['segment_id'] == current_segment_id]
+                    user_ids = partial_df.user_id.values.tolist()
+                    if len(set(user_ids)) > 1:
+                        is_emotion = True
+                        break
+                    else:
+                        last_segment_id = current_segment_id
+
+            if is_emotion == False:
+                emo_dict = get_highest_vote_based_on_time(input_df, "norm")
+            else:
+                emo_dict = get_highest_vote_based_on_time(input_df, "emotion")
 
             # Test that emo_dict is a dict w/ strings as keys & list as values
             self.assertIsInstance(emo_dict, dict)        
@@ -101,7 +119,7 @@ class EmotionDetectionTests(unittest.TestCase):
 
             # Create expected data frame
             expected_df = pd.read_csv(expected_file_path)
-
+ 
             # Loop over each column and change strings to dicts
             for (column_name, column_data) in expected_df.iteritems():
                 if column_name != "Emotion":
@@ -113,7 +131,7 @@ class EmotionDetectionTests(unittest.TestCase):
             generated_df = pd.DataFrame.from_dict(emo_dict, orient='index')
             generated_df = generated_df.reset_index()
             generated_df = generated_df.rename(columns={"index": "Emotion"})
-
+        
             # Convert column names from ints to strings
             for i in range(0, len(generated_df.columns.values)):
                 generated_df.columns.values[i] = str(generated_df.columns.values[i])
