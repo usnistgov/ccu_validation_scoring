@@ -1,5 +1,3 @@
-from heapq import merge
-from lib2to3.pgen2.pgen import generate_grammar
 from CCU_validation_scoring.preprocess_reference import *
 import json
 import ast
