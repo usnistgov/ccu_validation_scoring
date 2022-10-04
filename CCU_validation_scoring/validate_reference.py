@@ -37,7 +37,7 @@ def validate_ref_submission_dir_cli(args):
 					check_ref_fileid_segmentid_match(file_path, docs_dir) and
 					check_noann_all_columns(file_path))
 					error_count += 1 if file_checks != True else 0
-				elif file == "emotion.tab": # CHANGE TO emotions.tab
+				elif file == "emotions.tab": # CHANGE TO emotions.tab
 					file_checks = (global_ref_file_checks(file_path, index_dir) and 
 					check_empty_na(file_path, "emotions") and 
 					check_duplicate_emotions(file_path) and 
@@ -63,7 +63,7 @@ def validate_ref_submission_dir_cli(args):
 					index_dir = os.path.join(root, '..', "index_files")
 					file_checks = (global_ref_file_checks(file_path, index_dir) and 
 					check_start_end_types(file_path, root) and
-					check_start_small_end(file_path))
+					check_valid_timestamps(file_path, root))
 					error_count += 1 if file_checks != True else 0
 
 	if error_count > 0:
