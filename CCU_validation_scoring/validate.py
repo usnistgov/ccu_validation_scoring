@@ -274,7 +274,7 @@ def check_time_no_gap(file, ref):
 			for i in range(df_sorted.shape[0]-1):
 				if df_sorted.iloc[i]["end"] + 1 != df_sorted.iloc[i+1]["start"]:
 					logger.error('Invalid file {}:'.format(file))
-					logger.error("There are some gaps in timestamp of {}".format(file))
+					logger.error("There are some gaps/overlaps in timestamp of {}".format(file))
 					return False
 			return True
 		
