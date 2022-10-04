@@ -19,7 +19,7 @@ def process_subset_norm_emotion(list_file, ref):
 
 def extend_gap_segment(ref):
 	"""
-	Extend the gap between end of previous segment and start of next segment in LDC segments.tab.
+	Extend the gap between end of previous segment and start of next segment in reference.
 
 	e.g.
 	From
@@ -33,11 +33,11 @@ def extend_gap_segment(ref):
 
 	Parameters
 	----------
-	segment_df, gap
+	ref
 
 	Returns
 	-------
-	new_segment_df: data frame after removing the gap
+	ref_sorted: data frame after extending the gap
 
 	"""
 
@@ -63,6 +63,28 @@ def extend_gap_segment(ref):
 	return ref_sorted
 
 def fill_start_end(ref):
+	"""
+	Add no score region to start and end of the file in reference.
+
+	e.g.
+	From
+	Start  End  Class
+	45.2   60.2  joy
+
+	To result
+	Start  End  Class
+	0  		45.2	noann
+	45.2   60.2  joy
+
+	Parameters
+	----------
+	ref
+
+	Returns
+	-------
+	ref_sorted: data frame after adding the no score region
+
+	"""
 	
 	class_type = list(ref["Class_type"])[0]
 	file_ids = get_unique_items_in_array(ref['file_id'])
@@ -89,7 +111,9 @@ def fill_start_end(ref):
 	return ref_sorted
 
 def check_remove_start_end_same(ref):
-
+	"""
+	Remove instance from audio/video reference if the start is the same as end 
+	"""
 	label_lists = []
 	for i in range(0,ref.shape[0]):
 		if ref.iloc[i]["start"] == ref.iloc[i]["end"]:
@@ -119,6 +143,7 @@ def get_raw_file_id_dict(file_ids, data_frame, class_type):
 		----------
 		file_ids : array of unique file_ids
 		data_frame: raw data frame
+		class_type: norm or emotion
  
 		Returns
 		-------
@@ -180,6 +205,7 @@ def get_highest_vote_based_on_time(data_frame, class_type):
 		Parameters
 		----------
 		data_frame: raw data frame
+		class_type: norm or emotion
  
 		Returns
 		-------
@@ -463,7 +489,7 @@ def preprocess_valence_arousal_reference_df(reference_df, class_type):
 
 def preprocess_reference_dir(ref_dir, scoring_index, task):
 	"""
-	For each task, read and merge corresponding data file, segment file and index file(read this from reference directory for now) 
+	For each task, read and merge corresponding data file, segment file and index file
 	and then preprocess the merged data frame
 	"""
 	file_info = pd.read_csv(os.path.join(ref_dir,"docs","file_info.tab"), sep = "\t")

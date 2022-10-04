@@ -7,6 +7,9 @@ import numpy as np
 silence_string = "noann"
 
 def is_float(value):
+	"""
+	Check if value is float type
+	"""
 	try: 
 		float(value)
 		return True
@@ -67,6 +70,9 @@ def get_unique_items_in_array(file_id_array):
 	return list(set(file_id_array))
 
 def load_list(fn):
+	"""
+	read norm/emotion list from file
+	"""
 	try:
 		fh = open(fn, "r")
 		entries = fh.read()
@@ -93,11 +99,15 @@ def concatenate_submission_file(subm_dir, task):
 		else:
 			submission_df = pd.read_csv(os.path.join(subm_dir,subm_file_path), dtype={'norm': object}, sep='\t')
 
-		submission_df_sorted = submission_df.sort_values(by=['start','end'])
-
-		submission_df_filled = fill_epsilon_submission(submission_df_sorted)
-
-		submission_dfs = pd.concat([submission_dfs, submission_df_filled])
+		if task == "norms" or task == "emotions":
+			submission_df_sorted = submission_df.sort_values(by=['start','end'])
+			submission_dfs = pd.concat([submission_dfs, submission_df_sorted])
+		if task == "valence_continuous" or task == "arousal_continuous":
+			submission_df_sorted = submission_df.sort_values(by=['start','end'])
+			submission_df_filled = fill_epsilon_submission(submission_df_sorted, 0.02)
+			submission_dfs = pd.concat([submission_dfs, submission_df_filled])
+		if task == "changepoint":
+			submission_dfs = pd.concat([submission_dfs, submission_df])
 
 	submission_dfs.drop_duplicates(inplace = True)
 	submission_dfs = submission_dfs.reset_index(drop=True)
@@ -106,16 +116,20 @@ def concatenate_submission_file(subm_dir, task):
 
 	return new_submission_dfs
 
-def fill_epsilon_submission(sys):
-
+def fill_epsilon_submission(sys, epsilon):
+	"""
+	replace the start of next segment with the end of last segment when difference is smaller than a threshold
+	"""
 	for i in range(sys.shape[0]-1):
-		if sys.iloc[i]["end"] != sys.iloc[i+1]["start"] and abs(sys.iloc[i]["end"] - sys.iloc[i+1]["start"]) < 0.001:
+		if sys.iloc[i]["end"] != sys.iloc[i+1]["start"] and abs(sys.iloc[i]["end"] - sys.iloc[i+1]["start"]) < epsilon:
 			sys.iloc[i+1, sys.columns.get_loc('start')] = sys.iloc[i]["end"]
 	
 	return sys
 
 def convert_task_column(task):
-
+	"""
+	Convert filename into column name
+	"""
 	if task == "norms" or task == "emotions":
 		column_name = task.replace("s","")
 	elif task == "changepoint":
@@ -126,7 +140,9 @@ def convert_task_column(task):
 	return column_name
 
 def add_type_column(ref, hyp):
-
+	"""
+	Extract type column from ref and add it to hyp
+	"""
 	ref_type = ref[["file_id","type"]]
 	ref_type_uniq = ref_type.drop_duplicates()
 	hyp_type = hyp.merge(ref_type_uniq)
@@ -134,26 +150,35 @@ def add_type_column(ref, hyp):
 	return hyp_type
 
 def extract_df(df, file_id):
-
+	"""
+	Extract sub ref/hyp for specific file_id
+	"""
 	partial_df = df[df['file_id']==file_id]
 	sorted_df = partial_df.sort_values(by=['start','end'])
 
 	return sorted_df
 
 def change_class_type(df, class_type):
-
+	"""
+	Change difference column names into a general column name 
+	"""
 	new_df = df.rename(columns = {class_type: "Class"})
 
 	return new_df
 
 def formatNumber(num):
-  if num % 1 == 0:
-    return str(int(num))
-  else:
-    return str(num)
+	"""
+	Convert integer number into integer format
+	"""
+	if num % 1 == 0:
+		return str(int(num))
+	else:
+		return str(num)
 
 def replace_hyp_norm_mapping(sub_mapping_df, hyp, act):
-
+	"""
+	Merge mapping file with hyp for specific norm
+	"""
 	sys_norm_list = list(sub_mapping_df.sys_norm)
 	sub_hyp = hyp[hyp.Class.isin(sys_norm_list)]
 	new_sub_hyp = sub_mapping_df.merge(sub_hyp, left_on='sys_norm', right_on='Class')
@@ -165,7 +190,9 @@ def replace_hyp_norm_mapping(sub_mapping_df, hyp, act):
 	return final_sub_hyp
 
 def generate_alignment_file(ref, hyp, task):
-
+	"""
+	Generate alignment file using ihyp and ref
+	"""
 	def categorise(row):
 		if row['tp'] == 1 and row['fp'] == 0:
 			return 'mapped'
@@ -242,7 +269,9 @@ def generate_alignment_file(ref, hyp, task):
 	return alignment
 
 def generate_all_fn_alignment_file(ref, task):
-	
+	"""
+	Generate alignment file for no match using ref
+	"""
 	if task in ["norm","emotion"]:
 
 		ref_format = ref.copy()

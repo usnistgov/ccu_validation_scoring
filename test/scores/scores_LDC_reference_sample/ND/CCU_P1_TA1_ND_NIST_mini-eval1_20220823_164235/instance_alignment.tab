@@ -7,7 +7,7 @@ class	file_id	eval	ref	sys	llr	parameters
 002	M010015BY	mapped	{start=1104.567,end=1119.567}	{start=1104.567,end=1119.567}	1.5	{iou=1.000}
 002	M010019QD	unmapped	{start=45,end=60}	{}		{}
 002	M010029SP	unmapped	{start=200,end=215}	{}		{}
-007	M010005QD	mapped	{start=60.2,end=75.2}	{start=60.2,end=75.2}	1.5	{iou=1.000}
-007	M010015BY	mapped	{start=1119.567,end=1134.567}	{start=1119.567,end=1134.567}	1.5	{iou=1.000}
+007	M010005QD	mapped	{start=60.201,end=75.201}	{start=60.201,end=75.201}	1.5	{iou=1.000}
+007	M010015BY	mapped	{start=1119.568,end=1134.568}	{start=1119.568,end=1134.568}	1.5	{iou=1.000}
 007	M010019QD	unmapped	{start=78,end=90}	{}		{}
 007	M010029SP	unmapped	{start=216,end=230}	{}		{}

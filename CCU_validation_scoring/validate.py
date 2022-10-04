@@ -19,9 +19,9 @@ def global_ref_file_checks(file, index_dir):
 		file_type = "changepoint"
 		expected_header = ['user_id', 'file_id', 'timestamp', 'impact_scalar', 'comment']
 		expected_column_number = len(expected_header)
-		expected_header_types = {'user_id': 'int', 'file_id': 'object', 'timestamp': 'float', 'impact_scalar':'int', 'comment': 'object'}
+		expected_header_types = {'user_id': 'int', 'file_id': 'object', 'timestamp': ["int", "float"], 'impact_scalar':'int', 'comment': 'object'}
 
-	elif file != None and "emotion.tab" in file: # CHANGE TO emotions.tab
+	elif file != None and "emotions.tab" in file: # CHANGE TO emotions.tab
 		file_type = "emotions"
 		expected_header = ['user_id', 'file_id', 'segment_id', 'emotion', 'multi_speaker']
 		expected_column_number = len(expected_header)
@@ -37,7 +37,7 @@ def global_ref_file_checks(file, index_dir):
 		file_type = "segments"
 		expected_header = ['file_id', 'segment_id', 'start', 'end']
 		expected_column_number = len(expected_header)
-		expected_header_types = {'file_id': 'object', 'segment_id': 'object', 'start': 'float', 'end': 'float'}
+		expected_header_types = {'file_id': 'object', 'segment_id': 'object', 'start': ["int", "float"], 'end': ["int", "float"]}
 
 	file_checks = (check_valid_tab(file) and
 	check_column_number(file, expected_column_number) and
@@ -274,13 +274,13 @@ def check_time_no_gap(file, ref):
 			for i in range(df_sorted.shape[0]-1):
 				if df_sorted.iloc[i]["end"] + 1 != df_sorted.iloc[i+1]["start"]:
 					logger.error('Invalid file {}:'.format(file))
-					logger.error("There are some gaps in timestamp of {}".format(file))
+					logger.error("There are some gaps/overlaps in timestamp of {}".format(file))
 					return False
 			return True
 		
 		if ref["type"].unique()[0] == "audio" or ref["type"].unique()[0] == "video":
 			for i in range(df_sorted.shape[0]-1):
-				if abs(df_sorted.iloc[i]["end"] - df_sorted.iloc[i+1]["start"]) >= 0.001:
+				if abs(df_sorted.iloc[i]["end"] - df_sorted.iloc[i+1]["start"]) >= 0.02:
 					logger.error('Invalid file {}:'.format(file))
 					logger.error("There are some gaps in timestamp of {}".format(file))
 					return False
@@ -499,7 +499,11 @@ def check_ref_file_data_types(file, header_types, file_type):
 		for index, row in df.iterrows():
 			for column in df.columns.values: # Validate that each value in each column is of the correct type
 				if file_type != "valence": # Valence and arousal validation require particular validation checks
-					if df_types[column] != header_types[column]:
+					if type(header_types[column]) is list:
+						if df_types[column] not in header_types[column]:
+							invalid_type_column.append(column)
+					else:
+						if df_types[column] != header_types[column]:
 							invalid_type_column.append(column)
 				else: 
 					valence_arousal_columns = ["valence_continuous", "valence_binned", "arousal_continuous", "arousal_binned"]
@@ -514,7 +518,7 @@ def check_ref_file_data_types(file, header_types, file_type):
 	
 	if len(invalid_type_column) > 0:
 		logger.error("Validation failed")
-		logger.error("In file {}, the following column(s) have invalid data types: {}".format(file, invalid_type_column))
+		logger.error("In file {}, the following column(s) has data type errors: {}".format(file, set(invalid_type_column)))
 		return False
 	
 	return True
@@ -561,8 +565,6 @@ def check_duplicate_emotions(file):
 	df = pd.read_csv(file, sep='\t')
 	for index, row in df.iterrows():
 		emotion_list = [emotion.strip() for emotion in row['emotion'].split(',')] # Convert emotion column to list of individual emotions
-		#emotion_list = row['emotion'].split(',')
-		#uniq_emotions = set(emotion_list)
 		if len(emotion_list) != len(set(emotion_list)):
 			logger.error("Validation failed")
 			seen = set()
@@ -729,7 +731,7 @@ def check_start_end_types(file, docs_dir):
 				audvid_ids.append(row['file_uid'])
 			else:
 				continue
-		
+	
 	# Open segments.tab and for every file_id, if it's in one list, make sure it has a data type of ___ and vice versa otherwise
 	segments_df = pd.read_csv(file, sep='\t')
 	
@@ -737,16 +739,13 @@ def check_start_end_types(file, docs_dir):
 		invalid_types = []
 		for index, row in segments_df.iterrows():
 			if row['file_id'] in text_ids:
-				if row['start'].is_integer() == False or row['end'].is_integer() == False:
+				if float(row['start']).is_integer() == False or float(row['end']).is_integer() == False:
 					invalid_types.append(row['start'])
 					invalid_types.append(row['end'])
 			elif row['file_id'] in audvid_ids:
-				if isinstance(row['start'], float) == False or isinstance(row['end'], float) == False:
+				if is_float(row['start']) == False or is_float(row['end']) == False:
 					invalid_types.append(row['start'])
 					invalid_types.append(row['end'])
-				# if row['start'].is_integer() == row['end'].is_integer() == True:
-				# 	invalid_types.append(row['start'])
-				# 	invalid_types.append(row['end'])
 			else:
 				logger.error("Validation failed")
 				logger.error("Type of file ID {} in file {} is not text, audio, or video".format(row['file_id'], file))
@@ -756,6 +755,44 @@ def check_start_end_types(file, docs_dir):
 			logger.error("Validation failed")
 			logger.error("In file {}, the following start/end times are the wrong data type: {}".format(file, invalid_types))
 			return False
+	return True
+
+def check_valid_timestamps(file, docs_dir):
+	# Open system input file and record which files are text and which files are audio/video using two lists
+	file_info_path = os.path.join(docs_dir, "file_info.tab") 
+	check_file_exist(file_info_path, file_info_path, docs_dir)
+	file_info_df = pd.read_csv(file_info_path, sep='\t')
+
+	if file_info_df .shape[0] != 0:
+		text_ids = []
+		audvid_ids = []
+		for index, row in file_info_df.iterrows():
+			if row['type'] == "text":
+				text_ids.append(row['file_uid']) # Since file_id column does not exist, I used file_uid. Switch to original_file_id?
+			elif row['type'] == "audio" or row['type'] == "video":
+				audvid_ids.append(row['file_uid'])
+			else:
+				continue
+		
+	# Open segments.tab and for every file_id, if it's in one list, make sure it has a data type of ___ and vice versa otherwise
+	segments_df = pd.read_csv(file, sep='\t')
+
+	if segments_df.shape[0] != 0:
+		for index, row in segments_df.iterrows():
+			if row['file_id'] in text_ids:
+				if row['start'] > row['end']:
+					logger.error('Invalid file {}:'.format(file))
+					logger.error("Start is higher than end in text {}".format(file))
+					return False
+			elif row['file_id'] in audvid_ids:
+				if row['start'] >= row['end']:
+					logger.error('Invalid file {}:'.format(file))
+					logger.error("Start is equal to/higher than end in audio/video {}".format(file))
+					return False
+			else:
+				logger.error("Validation failed")
+				logger.error("Type of file ID {} in file {} is not text, audio, or video".format(row['file_id'], file))
+				return False
 	return True
 
 	
