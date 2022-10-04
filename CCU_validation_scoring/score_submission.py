@@ -79,8 +79,6 @@ def score_vd_submission_dir_cli(args):
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "valence_continuous")
 	hyp = concatenate_submission_file(subm_dir = args.submission_dir, task = "valence_continuous")
 
-	# ref = ref[["file_id", "start", "end", "Class"]]
-	# ref.to_csv("tmp.csv", sep = "\t", index = None)
 	score_valence_arousal(ref, hyp, output_dir = args.output_dir, task = "valence_continuous")
 
 	print("Diarization")
