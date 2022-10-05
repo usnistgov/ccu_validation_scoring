@@ -1,0 +1,2 @@
+catalog_id	version	file_uid	data_type	url	lang_id_manual	wrapped_md5	unwrapped_md5	download_date	content_date	status_in_corpus	legacy_catalog_id	original_file_id	type	file_path	length
+ACTEV	V1.0	VIRAT_S_000000	.mp4	na	cmn	0e9942346f2972d73815ab63d2074efb	1c797fd8bd832fe4c7244a7b9b0aa2a7	na	na	present	ACTEV	na	video	./data/audio/VIRAT_S_000000.mp4	1200

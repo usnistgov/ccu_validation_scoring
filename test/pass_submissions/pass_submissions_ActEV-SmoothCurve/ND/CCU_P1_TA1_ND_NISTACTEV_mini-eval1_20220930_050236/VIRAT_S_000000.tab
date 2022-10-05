@@ -1,0 +1,15 @@
+file_id	norm	start	end	status	llr
+VIRAT_S_000000	closing	1	50	adhere	1.0
+VIRAT_S_000000	closing	100	200	adhere	0.9
+VIRAT_S_000000	closing	200	300	adhere	0.8
+VIRAT_S_000000	closing	300	400	adhere	0.7
+VIRAT_S_000000	closing	400	500	adhere	0.6
+VIRAT_S_000000	closing	500	600	adhere	0.5
+VIRAT_S_000000	closing	600	700	adhere	0.4
+VIRAT_S_000000	closing	1100	1200	violate	1.0
+VIRAT_S_000000	closing	1100	1200	violate	0.9
+VIRAT_S_000000	closing	1100	1200	violate	0.8
+VIRAT_S_000000	closing	1100	1200	violate	0.7
+VIRAT_S_000000	closing	1100	1200	violate	0.6
+VIRAT_S_000000	closing	1100	1200	violate	0.5
+VIRAT_S_000000	closing	1100	1200	violate	0.4
