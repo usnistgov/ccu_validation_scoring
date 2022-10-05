@@ -120,7 +120,6 @@ def compute_average_precision_tad(ref, hyp, iou_thresholds=[0.2], task=None):
         for iout in iou_thresholds:
             output[iout] = 0.0, [0.0, 0.0], [0.0, 1.0]
         alignment_df = generate_all_fn_alignment_file(ref, task)
-        print("Gen all 2a")
         return output,alignment_df
 
     # Compute IoU for all hyps incl. NO_SCORE_REGION

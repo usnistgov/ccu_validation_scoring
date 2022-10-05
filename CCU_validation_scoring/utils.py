@@ -234,7 +234,6 @@ def generate_alignment_file(ref, hyp, task):
 
 		alignment = pd.concat([hyp_format, ref_new])
 		alignment = alignment.rename(columns={'Class':'class'})
-		print(alignment)
 	if task == "changepoint":
 
 		ref_format = ref.copy()
