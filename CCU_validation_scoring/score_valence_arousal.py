@@ -292,20 +292,6 @@ def write_segment(segment_df, output_dir, task):
 
 	segment_df_sorted.to_csv(os.path.join(output_dir, "segment_diarization.tab"), index = False, quoting=3, sep="\t", escapechar="\t",
                                  columns=['class', 'file_id','window','ref','sys','parameters'])
-        ### Write the file minimized
-	#fname= os.path.join(output_dir, "segment_diarization.tab")
-	#columns=['class', 'file_id','window','ref','sys','parameters']
-	#try:
-	#	f = open(fname, 'w')
-	#except OSError as e:
-	#	print(f"Cannot oppen file (errno: { e.errno } ):", fname, file=sys.stderr)
-	#	sys.exit(os.EX_OSFILE)
-	#with f:
-	#	print('\t'.join(columns), file=f)
-	#	for index, row in segment_df_format.iterrows():
-	#		print('\t'.join(row[columns]), file=f)
-	#	f.close()
-
 
 def write_valence_arousal_scores(output_dir, CCC_result, task):
 	"""
