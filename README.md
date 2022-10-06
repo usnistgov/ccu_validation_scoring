@@ -1,4 +1,4 @@
-# Computational Cultural Understanding (CCU) Toolkit
+# Computational Cultural Understanding (CCU) Evaluation Scoring Toolkit
 
 **Version:** 1.0.0
 
@@ -22,21 +22,19 @@
 ## <a name="overview">Overview</a>
 
 
-This directory contains the tools to validate and score several tasks (ND, NDMAP, ED, VD, AD, CD). There are used in the  **Computational Cultural Understanding** (CCU) evaluation.
+This package contains the tools to validate and score the TA1 evaluation tasks ND (norm discovery), ED (emotion detection), VD (valence diarization), AD (arousal diarization), CD (change detection) and scoring tools for the Hidden Norms (NDMAP). Please refer to the CCU evaluation plan for more information about CCU, the evaluation tasks, and file formats
 
-The goal of the CCU program is to create human language technologies that will provide effective dialogue assistance to monolingual operators in cross-cultural interactions.
-
-This README file describes a reference validation tool, six submission validation tools and five submission scoring tools
+This README file describes the reference validation tool, system output validation tools and scoring tools
 
  - Reference Validation Tool: confirms that a reference follows the rules set in the CCU Evaluation Plan.
- - Submission Validation Tool: confirms that a submission follows the rules set in the CCU Evaluation Plan.
- - Submission Scoring Tool: scores a submission against a reference with a scoring index file.
+ - System Output Validation Tool: confirms that a submission follows the rules set in the CCU Evaluation Plan.
+ - Scoring Tool: scores a system output submission against a reference with a scoring index file.
 
 
 
 ## <a name="setup">Setup</a>
 
-The four tools mentioned above are included in a Python package and can be run under a shell terminal. It has been confirmed to work under OS X and Linux.
+The tools mentioned above are included in a Python package. They can be run under a shell terminal and have been confirmed to work under OS X and Linux.
 
 
 
@@ -71,7 +69,7 @@ CCU_scoring version
 CCU_scoring -h
 ```
 
-A manual page can be printed for specfic command using the `-h` flag. For example,
+A manual page can be printed for specific command using the `-h` flag. For example,
 
 ```bash
 CCU_scoring score-nd -h
@@ -79,19 +77,21 @@ CCU_scoring score-nd -h
 
 ### Reference Validation Tool
 
-To **validate the format of a reference** directory to make sure the files under the `reference_directory` have the correct format:
+**Validate a reference annotation** directory to make sure the files under the `reference_directory` have the required files in the correct format. The reference directory follows the LDC annotation package directory structure.
+
 
 ```bash
 CCU_scoring validate-ref -ref <reference_directory>
-
-# an example of reference validation
-CCU_scoring validate-ref -ref test/reference/LDC_reference_sample
 ```
 
 **Required Arguments**
 
  * `-ref`: reference directory
 
+```bash
+# an example of reference validation
+CCU_scoring validate-ref -ref test/reference/LDC_reference_sample
+```
 
 ### Submission Validation Tool
 
@@ -105,12 +105,6 @@ CCU_scoring validate-ed -s <submission_directory> -ref <reference_directory> -i 
 CCU_scoring validate-vd -s <submission_directory> -ref <reference_directory> -i <scoring_index_file>
 CCU_scoring validate-ad -s <submission_directory> -ref <reference_directory> -i <scoring_index_file>
 CCU_scoring validate-cd -s <submission_directory> -ref <reference_directory> -i <scoring_index_file>
-
-# an example of submission validation
-CCU_scoring validate-nd \
--s test/pass_submissions/pass_submissions_LDC_reference_sample/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220815_164235 \
--ref test/reference/LDC_reference_sample \
--i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
 ```
 
 **Required Arguments**
@@ -119,7 +113,15 @@ CCU_scoring validate-nd \
 
  * `-ref`: reference directory
 
- * `-i`: file containing the file id of scoring datasets
+ * `-i`: file containing the list of documents to score
+
+```bash
+# an example of submission validation
+CCU_scoring validate-nd \
+-s test/pass_submissions/pass_submissions_LDC_reference_sample/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220815_164235 \
+-ref test/reference/LDC_reference_sample \
+-i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
+```
 
 **Norm Discovery Mapping Validation**
 
@@ -127,11 +129,6 @@ To **validate the format of a ndmap submission** directory against a reference d
 
 ```bash
 CCU_scoring validate-ndmap -s <submission_directory> -n <hidden_norm_list_file>
-
-# an example of ndmap submission validation
-CCU_scoring validate-ndmap \
--s test/pass_submissions/pass_submissions_LDC_reference_sample/NDMAP/CCU_P1_TA1_NDMAP_NIST_mini-eval1_20220605_050236 \
--n test/hidden_norms.txt 
 ```
 
 **Required Arguments**
@@ -140,6 +137,12 @@ CCU_scoring validate-ndmap \
 
  * `-n`: file containing the hidden norm
 
+```bash
+# an example of ndmap submission validation
+CCU_scoring validate-ndmap \
+-s test/pass_submissions/pass_submissions_LDC_reference_sample/NDMAP/CCU_P1_TA1_NDMAP_NIST_mini-eval1_20220605_050236 \
+-n test/hidden_norms.txt 
+```
 
 ### Submission Scoring Tool
 
@@ -149,12 +152,6 @@ To **score a nd submission** directory against a reference directory with a scor
 
 ```bash
 CCU_scoring score-nd -s <norm_submission_directory> -ref <reference_directory> -i <scoring_index_file>
-
-# an example of norm scoring
-CCU_scoring score-nd \
--s test/pass_submissions/pass_submissions_LDC_reference_sample/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220815_164235 \
--ref test/reference/LDC_reference_sample \
--i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
 ```
 
 **Norm Discovery Mapping Scoring**
@@ -163,14 +160,8 @@ To **score a ndmap submission** directory against a reference directory with a s
 
 ```bash
 CCU_scoring score-nd -s <norm_submission_directory> -m <norm_mapping_submission_directory> -ref <reference_directory> -i <scoring_index_file>
-
-# an example of ndmap scoring
-CCU_scoring score-nd \
--s test/pass_submissions/pass_submissions_LDC_reference_sample/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220531_050236 \
--m test/pass_submissions/pass_submissions_LDC_reference_sample/NDMAP/CCU_P1_TA1_NDMAP_NIST_mini-eval1_20220605_050236 \
--ref test/reference/LDC_reference_sample \
--i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
 ```
+
 **Required Arguments**
 
  * `-s`: norm submission directory
@@ -189,19 +180,29 @@ CCU_scoring score-nd \
 
  * `-o`: output directory containing the score and alignment file
 
+```bash
+# an example of norm scoring
+CCU_scoring score-nd \
+-s test/pass_submissions/pass_submissions_LDC_reference_sample/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220815_164235 \
+-ref test/reference/LDC_reference_sample \
+-i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
+
+# an example of ndmap scoring
+CCU_scoring score-nd \
+-s test/pass_submissions/pass_submissions_LDC_reference_sample/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220531_050236 \
+-m test/pass_submissions/pass_submissions_LDC_reference_sample/NDMAP/CCU_P1_TA1_NDMAP_NIST_mini-eval1_20220605_050236 \
+-ref test/reference/LDC_reference_sample \
+-i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
+```
+
 **Emotion Detection Scoring**
 
 To **score a ed submission** directory against a reference directory with a scoring index file:
 
 ```bash
 CCU_scoring score-ed -s <norm_submission_directory> -m <norm_mapping_submission_directory> -ref <reference_directory> -i <scoring_index_file>
-
-# an example of ed scoring
-CCU_scoring score-ed \
--s test/pass_submissions/pass_submissions_LDC_reference_sample/ED/CCU_P1_TA1_ED_NIST_mini-eval1_20220531_050236 \
--ref test/reference/LDC_reference_sample \
--i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
 ```
+
 **Required Arguments**
 
  * `-s`: emotion submission directory
@@ -218,6 +219,14 @@ CCU_scoring score-ed \
 
  * `-o`: output directory containing the score and alignment file
 
+```bash
+# an example of ed scoring
+CCU_scoring score-ed \
+-s test/pass_submissions/pass_submissions_LDC_reference_sample/ED/CCU_P1_TA1_ED_NIST_mini-eval1_20220531_050236 \
+-ref test/reference/LDC_reference_sample \
+-i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
+```
+
 **Valence/Arousal Detection Scoring**
 
 To **score a vd/ad submission** directory against a reference directory with a scoring index file:
@@ -225,19 +234,8 @@ To **score a vd/ad submission** directory against a reference directory with a s
 ```bash
 CCU_scoring score-vd -s <norm_submission_directory> -m <norm_mapping_submission_directory> -ref <reference_directory> -i <scoring_index_file>
 CCU_scoring score-ad -s <norm_submission_directory> -m <norm_mapping_submission_directory> -ref <reference_directory> -i <scoring_index_file>
-
-# an example of vd scoring
-CCU_scoring score-vd \
--s test/pass_submissions/pass_submissions_LDC_reference_sample/VD/CCU_P1_TA1_VD_NIST_mini-eval1_20220531_050236 \
--ref test/reference/LDC_reference_sample \
--i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
-
-# an example of ad scoring
-CCU_scoring score-ad \
--s test/pass_submissions/pass_submissions_LDC_reference_sample/AD/CCU_P1_TA1_AD_NIST_mini-eval1_20220531_050236 \
--ref test/reference/LDC_reference_sample \
--i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
 ```
+
 **Required Arguments**
 
  * `-s`: emotion submission directory
@@ -250,19 +248,28 @@ CCU_scoring score-ad \
 
  * `-o`: output directory containing the score and diarization file
 
+```bash
+# an example of vd scoring
+CCU_scoring score-vd \
+-s test/pass_submissions/pass_submissions_LDC_reference_sample/VD/CCU_P1_TA1_VD_NIST_mini-eval1_20220531_050236 \
+-ref test/reference/LDC_reference_sample \
+-i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
+
+# an example of ad scoring
+CCU_scoring score-ad \
+-s test/pass_submissions/pass_submissions_LDC_reference_sample/AD/CCU_P1_TA1_AD_NIST_mini-eval1_20220531_050236 \
+-ref test/reference/LDC_reference_sample \
+-i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
+```
+
 **Change Detection Scoring**
 
 To **score a cd submission** directory against a reference directory with a scoring index file:
 
 ```bash
 CCU_scoring score-cd -s <norm_submission_directory> -m <norm_mapping_submission_directory> -ref <reference_directory> -i <scoring_index_file>
-
-# an example of cd scoring
-CCU_scoring score-cd \
--s test/pass_submissions/pass_submissions_LDC_reference_sample/CD/CCU_P1_TA1_CD_NIST_mini-eval1_20220531_050236 \
--ref test/reference/LDC_reference_sample \
--i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab 
 ```
+
 **Required Arguments**
 
  * `-s`: emotion submission directory
@@ -278,6 +285,14 @@ CCU_scoring score-cd \
  * `-m`: comma separated list of delta CP time thresholds
 
  * `-o`: output directory containing the score and alignment file
+
+```bash
+# an example of cd scoring
+CCU_scoring score-cd \
+-s test/pass_submissions/pass_submissions_LDC_reference_sample/CD/CCU_P1_TA1_CD_NIST_mini-eval1_20220531_050236 \
+-ref test/reference/LDC_reference_sample \
+-i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab 
+```
 
 ## <a name="contacts">Report a Bug</a>
 
