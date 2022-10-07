@@ -22,7 +22,7 @@
 ## <a name="overview">Overview</a>
 
 
-This package contains the tools to validate and score the TA1 evaluation tasks ND (norm discovery), ED (emotion detection), VD (valence diarization), AD (arousal diarization), CD (change detection) and scoring tools for the Hidden Norms (NDMAP). Please refer to the CCU evaluation plan for more information about CCU, the evaluation tasks, and file formats
+This package contains the tools to validate and score the TA1 evaluation tasks ND (norm discovery), ED (emotion detection), VD (valence diarization), AD (arousal diarization), CD (change detection) and scoring tools for the Hidden Norms (NDMAP). Please refer to the CCU evaluation plan for more information about CCU, the evaluation tasks, and file formats.
 
 This README file describes the reference annotation validation tool, system output validation tools and scoring tools.
 
@@ -34,7 +34,7 @@ This README file describes the reference annotation validation tool, system outp
 
 ## <a name="setup">Setup</a>
 
-The tools mentioned above are included in a Python package. They can be run under a shell terminal and have been confirmed to work under OS X and Linux.
+The tools mentioned above are included in a Python package. They can be run under a shell terminal and have been confirmed to work under OS X and Ubuntu.
 
 
 
@@ -73,7 +73,7 @@ CCU_scoring is an umbrella tool that has many subcommands, each with its on set 
 CCU_scoring -h
 ```
 
-To get the command line options for a specific subcommand, use the subcommand `-h` flag. For example,
+Use the `-h` flag on the subcommand to get the subcommand help manual. For example,
 
 ```bash
 CCU_scoring score-nd -h
@@ -99,7 +99,7 @@ CCU_scoring validate-ref -ref test/reference/LDC_reference_sample
 
 ### Submission Validation Subcommands
 
-Each evaluation task has a subcommand to validate a system output file.  The evaluation task include Norm Discovery, Emotion Detection, Valence Diarization, Arousal Diarization, Change Detection.  To **validate the format of a nd/ed/vd/ad/cd submission** directory against a reference directory with a scoring index file use the commands:
+Each evaluation task has a subcommand to validate a system output file.  The evaluation tasks include Norm Discovery (ND), Emotion Detection (ED), Valence Diarization (VD), Arousal Diarization (AD), Change Detection (CD).  Use the commands below to **validate the format of a ND/ED/VD/AD/CD submission** directory against a reference directory with a scoring index file.
 
 ```bash
 CCU_scoring validate-nd -s <submission_directory> -ref <reference_directory> -i <scoring_index_file>
@@ -127,7 +127,7 @@ CCU_scoring validate-nd \
 
 **Norm Discovery Mapping Validation**
 
-To **validate the format of an NDMAP submission** directory against a reference directory with a scoring index file, use the command below.  This validation only applies to the mapping file, not the original system.
+Use the command below to **validate the format of an NDMAP submission** directory against a reference directory with a scoring index file.  This validation only applies to the mapping file, not the original system.
 
 ```bash
 CCU_scoring validate-ndmap -s <submission_directory> -n <hidden_norm_list_file>
@@ -150,7 +150,7 @@ CCU_scoring validate-ndmap \
 
 **Norm Discovery (ND) Scoring Subcommand**
 
-To **score an ND submission** directory against a reference directory with a scoring index file, us the command:
+Use the command below to **score an ND submission** directory against a reference directory with a scoring index file.
 
 ```bash
 CCU_scoring score-nd -s <norm_submission_directory> -ref <reference_directory> -i <scoring_index_file>
@@ -158,7 +158,7 @@ CCU_scoring score-nd -s <norm_submission_directory> -ref <reference_directory> -
 
 **Norm Discovery Mapping Scoring Subcommand**
 
-To **score an NDMAP submission** directory and an ND submission using against a reference directory with a scoring index file, use the command:
+Use the command below to **score an NDMAP submission** directory and an ND submission using against a reference directory with a scoring index file.
 
 ```bash
 CCU_scoring score-nd -s <norm_submission_directory> -m <norm_mapping_submission_directory> -ref <reference_directory> -i <scoring_index_file>
@@ -199,7 +199,7 @@ CCU_scoring score-nd \
 
 **Emotion Detection (ED) Scoring Subcommand**
 
-To **score an ED submission** directory against a reference directory with a scoring index file, use the command:
+Use the command below to **score an ED submission** directory against a reference directory with a scoring index file.
 
 ```bash
 CCU_scoring score-ed -s <norm_submission_directory> -m <norm_mapping_submission_directory> -ref <reference_directory> -i <scoring_index_file>
@@ -231,7 +231,7 @@ CCU_scoring score-ed \
 
 **Valence Detection (VD) and Arousal Detection (AD) Scoring Subcommands**
 
-To **score an VD or AD submission** directory against a reference directory with a scoring index file:
+Use the commands below to **score an VD or AD submission** directory against a reference directory with a scoring index file.
 
 ```bash
 CCU_scoring score-vd -s <norm_submission_directory> -m <norm_mapping_submission_directory> -ref <reference_directory> -i <scoring_index_file>
@@ -266,7 +266,7 @@ CCU_scoring score-ad \
 
 **Change Detection (CD) Scoring Subcommand**
 
-To **score a CD submission** directory against a reference directory with a scoring index file, use the command:
+Use the command below to **score a CD submission** directory against a reference directory with a scoring index file.
 
 ```bash
 CCU_scoring score-cd -s <norm_submission_directory> -m <norm_mapping_submission_directory> -ref <reference_directory> -i <scoring_index_file>
