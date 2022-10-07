@@ -54,7 +54,7 @@ def ap_interp_pr(prec, rec):
 def ensure_output_dir(output_dir):
 	if os.path.isfile(output_dir):
 		logger = logging.getLogger('SCORING')
-		logger.error("Please remove {} file before generating {} directory".format(output_dir, output_dir))
+		logger.error("The output directory '{}' is a file and exists. Please remove or specify another output directory.".format(output_dir))
 		exit(1)
 	if not os.path.isdir(output_dir):
 		os.makedirs(output_dir)
