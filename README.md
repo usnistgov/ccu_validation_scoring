@@ -197,9 +197,9 @@ CCU_scoring score-nd \
 -i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
 ```
 
-**Emotion Detection Scoring**
+**Emotion Detection (ED) Scoring Subcommand**
 
-To **score an ED submission** directory against a reference directory with a scoring index file:
+To **score an ED submission** directory against a reference directory with a scoring index file, use the command:
 
 ```bash
 CCU_scoring score-ed -s <norm_submission_directory> -m <norm_mapping_submission_directory> -ref <reference_directory> -i <scoring_index_file>
@@ -264,9 +264,9 @@ CCU_scoring score-ad \
 -i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
 ```
 
-**Change Detection (CD) Scoring**
+**Change Detection (CD) Scoring Subcommand**
 
-To **score a CD submission** directory against a reference directory with a scoring index file:
+To **score a CD submission** directory against a reference directory with a scoring index file, use the command:
 
 ```bash
 CCU_scoring score-cd -s <norm_submission_directory> -m <norm_mapping_submission_directory> -ref <reference_directory> -i <scoring_index_file>
