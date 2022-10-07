@@ -61,6 +61,7 @@ def run_scorer():
                           ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'ED', '', ''),
                           ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'VD', '', ''),
                           ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'AD', '', ''),
+                          ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'NDMAP', 'CCU_P1_TA1_ND_NIST_mini-eval1_20220908_111111', 'hidden_norms_LC1.txt'),
 
                           ('ActEV-SmoothCurve', 'ActEV-SmoothCurve.scoring.index.tab', 'pass_submissions_ActEV-SmoothCurve', 'ND', '', '')                        
                           ])
@@ -125,6 +126,10 @@ def test_run_score_submissions(dataset, system_input_index, system_dir, task, op
                     
             sys.argv[1:] = ["score-nd", "-ref", refdir, "-s", orig_system[0],
                             "-m", subdir, "-i", scoring_index_path, "-o", tmp_dir]
+            ### Add opt2 if there
+            if (opt2 != ''):
+                sys.argv.append("-n")
+                sys.argv.append(os.path.join(test_dir_path, opt2))
             run_scorer()
             
             for filename in ["scores_by_class.tab", "scores_aggregated.tab", "instance_alignment.tab"]:
