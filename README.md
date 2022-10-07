@@ -79,9 +79,9 @@ To get the command line options for a specific subcommand, use the subcommand `-
 CCU_scoring score-nd -h
 ```
 
-### Reference Validation Tool
+### Reference Validation Subcommand
 
-**Validate a reference annotation** directory to make sure the files under the `reference_directory` have the required files in the correct format. The reference directory follows the LDC annotation package directory structure.
+**Validate a reference annotation** directory to make sure the files under the `reference_directory` have the required files in the correct format. The reference directory must follow the LDC annotation package directory structure.
 
 
 ```bash
@@ -97,11 +97,9 @@ CCU_scoring validate-ref -ref <reference_directory>
 CCU_scoring validate-ref -ref test/reference/LDC_reference_sample
 ```
 
-### Submission Validation Tool
+### Submission Validation Subcommands
 
-**Norm Discovery/Emotion Detection/Valence Diarization/Arousal Diarization/Change Detection Validation**
-
-To **validate the format of a nd/ed/vd/ad/cd submission** directory against a reference directory with a scoring index file:
+Each evaluation task has a subcommand to validate a system output file.  The evaluation task include Norm Discovery, Emotion Detection, Valence Diarization, Arousal Diarization, Change Detection.  To **validate the format of a nd/ed/vd/ad/cd submission** directory against a reference directory with a scoring index file use the commands:
 
 ```bash
 CCU_scoring validate-nd -s <submission_directory> -ref <reference_directory> -i <scoring_index_file>
@@ -129,7 +127,7 @@ CCU_scoring validate-nd \
 
 **Norm Discovery Mapping Validation**
 
-To **validate the format of a ndmap submission** directory against a reference directory with a scoring index file:
+To **validate the format of an NDMAP submission** directory against a reference directory with a scoring index file, use the command below.  This validation only applies to the mapping file, not the original system.
 
 ```bash
 CCU_scoring validate-ndmap -s <submission_directory> -n <hidden_norm_list_file>
@@ -148,19 +146,19 @@ CCU_scoring validate-ndmap \
 -n test/hidden_norms.txt 
 ```
 
-### Submission Scoring Tool
+### Submission Scoring Subcommands
 
-**Norm Discovery Scoring**
+**Norm Discovery (ND) Scoring Subcommand**
 
-To **score a nd submission** directory against a reference directory with a scoring index file:
+To **score an ND submission** directory against a reference directory with a scoring index file, us the command:
 
 ```bash
 CCU_scoring score-nd -s <norm_submission_directory> -ref <reference_directory> -i <scoring_index_file>
 ```
 
-**Norm Discovery Mapping Scoring**
+**Norm Discovery Mapping Scoring Subcommand**
 
-To **score a ndmap submission** directory against a reference directory with a scoring index file:
+To **score an NDMAP submission** directory and an ND submission using against a reference directory with a scoring index file, use the command:
 
 ```bash
 CCU_scoring score-nd -s <norm_submission_directory> -m <norm_mapping_submission_directory> -ref <reference_directory> -i <scoring_index_file>
@@ -201,7 +199,7 @@ CCU_scoring score-nd \
 
 **Emotion Detection Scoring**
 
-To **score a ed submission** directory against a reference directory with a scoring index file:
+To **score an ED submission** directory against a reference directory with a scoring index file:
 
 ```bash
 CCU_scoring score-ed -s <norm_submission_directory> -m <norm_mapping_submission_directory> -ref <reference_directory> -i <scoring_index_file>
@@ -231,9 +229,9 @@ CCU_scoring score-ed \
 -i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
 ```
 
-**Valence/Arousal Detection Scoring**
+**Valence Detection (VD) and Arousal Detection (AD) Scoring Subcommands**
 
-To **score a vd/ad submission** directory against a reference directory with a scoring index file:
+To **score an VD or AD submission** directory against a reference directory with a scoring index file:
 
 ```bash
 CCU_scoring score-vd -s <norm_submission_directory> -m <norm_mapping_submission_directory> -ref <reference_directory> -i <scoring_index_file>
@@ -266,9 +264,9 @@ CCU_scoring score-ad \
 -i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
 ```
 
-**Change Detection Scoring**
+**Change Detection (CD) Scoring**
 
-To **score a cd submission** directory against a reference directory with a scoring index file:
+To **score a CD submission** directory against a reference directory with a scoring index file:
 
 ```bash
 CCU_scoring score-cd -s <norm_submission_directory> -m <norm_mapping_submission_directory> -ref <reference_directory> -i <scoring_index_file>
