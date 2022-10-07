@@ -52,7 +52,11 @@ def ap_interp_pr(prec, rec):
 	return mprec, mrec, idx
 
 def ensure_output_dir(output_dir):
-	if not os.path.exists(output_dir):
+	if os.path.isfile(output_dir):
+		os.remove(output_dir)
+		logger = logging.getLogger('SCORING')
+		logger.info("{} file has been removed before generating {} directory".format(output_dir, output_dir))
+	if not os.path.isdir(output_dir):
 		os.makedirs(output_dir)
 
 def get_unique_items_in_array(file_id_array):
