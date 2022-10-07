@@ -24,10 +24,10 @@
 
 This package contains the tools to validate and score the TA1 evaluation tasks ND (norm discovery), ED (emotion detection), VD (valence diarization), AD (arousal diarization), CD (change detection) and scoring tools for the Hidden Norms (NDMAP). Please refer to the CCU evaluation plan for more information about CCU, the evaluation tasks, and file formats
 
-This README file describes the reference validation tool, system output validation tools and scoring tools
+This README file describes the reference annotation validation tool, system output validation tools and scoring tools.
 
- - Reference Validation Tool: confirms that a reference follows the rules set in the CCU Evaluation Plan.
- - System Output Validation Tool: confirms that a submission follows the rules set in the CCU Evaluation Plan.
+ - Reference Validation Tool: confirms that a reference annotation set follows the rules set in the CCU Evaluation Plan.
+ - System Output Validation Tool: confirms that a submission of system output follows the rules set in the CCU Evaluation Plan.
  - Scoring Tool: scores a system output submission against a reference with a scoring index file.
 
 
@@ -66,10 +66,14 @@ In the `CCU_validation_scoring-x.x.x/` directory, run the following to get the v
 ```bash
 CCU_scoring version
 
+```
+CCU_scoring is an umbrella tool that has many subcommands, each with its on set of command line options.  To get a list of subcommands, execute the command:
+
+```bash
 CCU_scoring -h
 ```
 
-A manual page can be printed for specific command using the `-h` flag. For example,
+To get the command line options for a specific subcommand, use the subcommand `-h` flag. For example,
 
 ```bash
 CCU_scoring score-nd -h
