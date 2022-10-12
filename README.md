@@ -202,7 +202,7 @@ CCU_scoring score-nd \
 Use the command below to **score an ED submission** directory against a reference directory with a scoring index file.
 
 ```bash
-CCU_scoring score-ed -s <norm_submission_directory> -m <norm_mapping_submission_directory> -ref <reference_directory> -i <scoring_index_file>
+CCU_scoring score-ed -s <emotion_submission_directory> -ref <reference_directory> -i <scoring_index_file>
 ```
 
 **Required Arguments**
@@ -234,8 +234,8 @@ CCU_scoring score-ed \
 Use the commands below to **score an VD or AD submission** directory against a reference directory with a scoring index file.
 
 ```bash
-CCU_scoring score-vd -s <norm_submission_directory> -m <norm_mapping_submission_directory> -ref <reference_directory> -i <scoring_index_file>
-CCU_scoring score-ad -s <norm_submission_directory> -m <norm_mapping_submission_directory> -ref <reference_directory> -i <scoring_index_file>
+CCU_scoring score-vd -s <valence_submission_directory> -ref <reference_directory> -i <scoring_index_file>
+CCU_scoring score-ad -s <arousal_submission_directory> -ref <reference_directory> -i <scoring_index_file>
 ```
 
 **Required Arguments**
@@ -269,7 +269,7 @@ CCU_scoring score-ad \
 Use the command below to **score a CD submission** directory against a reference directory with a scoring index file.
 
 ```bash
-CCU_scoring score-cd -s <norm_submission_directory> -m <norm_mapping_submission_directory> -ref <reference_directory> -i <scoring_index_file>
+CCU_scoring score-cd -s <change_submission_directory> -ref <reference_directory> -i <scoring_index_file>
 ```
 
 **Required Arguments**
