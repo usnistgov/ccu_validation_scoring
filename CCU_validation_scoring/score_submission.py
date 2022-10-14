@@ -14,7 +14,7 @@ def score_nd_submission_dir_cli(args):
 	try:
 		scoring_index = pd.read_csv(args.scoring_index_file, usecols = ['file_id'], sep = "\t")
 	except Exception as e:
-		logger.error('{} is not a valid scoring index file'.format(args.scoring_index_file))
+		logger.error('ERROR:SCORING:{} is not a valid scoring index file'.format(args.scoring_index_file))
 		exit(1)
 
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "norms")
@@ -47,7 +47,7 @@ def score_ed_submission_dir_cli(args):
 	try:
 		scoring_index = pd.read_csv(args.scoring_index_file, usecols = ['file_id'], sep = "\t")
 	except Exception as e:
-		logger.error('{} is not a valid scoring index file'.format(args.scoring_index_file))
+		logger.error('ERROR:SCORING:{} is not a valid scoring index file'.format(args.scoring_index_file))
 		exit(1)
 
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "emotions")
@@ -73,7 +73,7 @@ def score_vd_submission_dir_cli(args):
 	try:
 		scoring_index = pd.read_csv(args.scoring_index_file, usecols = ['file_id'], sep = "\t")
 	except Exception as e:
-		logger.error('{} is not a valid scoring index file'.format(args.scoring_index_file))
+		logger.error('ERROR:SCORING:{} is not a valid scoring index file'.format(args.scoring_index_file))
 		exit(1)
 
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "valence_continuous")
@@ -94,7 +94,7 @@ def score_ad_submission_dir_cli(args):
 	try:
 		scoring_index = pd.read_csv(args.scoring_index_file, usecols = ['file_id'], sep = "\t")
 	except Exception as e:
-		logger.error('{} is not a valid scoring index file'.format(args.scoring_index_file))
+		logger.error('ERROR:SCORING:{} is not a valid scoring index file'.format(args.scoring_index_file))
 		exit(1)
 
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "arousal_continuous")
@@ -114,7 +114,7 @@ def score_cd_submission_dir_cli(args):
 	try:
 		scoring_index = pd.read_csv(args.scoring_index_file, usecols = ['file_id'], sep = "\t")
 	except Exception as e:
-		logger.error('{} is not a valid scoring index file'.format(args.scoring_index_file))
+		logger.error('ERROR:SCORING:{} is not a valid scoring index file'.format(args.scoring_index_file))
 		exit(1)
 
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "changepoint")
