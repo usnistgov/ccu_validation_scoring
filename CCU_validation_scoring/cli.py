@@ -9,9 +9,7 @@ def print_package_version(args):
     print(__import__(__package__).__version__)
 
 def main():
-    
-    logging.basicConfig(level=logging.INFO)
-    
+        
     parser = argparse.ArgumentParser()
     subs = parser.add_subparsers(title='subcommands')
 

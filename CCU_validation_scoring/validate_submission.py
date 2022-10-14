@@ -1,11 +1,24 @@
 import os
-import pandas as pd
+import sys
 import logging
 from .utils import *
 from .validate import *
 
 logger = logging.getLogger('VALIDATION')
+logger.setLevel(logging.DEBUG)
+format='%(levelname)s:%(name)s:%(message)s'
+formatter = logging.Formatter(format)
 
+h1 = logging.StreamHandler(sys.stdout)
+h1.setLevel(logging.DEBUG)
+h1.addFilter(lambda record: record.levelno <= logging.INFO)
+h1.setFormatter(formatter)
+
+h2 = logging.StreamHandler()
+h2.setLevel(logging.WARNING)
+h2.setFormatter(formatter)
+logger.addHandler(h1)
+logger.addHandler(h2)
 
 def validate_nd_submission_dir_cli(args):
 
