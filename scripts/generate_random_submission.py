@@ -102,7 +102,7 @@ def generate_random_submission(task, reference_dir, scoring_index_file, output_d
 			submission_df = pd.DataFrame(columns=["file_id",task_column,"start","end","status","llr"])
 		if task_column == "emotion":
 			submission_df = pd.DataFrame(columns=["file_id",task_column,"start","end","llr"])
-		for j in sorted(list(Class)):
+		for j in sorted(list(set(Class))):
 			for time in range(2):
 				record = write_submission_record(stats_ref, i, j, task_column)
 				submission_df = pd.concat([submission_df,record], ignore_index = True)
