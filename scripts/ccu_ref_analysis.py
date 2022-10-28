@@ -10,6 +10,8 @@ import pandas as pd
 from CCU_validation_scoring.preprocess_reference import *
 
 def compute_stats(df):
+
+    df['duration'] = df['end'] - df['start']
     stats = pd.DataFrame(columns = ['class', 'genre', 'file_count', 'instance_count', 'unit', 'duration', 'mean', 'stdev', 'min', 'p25', 'p50', 'p75', 'max'])
     for genre in df['type'].unique():
         for clss in df[df['type'] == genre]['Class'].unique():
@@ -55,9 +57,6 @@ def main():
         exit(1)
 
     ref = preprocess_reference_dir(ref_dir, scoring_index, task)
-    ref['duration'] = ref['end'] - ref['start']
-    #print(ref.head())
-    #ref.to_csv("ccu_ref.tab", sep='\t', index=False, float_format='%.2f')
 
     stats = compute_stats(ref)
     stats.to_csv(output_file, sep='\t', index=False, float_format='%.2f')

@@ -128,7 +128,13 @@ def compute_average_precision_tad(ref, hyp, iou_thresholds=[0.2], task=None):
     ihyp = pd.concat(out)
 
     # Exclude NO_SCORE_REGIONs but keep FP NA's
-    ihyp = ihyp.loc[(ihyp.Class.str.contains('NO_SCORE_REGION') == False) | ihyp.start_ref.isna()]        
+    ihyp = ihyp.loc[(ihyp.Class.str.contains('NO_SCORE_REGION') == False) | ihyp.start_ref.isna()]
+
+    if ihyp.empty:
+        for iout in iou_thresholds:
+            output[iout] = 0.0, [0.0, 0.0], [0.0, 1.0]
+        alignment_df = generate_all_fn_alignment_file(ref, task)
+        return output,alignment_df
 
     # Sort by confidence score
     ihyp.sort_values(["llr"], ascending=False, inplace=True)        
