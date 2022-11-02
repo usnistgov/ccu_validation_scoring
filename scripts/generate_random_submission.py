@@ -11,9 +11,13 @@ import argparse
 logger = logging.getLogger('GENERATING')
 silence_string = "noann"
 
-def generate_submission_file(file_id, df, output_submission, index_df):
+def PosNormal(mean):
+  x = np.random.normal(mean,1)
+  return(x if x>0 else PosNormal(mean))
 
-	record_dict = {"file_id": file_id, "is_processed": "True", "message": "", "file_path": "{}.tab".format(file_id)}
+def generate_submission_file(file_id, df, output_submission, index_df, nan_label):
+
+	record_dict = {"file_id": file_id, "is_processed": nan_label, "message": "", "file_path": "{}.tab".format(file_id)}
 	record_df = pd.DataFrame(record_dict, index=[0])
 	new_index_df = pd.concat([index_df, record_df], ignore_index = True)
 	df.to_csv(os.path.join(output_submission, "{}.tab".format(file_id)), sep = "\t", index = None)
@@ -27,7 +31,7 @@ def generate_submission_dir(output_dir, task):
 	task_map = {"norms": "ND", "emotions": "ED", "valence_continuous": "VD", "arousal_continuous": "AD", "changepoint": "CD"}
 	task_label = task_map[task]
 	team = "fake"
-	dataset = "LDC2022R17-V1"
+	dataset = "LDC2022E18-V1"
 	now = datetime.now()
 	date = now.strftime("%Y%m%d")
 	time = now.strftime("%H%M%S")
@@ -47,16 +51,15 @@ def generate_submission_dir(output_dir, task):
 def write_submission_record(stats_ref, i, j, task_column):
 
 	Mean = stats_ref.loc[(stats_ref["file_id"] == i) & (stats_ref["class"] == j), "mean"].values[0]
-	Std_dev = stats_ref.loc[(stats_ref["file_id"] == i) & (stats_ref["class"] == j), "stdev"].values[0]
 	genre = stats_ref.loc[(stats_ref["file_id"] == i) & (stats_ref["class"] == j), "genre"].values[0]
 	length = list(stats_ref.loc[stats_ref["file_id"] == i, "length"])[0]
 	
 	if genre == "text":
-		duration = round(np.random.normal(loc=Mean, scale=Std_dev))
+		duration = round(PosNormal(Mean))
 		new_end = length - duration
 		start_time = np.random.randint(low=0,high=new_end)	
 	else:
-		duration = np.random.normal(loc=Mean, scale=Std_dev)
+		duration = PosNormal(Mean)
 		new_end = length - duration
 		start_time = np.random.uniform(low=0,high=new_end)
 
@@ -95,19 +98,23 @@ def generate_random_submission(task, reference_dir, scoring_index_file, output_d
 
 	index_df = pd.DataFrame(columns=["file_id", "is_processed", "message", "file_path"])
 
-	for i in sorted(list(set(stats_ref.file_id))):
-		Class = stats_ref.loc[stats_ref["file_id"] == i, "class"]
+	for i in sorted(list(set(ref.file_id))):
+
 		task_column = task.replace("s","")
 		if task_column == "norm":
 			submission_df = pd.DataFrame(columns=["file_id",task_column,"start","end","status","llr"])
 		if task_column == "emotion":
 			submission_df = pd.DataFrame(columns=["file_id",task_column,"start","end","llr"])
-		for j in sorted(list(set(Class))):
-			for time in range(2):
-				record = write_submission_record(stats_ref, i, j, task_column)
-				submission_df = pd.concat([submission_df,record], ignore_index = True)
-
-		index_df = generate_submission_file(i, submission_df, output_submission, index_df)
+		
+		if i in sorted(list(set(stats_ref.file_id))):
+			Class = stats_ref.loc[stats_ref["file_id"] == i, "class"]
+			for j in sorted(list(set(Class))):
+				for time in range(2):
+					record = write_submission_record(stats_ref, i, j, task_column)
+					submission_df = pd.concat([submission_df,record], ignore_index = True)
+			index_df = generate_submission_file(i, submission_df, output_submission, index_df, "True")
+		else:
+			index_df = generate_submission_file(i, submission_df, output_submission, index_df, "False")
 	
 	index_df.to_csv(os.path.join(output_submission, "system_output.index.tab"), sep = "\t", index = None)
 
