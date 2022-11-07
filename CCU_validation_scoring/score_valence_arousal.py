@@ -312,8 +312,7 @@ def score_valence_arousal(ref, hyp, output_dir, task):
 	"""
 	The wrapper
 	"""
-	hyp_type = add_type_column(ref, hyp)
-	ref_dict, hyp_dict, segment_df = process_ref_hyp_time_series(ref, hyp_type, task)
+	ref_dict, hyp_dict, segment_df = process_ref_hyp_time_series(ref, hyp, task)
 	CCC_result = score_genre(ref_dict, hyp_dict)
 	
 	ensure_output_dir(output_dir)

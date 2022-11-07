@@ -312,10 +312,9 @@ def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df):
 
     # FIXME: Use a No score-region parameter
     tad_add_noscore_region(ref,hyp)
-    hyp_type = add_type_column(ref, hyp)
 
     if len(hyp) > 0:
-        pr_iou_scores, final_alignment_df = compute_multiclass_iou_pr(ref, hyp_type, iou_thresholds, mapping_df, class_type)
+        pr_iou_scores, final_alignment_df = compute_multiclass_iou_pr(ref, hyp, iou_thresholds, mapping_df, class_type)
     else:
         pr_iou_scores = {}
         unique_combo = ref[["Class", "type"]].value_counts().reset_index()

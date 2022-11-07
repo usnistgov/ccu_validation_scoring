@@ -260,10 +260,9 @@ def score_cp(ref, hyp, delta_cp_text_thresholds, delta_cp_time_thresholds, outpu
     """    
     # Add text/audio/video info to hyp   
     tad_add_noscore_region(ref,hyp)
-    hyp_type = add_type_column(ref, hyp)
 
     if len(hyp) > 0:
-        pr_iou_scores, final_alignment_df = compute_multiclass_cp_pr(ref, hyp_type, delta_cp_text_thresholds, delta_cp_time_thresholds)
+        pr_iou_scores, final_alignment_df = compute_multiclass_cp_pr(ref, hyp, delta_cp_text_thresholds, delta_cp_time_thresholds)
     else:
         alist = ref.loc[ref.Class != 'NO_SCORE_REGION'].type.unique()
         pr_iou_scores = generate_zero_scores_changepoint(alist, delta_cp_text_thresholds, delta_cp_time_thresholds)

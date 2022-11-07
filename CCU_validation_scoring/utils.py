@@ -143,13 +143,14 @@ def convert_task_column(task):
 
 	return column_name
 
-def add_type_column(ref, hyp):
+def add_type_column(ref_dir, hyp):
 	"""
 	Extract type column from ref and add it to hyp
 	"""
-	ref_type = ref[["file_id","type"]]
-	ref_type_uniq = ref_type.drop_duplicates()
-	hyp_type = hyp.merge(ref_type_uniq)
+	file_info = pd.read_csv(os.path.join(ref_dir,"docs","file_info.tab"), sep = "\t")
+	file_info = file_info[["file_uid","type"]]
+	file_info_uniq = file_info.drop_duplicates()
+	hyp_type = hyp.merge(file_info_uniq, left_on = "file_id", right_on = "file_uid")
 
 	return hyp_type
 
