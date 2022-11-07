@@ -1,4 +1,4 @@
-import os
+import os, glob
 import pandas as pd
 from pathlib import Path
 from .preprocess_reference import *
@@ -139,7 +139,7 @@ def check_submission_files(subm_dir, index_file_path, subm_file_dict):
 
 def check_file_exist(file_path, file, dir):
 
-	if os.path.exists(file_path):
+	if len(glob.glob(file_path)) >= 1:
 		pass
 	else:
 		logger.error('No file {} found in {}'.format(file, dir))
@@ -313,7 +313,7 @@ def check_index_get_submission_files(ref_dir, subm_dir):
 	system_output_index_file_path = os.path.join(subm_dir, "system_output.index.tab")
 	check_file_exist(system_output_index_file_path, system_output_index_file_path, subm_dir)
 
-	system_input_index_file_path = os.path.join(ref_dir, "index_files", "system_input.index.tab")
+	system_input_index_file_path = os.path.join(ref_dir, "index_files", "*system_input.index.tab")
 	check_file_exist(system_input_index_file_path, system_input_index_file_path, ref_dir)
 
 	file_info_path = os.path.join(ref_dir, "docs", "file_info.tab")
@@ -326,6 +326,7 @@ def check_index_get_submission_files(ref_dir, subm_dir):
 	if individual_file_check("index", None, system_output_index_file_path, column_map, header_map, processed_label=None, subm_file=None, length=None, norm_list=None):
 
 		system_output_index_df = pd.read_csv(system_output_index_file_path, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
+		system_input_index_file_path = glob.glob(system_input_index_file_path)[0]
 		system_input_index_df = pd.read_csv(system_input_index_file_path, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
 		file_info_df = pd.read_csv(file_info_path, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
 
