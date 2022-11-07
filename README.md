@@ -102,11 +102,11 @@ CCU_scoring validate-ref -ref test/reference/LDC_reference_sample
 Each evaluation task has a subcommand to validate a system output file.  The evaluation tasks include Norm Discovery (ND), Emotion Detection (ED), Valence Diarization (VD), Arousal Diarization (AD), Change Detection (CD).  Use the commands below to **validate the format of a ND/ED/VD/AD/CD submission** directory against a reference directory with a scoring index file.
 
 ```bash
-CCU_scoring validate-nd -s <submission_directory> -ref <reference_directory> -i <scoring_index_file>
-CCU_scoring validate-ed -s <submission_directory> -ref <reference_directory> -i <scoring_index_file>
-CCU_scoring validate-vd -s <submission_directory> -ref <reference_directory> -i <scoring_index_file>
-CCU_scoring validate-ad -s <submission_directory> -ref <reference_directory> -i <scoring_index_file>
-CCU_scoring validate-cd -s <submission_directory> -ref <reference_directory> -i <scoring_index_file>
+CCU_scoring validate-nd -s <submission_directory> -ref <reference_directory>
+CCU_scoring validate-ed -s <submission_directory> -ref <reference_directory> 
+CCU_scoring validate-vd -s <submission_directory> -ref <reference_directory>
+CCU_scoring validate-ad -s <submission_directory> -ref <reference_directory>
+CCU_scoring validate-cd -s <submission_directory> -ref <reference_directory>
 ```
 
 **Required Arguments**

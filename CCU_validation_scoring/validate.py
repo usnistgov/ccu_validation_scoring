@@ -46,21 +46,14 @@ def global_ref_file_checks(file, index_dir):
 
 	return file_checks
 
-def global_file_checks(task, reference_dir, submission_dir, scoring_index_file):
+def global_file_checks(reference_dir, submission_dir):
 	
-	try:
-		scoring_index = pd.read_csv(scoring_index_file, usecols = ['file_id'], sep = "\t")
-	except Exception as e:
-		logger.error('{} is not a valid scoring index file'.format(scoring_index_file))
-		exit(1)
-
-	ref = preprocess_reference_dir(ref_dir = reference_dir, scoring_index = scoring_index, task = task)
-	index_file_path, subm_file_dict = check_index_get_submission_files(ref, submission_dir)
+	index_file_path, subm_file_dict = check_index_get_submission_files(reference_dir, submission_dir)
 	check_submission_files(submission_dir, index_file_path, subm_file_dict)
 
-	return ref, subm_file_dict
+	return subm_file_dict
 
-def individual_file_check(task, type, subm_file_path, column_map, header_map, processed_label, subm_file, length, ref_df, norm_list):
+def individual_file_check(task, type, subm_file_path, column_map, header_map, processed_label, subm_file, length, norm_list):
 	
 	if task == "norms":
 		file_checks = (check_valid_tab(subm_file_path) and
@@ -91,9 +84,8 @@ def individual_file_check(task, type, subm_file_path, column_map, header_map, pr
 			check_data_type(subm_file_path, header_map[task]) and
 			check_fileid_index_match(subm_file_path, subm_file) and
 			check_start_small_end(subm_file_path, type) and
-			check_time_no_gap(subm_file_path, ref_df) and
+			check_time_no_gap(subm_file_path, type) and
 			check_duration_cover(subm_file_path, length) and
-			check_duration_equal(subm_file_path, ref_df) and
 			check_start_end_timestamp_within_length(subm_file_path, task, length) and
 			check_value_range(subm_file_path, task))
 
@@ -255,7 +247,7 @@ def check_start_small_end(file, type):
 					logger.error('Invalid file {}:'.format(file))
 					logger.error("Start is higher than end in text {}".format(file))
 					return False
-		if type != "text":	
+		if type == "audio" or type == "video":	
 			for i in range(df.shape[0]):
 				if df.iloc[i]["start"] >= df.iloc[i]["end"]:
 					logger.error('Invalid file {}:'.format(file))
@@ -263,13 +255,13 @@ def check_start_small_end(file, type):
 					return False
 	return True
 
-def check_time_no_gap(file, ref):
+def check_time_no_gap(file, type):
 
 	df = pd.read_csv(file, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
 	if df.shape[0] != 0:
 		df_sorted = df.sort_values(by=['start','end'])
 
-		if ref["type"].unique()[0] == "text":
+		if type == "text":
 			for i in range(df_sorted.shape[0]-1):
 				if df_sorted.iloc[i]["end"] + 1 != df_sorted.iloc[i+1]["start"]:
 					logger.error('Invalid file {}:'.format(file))
@@ -277,7 +269,7 @@ def check_time_no_gap(file, ref):
 					return False
 			return True
 		
-		if ref["type"].unique()[0] == "audio" or ref["type"].unique()[0] == "video":
+		if type == "audio" or type == "video":
 			for i in range(df_sorted.shape[0]-1):
 				if abs(df_sorted.iloc[i]["end"] - df_sorted.iloc[i+1]["start"]) >= 0.02:
 					logger.error('Invalid file {}:'.format(file))
@@ -300,28 +292,6 @@ def check_duration_cover(file, length):
 		return False
 	return True
 
-def check_duration_equal(file, ref_df):
-
-	df = pd.read_csv(file, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
-
-	def calculate_duration_vd_ad(df):
-
-		start = min(list(df["start"]))
-		end = max(list(df["end"]))
-
-		return start, end
-
-	if df.shape[0] != 0:
-		start_ref, end_ref = calculate_duration_vd_ad(ref_df)
-		start_hyp, end_hyp = calculate_duration_vd_ad(df)
-		
-		if not ((start_ref == start_hyp) and (end_ref == end_hyp)):
-			logger.error('Invalid file {}:'.format(file))
-			logger.error("The duration of {} is different from the duration of reference".format(file))
-			return False
-
-	return True
-
 def check_fileid_index_match(file, file_id):
 
 	df = pd.read_csv(file, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
@@ -337,37 +307,46 @@ def check_fileid_index_match(file, file_id):
 			return False
 	return True
 
-def check_index_get_submission_files(ref, subm_dir):
+def check_index_get_submission_files(ref_dir, subm_dir):
 
 	# Get and check if index file is there
-	index_file_path = os.path.join(subm_dir, "system_output.index.tab")
-	check_file_exist(index_file_path, index_file_path, subm_dir)
+	system_output_index_file_path = os.path.join(subm_dir, "system_output.index.tab")
+	check_file_exist(system_output_index_file_path, system_output_index_file_path, subm_dir)
+
+	system_input_index_file_path = os.path.join(ref_dir, "index_files", "system_input.index.tab")
+	check_file_exist(system_input_index_file_path, system_input_index_file_path, ref_dir)
+
+	file_info_path = os.path.join(ref_dir, "docs", "file_info.tab")
+	check_file_exist(file_info_path, file_info_path, ref_dir)
 
 	# Check the format of index file
 	column_map = {"index": 4}
 	header_map = {"index":{"file_id": "object","is_processed": "bool","message": "object","file_path": "object"}}
 
-	if individual_file_check("index", None, index_file_path, column_map, header_map, processed_label=None, subm_file=None, length=None, ref_df=None, norm_list=None):
-		index_df = pd.read_csv(index_file_path, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
+	if individual_file_check("index", None, system_output_index_file_path, column_map, header_map, processed_label=None, subm_file=None, length=None, norm_list=None):
+
+		system_output_index_df = pd.read_csv(system_output_index_file_path, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
+		system_input_index_df = pd.read_csv(system_input_index_file_path, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
+		file_info_df = pd.read_csv(file_info_path, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
 
 		# Then check if file_id in reference is equal to file_id in index file
-		if sorted(list(index_df["file_id"])) != sorted(list(ref["file_id"].unique())):
-			logger.error('File_ids in index_file are different from file_ids in reference')
+		if sorted(list(system_output_index_df["file_id"])) != sorted(list(system_input_index_df["file_id"].unique())):
+			logger.error('File_ids in system input are different from file_ids in system output')
 			logger.error('Validation failed')
 			exit(1)
 	
 		# Then check submission path, if it's ok, append path into dictionary
 		subm_file_paths_dict = {}
-		for j in index_df["file_id"]:
-			processed_label = index_df["is_processed"][index_df["file_id"] == j].values[0]
-			subm_file_path = index_df["file_path"][index_df["file_id"] == j].values[0]
+		for j in system_output_index_df["file_id"]:
+			processed_label = system_output_index_df["is_processed"][system_output_index_df["file_id"] == j].values[0]
+			subm_file_path = system_output_index_df["file_path"][system_output_index_df["file_id"] == j].values[0]
 			if subm_file_path != subm_file_path: # check if it's NaN value
 				logger.error("Can't find submission file path for {}".format(j))
 				logger.error('Validation failed')
 				exit(1)
 
-			type = ref["type"][ref["file_id"] == j].values[0]
-			length = ref["length"][ref["file_id"] == j].values[0]
+			type = file_info_df["type"][file_info_df["file_uid"] == j].values[0]
+			length = file_info_df["length"][file_info_df["file_uid"] == j].values[0]
 			if subm_file_path[:2] == './': #Check if path is start with ./
 				subm_file_path = subm_file_path[2:]
 			if subm_dir not in subm_file_path: # Check it's absolute or relative path
@@ -381,7 +360,7 @@ def check_index_get_submission_files(ref, subm_dir):
 		logger.error('Validation failed')
 		exit(1)
 
-	return index_file_path, subm_file_paths_dict
+	return system_output_index_file_path, subm_file_paths_dict
 
 def check_start_end_timestamp_within_length(file, task, length):
 
