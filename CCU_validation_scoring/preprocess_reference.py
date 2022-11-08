@@ -494,8 +494,8 @@ def preprocess_reference_dir(ref_dir, scoring_index, task):
 	"""
 	file_info = pd.read_csv(os.path.join(ref_dir,"docs","file_info.tab"), sep = "\t")
 	index_df = file_info.merge(scoring_index, left_on = "file_uid", right_on = "file_id")
-	index_df.drop_duplicates(inplace = True)
 	index_df = index_df[["file_id", "type", "length"]]
+	index_df.drop_duplicates(inplace = True)
 
 	if task == "norms" or task == "emotions":
 		data_file = os.path.join(ref_dir,"data","{}.tab".format(task))

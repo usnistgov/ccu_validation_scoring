@@ -1,7 +1,6 @@
-import os
+import os, glob
 import numpy as np
 import pandas as pd
-import math
 from datetime import datetime
 import logging
 from CCU_validation_scoring.preprocess_reference import *
@@ -98,7 +97,10 @@ def generate_random_submission(task, reference_dir, scoring_index_file, output_d
 
 	index_df = pd.DataFrame(columns=["file_id", "is_processed", "message", "file_path"])
 
-	for i in sorted(list(set(ref.file_id))):
+	system_input_index_file_path = os.path.join(reference_dir, "index_files", "*system_input.index.tab")
+	system_input_index_df = pd.read_csv(glob.glob(system_input_index_file_path)[0], sep = "\t")
+
+	for i in sorted(list(system_input_index_df["file_id"].unique())):
 
 		task_column = task.replace("s","")
 		if task_column == "norm":
@@ -112,9 +114,7 @@ def generate_random_submission(task, reference_dir, scoring_index_file, output_d
 				for time in range(2):
 					record = write_submission_record(stats_ref, i, j, task_column)
 					submission_df = pd.concat([submission_df,record], ignore_index = True)
-			index_df = generate_submission_file(i, submission_df, output_submission, index_df, "True")
-		else:
-			index_df = generate_submission_file(i, submission_df, output_submission, index_df, "False")
+		index_df = generate_submission_file(i, submission_df, output_submission, index_df, "True")
 	
 	index_df.to_csv(os.path.join(output_submission, "system_output.index.tab"), sep = "\t", index = None)
 

@@ -187,7 +187,7 @@ def check_valid_header(file, header):
 
 def check_output_records(file, task, processed_label):
 
-	df = pd.read_csv(file, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
+	df = pd.read_csv(file, dtype={'norm': object}, sep='\t')
 
 	if task == "valence_continuous" or task == "arousal_continuous":
 		if processed_label == False and df.shape[0] != 0:
@@ -224,7 +224,7 @@ def check_data_type(file, header_type):
 
 def check_emotion_id(file):
 
-	df = pd.read_csv(file, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
+	df = pd.read_csv(file, sep='\t')
 	if df.shape[0] != 0:
 		invalid_emotion = []
 		for i in df["emotion"]:
@@ -239,7 +239,7 @@ def check_emotion_id(file):
 
 def check_start_small_end(file, type):
 
-	df = pd.read_csv(file, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
+	df = pd.read_csv(file, dtype={'norm': object}, sep='\t')
 	if df.shape[0] != 0:
 		if type == "text":	
 			for i in range(df.shape[0]):
@@ -257,7 +257,7 @@ def check_start_small_end(file, type):
 
 def check_time_no_gap(file, type):
 
-	df = pd.read_csv(file, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
+	df = pd.read_csv(file, sep='\t')
 	if df.shape[0] != 0:
 		df_sorted = df.sort_values(by=['start','end'])
 
@@ -279,7 +279,7 @@ def check_time_no_gap(file, type):
 
 def check_duration_cover(file, length):
 
-	df = pd.read_csv(file, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
+	df = pd.read_csv(file, dtype={'norm': object}, sep='\t')
 	if df.shape[0] != 0:
 		start = min(list(df["start"]))
 		end = max(list(df["end"]))	
@@ -294,7 +294,7 @@ def check_duration_cover(file, length):
 
 def check_fileid_index_match(file, file_id):
 
-	df = pd.read_csv(file, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
+	df = pd.read_csv(file, dtype={'norm': object}, sep='\t')
 	if df.shape[0] != 0:
 		invalid_fileid = []
 		for i in df["file_id"]:
@@ -325,10 +325,12 @@ def check_index_get_submission_files(ref_dir, subm_dir):
 
 	if individual_file_check("index", None, system_output_index_file_path, column_map, header_map, processed_label=None, subm_file=None, length=None, norm_list=None):
 
-		system_output_index_df = pd.read_csv(system_output_index_file_path, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
+		system_output_index_df = pd.read_csv(system_output_index_file_path, sep='\t')
 		system_input_index_file_path = glob.glob(system_input_index_file_path)[0]
-		system_input_index_df = pd.read_csv(system_input_index_file_path, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
-		file_info_df = pd.read_csv(file_info_path, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
+		system_input_index_df = pd.read_csv(system_input_index_file_path, sep='\t')
+		file_info_df = pd.read_csv(file_info_path, sep='\t')
+		file_info_df = file_info_df[["file_uid", "type", "length"]]
+		file_info_df.drop_duplicates(inplace = True)
 
 		# Then check if file_id in reference is equal to file_id in index file
 		if sorted(list(system_output_index_df["file_id"])) != sorted(list(system_input_index_df["file_id"].unique())):
@@ -365,7 +367,7 @@ def check_index_get_submission_files(ref_dir, subm_dir):
 
 def check_start_end_timestamp_within_length(file, task, length):
 
-	df = pd.read_csv(file, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
+	df = pd.read_csv(file, dtype={'norm': object}, sep='\t')
 	if df.shape[0] != 0:
 		invalid_point = []
 
@@ -389,7 +391,7 @@ def check_start_end_timestamp_within_length(file, task, length):
 
 def check_value_range(file, task):
 
-	df = pd.read_csv(file, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
+	df = pd.read_csv(file, sep='\t')
 	if df.shape[0] != 0:
 		invalid_value_range = []
 		for i in df[task]:
@@ -404,7 +406,7 @@ def check_value_range(file, task):
 
 def check_ref_norm(hidden_norm, mapping_file):
 
-	mapping_df = pd.read_csv(mapping_file, dtype={'norm': object, 'sys_norm': object, 'ref_norm': object, 'message': object}, sep='\t')
+	mapping_df = pd.read_csv(mapping_file, dtype={'sys_norm': object, 'ref_norm': object}, sep='\t')
 	invalid_ref_norm = []
 	for i in mapping_df["ref_norm"]:
 		if i not in hidden_norm:
@@ -700,7 +702,7 @@ def check_start_end_types(file, docs_dir):
 	check_file_exist(file_info_path, file_info_path, docs_dir)
 	file_info_df = pd.read_csv(file_info_path, sep='\t')
 
-	if file_info_df .shape[0] != 0:
+	if file_info_df.shape[0] != 0:
 		text_ids = []
 		audvid_ids = []
 		for index, row in file_info_df .iterrows():
