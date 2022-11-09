@@ -35,7 +35,7 @@ def generate_submission_dir(output_dir, task):
 	task_map = {"norms": "ND", "emotions": "ED", "valence_continuous": "VD", "arousal_continuous": "AD", "changepoint": "CD"}
 	task_label = task_map[task]
 	team = "fake"
-	dataset = "LDC2022E18-V1"
+	dataset = "LDC2022E22-V1"
 	now = datetime.now()
 	date = now.strftime("%Y%m%d")
 	time = now.strftime("%H%M%S")
@@ -126,7 +126,7 @@ def generate_random_submission(task, reference_dir, scoring_index_file, output_d
 
 def main():
 	parser = argparse.ArgumentParser(description='Generate a random norm/emotion submission')
-	parser.add_argument('-t','--task', type=str, required=True, help='norms or emotions')
+	parser.add_argument('-t', '--task', choices=['norms', 'emotions'], required=True, help = 'norms, emotions')
 	parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
 	parser.add_argument('-i','--scoring-index-file', type=str, required=True, help='Use to filter file from scoring (REF)')
 	parser.add_argument("-o", "--output_dir", type=str, required=True, help="Output directory")

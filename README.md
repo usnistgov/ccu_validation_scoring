@@ -24,12 +24,13 @@
 
 This package contains the tools to validate and score the TA1 evaluation tasks ND (norm discovery), ED (emotion detection), VD (valence diarization), AD (arousal diarization), CD (change detection) and scoring tools for the Hidden Norms (NDMAP). Please refer to the CCU evaluation plan for more information about CCU, the evaluation tasks, and file formats.
 
-This README file describes the reference annotation validation tool, system output validation tools and scoring tools.
+This README file describes the reference annotation validation tool, system output validation tool, scoring tool, reference statistics computing tool and fake submission generation tool.
 
  - Reference Validation Tool: confirms that a reference annotation set follows the rules set in the CCU Evaluation Plan.
  - System Output Validation Tool: confirms that a submission of system output follows the rules set in the CCU Evaluation Plan.
  - Scoring Tool: scores a system output submission against a reference with a scoring index file.
-
+ - Reference Statistics Computing Tool: computes basic statistics on the reference data for norms or emotions task.
+ - Fake Submission Generation Tool: generates a random submission for norms or emotions task.
 
 
 ## <a name="setup">Setup</a>
@@ -237,7 +238,7 @@ CCU_scoring score-ad -s <arousal_submission_directory> -ref <reference_directory
 
 **Required Arguments**
 
- * `-s`: emotion submission directory
+ * `-s`: valence or arousal submission directory
 
  * `-ref`: reference directory
 
@@ -271,7 +272,7 @@ CCU_scoring score-cd -s <change_submission_directory> -ref <reference_directory>
 
 **Required Arguments**
 
- * `-s`: emotion submission directory
+ * `-s`: change detection submission directory
 
  * `-ref`: reference directory
 
@@ -291,6 +292,51 @@ CCU_scoring score-cd \
 -s test/pass_submissions/pass_submissions_LDC_reference_sample/CD/CCU_P1_TA1_CD_NIST_mini-eval1_20220531_050236 \
 -ref test/reference/LDC_reference_sample \
 -i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab 
+```
+### Reference Statistics Computing Tool
+
+The following command should be run within the `CCU_validation_scoring-x.x.x/` directory.
+
+```bash
+python3 scripts/ccu_ref_analysis.py -r <reference_directory> -t <task_string> -i <scoring_index_file> -o <output_file>
+```
+
+**Required Arguments**
+
+ * `-r`: reference directory
+ * `-t`: norms or emotions
+ * `-i`: file containing the file id of scoring datasets
+ * `-o`: file where the statistics will be output
+
+```bash
+# an example of statistics computing
+python3 scripts/ccu_ref_analysis.py -r test/reference/LDC_reference_sample \
+-t norms \
+-i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab \
+-o tmp.tab
+```
+
+### Fake Submission Generation Tool
+
+The following command should be run within the `CCU_validation_scoring-x.x.x/` directory.
+
+```bash
+python3 scripts/generate_random_submission.py -ref <reference_directory> -t <task_string> -i <scoring_index_file> -o <output_directory>
+```
+
+**Required Arguments**
+
+ * `-ref`: reference directory
+ * `-t`: norms or emotions
+ * `-i`: file containing the file id of scoring datasets
+ * `-o`: output directory containing a random submission
+
+```bash
+# an example of statistics computing
+python3 scripts/generate_random_submission.py -ref test/reference/LDC_reference_sample \
+-t norms \
+-i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab \
+-o tmp
 ```
 
 ## <a name="contacts">Report a Bug</a>

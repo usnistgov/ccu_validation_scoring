@@ -42,7 +42,7 @@ def main():
     parser.add_argument('-r', '--ref-dir', type=str, required=True, help="path to the reference directory")
     parser.add_argument('-t', '--task', choices=['norms', 'emotions'], required=True, help = 'norms, emotions')
     parser.add_argument('-i', '--scoring-index-file', type=str, required=True, help='use to filter file from scoring (REF)')
-    parser.add_argument('-o', '--output-file', type=str, required=True, help='file where the statistics will be output)')    
+    parser.add_argument('-o', '--output-file', type=str, required=True, help='file where the statistics will be output')    
 
     args = parser.parse_args()
     ref_dir = args.ref_dir
