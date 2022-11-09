@@ -1,3 +1,8 @@
+#! /usr/bin/env python
+"""
+A python script to generate a random submission. Currently, it only works
+for norms and emotions.
+"""
 import os, glob
 import numpy as np
 import pandas as pd
@@ -120,8 +125,8 @@ def generate_random_submission(task, reference_dir, scoring_index_file, output_d
 
 
 def main():
-	parser = argparse.ArgumentParser(description='Generate a random submission')
-	parser.add_argument('-t','--task', type=str, required=True, help='norms, emotions, valence_continuous, arousal_continuous or changepoint')
+	parser = argparse.ArgumentParser(description='Generate a random norm/emotion submission')
+	parser.add_argument('-t','--task', type=str, required=True, help='norms or emotions')
 	parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
 	parser.add_argument('-i','--scoring-index-file', type=str, required=True, help='Use to filter file from scoring (REF)')
 	parser.add_argument("-o", "--output_dir", type=str, required=True, help="Output directory")

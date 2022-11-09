@@ -115,14 +115,11 @@ CCU_scoring validate-cd -s <submission_directory> -ref <reference_directory>
 
  * `-ref`: reference directory
 
- * `-i`: file containing the list of documents to score
-
 ```bash
 # an example of submission validation
 CCU_scoring validate-nd \
 -s test/pass_submissions/pass_submissions_LDC_reference_sample/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220815_164235 \
--ref test/reference/LDC_reference_sample \
--i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
+-ref test/reference/LDC_reference_sample
 ```
 
 **Norm Discovery Mapping Validation**
