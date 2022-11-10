@@ -499,7 +499,8 @@ def preprocess_reference_dir(ref_dir, scoring_index, task):
 
 	if task == "norms" or task == "emotions":
 		data_file = os.path.join(ref_dir,"data","{}.tab".format(task))
-		data_df = read_dedupe_file(data_file)  
+		data_df = read_dedupe_file(data_file)
+		data_df = data_df[~data_df.isin(['EMPTY_TBD']).any(axis=1)]  
 		segment_file = os.path.join(ref_dir,"docs","segments.tab")
 		segment_df = read_dedupe_file(segment_file)
 		reference_df = data_df.merge(segment_df.merge(index_df))
@@ -513,7 +514,8 @@ def preprocess_reference_dir(ref_dir, scoring_index, task):
 
 	if task == "valence_continuous" or task == "arousal_continuous":
 		data_file = os.path.join(ref_dir,"data","valence_arousal.tab")
-		data_df = read_dedupe_file(data_file)  
+		data_df = read_dedupe_file(data_file)
+		data_df = data_df[~data_df.isin(['EMPTY_TBD']).any(axis=1)]  
 		segment_file = os.path.join(ref_dir,"docs","segments.tab")
 		segment_df = read_dedupe_file(segment_file)
 		reference_df = data_df.merge(segment_df.merge(index_df))
@@ -526,7 +528,8 @@ def preprocess_reference_dir(ref_dir, scoring_index, task):
 
 	if task == "changepoint":
 		data_file = os.path.join(ref_dir,"data","{}.tab".format(task))
-		data_df = read_dedupe_file(data_file)  
+		data_df = read_dedupe_file(data_file)
+		data_df = data_df[~data_df.isin(['EMPTY_TBD']).any(axis=1)]  
 		ref = data_df.merge(index_df)
 		ref = ref[ref.timestamp != "none"]
 		ref_final = change_class_type(ref, convert_task_column(task))

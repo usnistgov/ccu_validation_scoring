@@ -9,5 +9,6 @@ All notable changes to this project will be documented in this file.
 - Remove scoring index option of validation command
 - Use system_input index/file_info rather than reference to validate submission
 - Fix the testcases based on the new validation rule
+- Remove EMPTY_TBD string from annotation
 - Update REAMDE
 - Add CHANGELOG
