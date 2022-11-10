@@ -81,7 +81,7 @@ The `reference directory` mentioned validation and scoring sections must follow 
           <DATASET>.system_input.index.tab
 ```
 
-where `<DATASET>` is the corresponding source data package name (e.g., LDC catalog and version number of the  source package LDC2022E11-V1)
+where `<DATASET>` is the name of dataset.
 
 Please refer to the LDC CCU annotation data package `README` for the formats of the above `.tab`
 files. 
@@ -169,7 +169,7 @@ CCU_scoring validate-nd \
 
 **Norm Discovery Mapping Validation**
 
-Use the command below to **validate the format of an NDMAP submission directory** with a `hidden norm list`.  This validation only applies to the mapping file, not the original system. Please refer to the CCU Evaluation Plan for the `hidden norm list` file format.
+Use the command below to **validate the format of an NDMAP submission directory** with a `hidden norm list`.  This validation only applies to the mapping file, not the original system. The `hidden norm list` has one column (no header) containing norm IDs, one per row.
 
 ```bash
 CCU_scoring validate-ndmap -s <submission_directory> -n <hidden_norm_list_file>
