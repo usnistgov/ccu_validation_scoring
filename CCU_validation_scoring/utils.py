@@ -154,6 +154,20 @@ def add_type_column(ref_dir, hyp):
 
 	return hyp_type
 
+def filter_hyp_use_scoring_index(hyp, scoring_index):
+
+	hyp_pruned = hyp.merge(scoring_index)
+
+	return hyp_pruned
+
+def preprocess_submission_file(subm_dir, ref_dir, scoring_index, task):
+
+	hyp = concatenate_submission_file(subm_dir, task)
+	hyp_type = add_type_column(ref_dir, hyp)
+	hyp_final = filter_hyp_use_scoring_index(hyp_type, scoring_index)
+
+	return hyp_final
+
 def extract_df(df, file_id):
 	"""
 	Extract sub ref/hyp for specific file_id

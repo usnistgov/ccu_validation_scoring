@@ -49,21 +49,21 @@ def run_scorer():
 
     
 @pytest.mark.parametrize("dataset, system_input_index, system_dir, task, opt1, opt2",
-                         [('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'VD', '', ''),
-                          ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'AD', '', ''),
-                          ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'ND', '', ''),
-                          ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'ED', '', ''),
-                          ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'CD', '', ''),
-                          ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'NDMAP', 'CCU_P1_TA1_ND_NIST_mini-eval1_20220531_050236', ''),
+                         [('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.VD.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'VD', '', ''),
+                          ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.AD.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'AD', '', ''),
+                          ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'ND', '', ''),
+                          ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.ED.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'ED', '', ''),
+                          ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.CD.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'CD', '', ''),
+                          ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'NDMAP', 'CCU_P1_TA1_ND_NIST_mini-eval1_20220531_050236', ''),
                           
-                          ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'ND', '', 'known_norms_LC1.txt'),
-                          ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'CD', '', ''),
-                          ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'ED', '', ''),
-                          ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'VD', '', ''),
-                          ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'AD', '', ''),
-                          ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'NDMAP', 'CCU_P1_TA1_ND_NIST_mini-eval1_20220908_111111', 'hidden_norms_LC1.txt'),
+                          ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'ND', '', 'known_norms_LC1.txt'),
+                          ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.CD.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'CD', '', ''),
+                          ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.ED.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'ED', '', ''),
+                          ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.VD.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'VD', '', ''),
+                          ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.AD.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'AD', '', ''),
+                          ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'NDMAP', 'CCU_P1_TA1_ND_NIST_mini-eval1_20220908_111111', 'hidden_norms_LC1.txt'),
 
-                          ('ActEV-SmoothCurve', 'ActEV-SmoothCurve.scoring.index.tab', 'pass_submissions_ActEV-SmoothCurve', 'ND', '', '')                        
+                          ('ActEV-SmoothCurve', 'ActEV-SmoothCurve.ND.scoring.index.tab', 'pass_submissions_ActEV-SmoothCurve', 'ND', '', '')                        
                           ])
 
 def test_run_score_submissions(dataset, system_input_index, system_dir, task, opt1, opt2):
