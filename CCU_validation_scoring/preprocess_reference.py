@@ -130,7 +130,7 @@ def read_dedupe_file(path):
 	"""
 	Read file and remove duplicate records 
 	"""
-	df = pd.read_csv(path, sep = "\t")
+	df = pd.read_csv(path, dtype={'norm': object}, sep = "\t")
 	df.drop_duplicates(inplace = True)
 
 	return df

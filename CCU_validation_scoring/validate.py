@@ -63,7 +63,7 @@ def individual_file_check(task, type, subm_file_path, column_map, header_map, pr
 			check_data_type(subm_file_path, header_map[task]) and
 			check_fileid_index_match(subm_file_path, subm_file) and
 			check_start_small_end(subm_file_path, type) and
-			check_start_end_timestamp_within_length(subm_file_path, task, length))
+			check_start_end_timestamp_within_length(subm_file_path, task, length, type))
 	
 	if task == "emotions":
 		file_checks = (check_valid_tab(subm_file_path) and
@@ -74,7 +74,7 @@ def individual_file_check(task, type, subm_file_path, column_map, header_map, pr
 			check_fileid_index_match(subm_file_path, subm_file) and
 			check_emotion_id(subm_file_path) and
 			check_start_small_end(subm_file_path, type) and
-			check_start_end_timestamp_within_length(subm_file_path, task, length))
+			check_start_end_timestamp_within_length(subm_file_path, task, length, type))
 
 	if task == "valence_continuous" or task == "arousal_continuous":
 		file_checks = (check_valid_tab(subm_file_path) and
@@ -86,7 +86,7 @@ def individual_file_check(task, type, subm_file_path, column_map, header_map, pr
 			check_start_small_end(subm_file_path, type) and
 			check_time_no_gap(subm_file_path, type) and
 			check_duration_cover(subm_file_path, length) and
-			check_start_end_timestamp_within_length(subm_file_path, task, length) and
+			check_start_end_timestamp_within_length(subm_file_path, task, length, type) and
 			check_value_range(subm_file_path, task))
 
 	if task == "changepoint":
@@ -96,7 +96,7 @@ def individual_file_check(task, type, subm_file_path, column_map, header_map, pr
 			check_output_records(subm_file_path, task, processed_label) and
 			check_data_type(subm_file_path, header_map[task]) and
 			check_fileid_index_match(subm_file_path, subm_file) and
-			check_start_end_timestamp_within_length(subm_file_path, task, length))
+			check_start_end_timestamp_within_length(subm_file_path, task, length, type))
 
 	if task == "index":
 		file_checks = (check_valid_tab(subm_file_path) and
@@ -365,7 +365,7 @@ def check_index_get_submission_files(ref_dir, subm_dir):
 
 	return system_output_index_file_path, subm_file_paths_dict
 
-def check_start_end_timestamp_within_length(file, task, length):
+def check_start_end_timestamp_within_length(file, task, length, type):
 
 	df = pd.read_csv(file, dtype={'norm': object}, sep='\t')
 	if df.shape[0] != 0:
@@ -378,10 +378,16 @@ def check_start_end_timestamp_within_length(file, task, length):
 			
 		else:
 			for i in range(df.shape[0]):
-				if df.iloc[i]["start"] >= length:
-					invalid_point.append(df.iloc[i]["start"])
-				if df.iloc[i]["end"] > length:
-					invalid_point.append(df.iloc[i]["end"])
+				if type == "text":	
+					if df.iloc[i]["start"] > length:
+						invalid_point.append(df.iloc[i]["start"])
+					if df.iloc[i]["end"] > length:
+						invalid_point.append(df.iloc[i]["end"])
+				if type == "audio" or type == "video":
+					if df.iloc[i]["start"] >= length:
+						invalid_point.append(df.iloc[i]["start"])
+					if df.iloc[i]["end"] > length:
+						invalid_point.append(df.iloc[i]["end"])					
 			
 		if len(invalid_point) > 0:
 			logger.error('Invalid file {}:'.format(file))

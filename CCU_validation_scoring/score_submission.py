@@ -17,6 +17,7 @@ def score_nd_submission_dir_cli(args):
 		logger.error('ERROR:SCORING:{} is not a valid scoring index file'.format(args.scoring_index_file))
 		exit(1)
 
+	check_scoring_index_out_of_scope(args.reference_dir, scoring_index, "norms")
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "norms")
 	if args.norm_list_file:
 		ref = process_subset_norm_emotion(args.norm_list_file, ref)
@@ -50,6 +51,7 @@ def score_ed_submission_dir_cli(args):
 		logger.error('ERROR:SCORING:{} is not a valid scoring index file'.format(args.scoring_index_file))
 		exit(1)
 
+	check_scoring_index_out_of_scope(args.reference_dir, scoring_index, "emotions")
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "emotions")
 	if args.emotion_list_file:
 		ref = process_subset_norm_emotion(args.emotion_list_file, ref)
@@ -77,6 +79,7 @@ def score_vd_submission_dir_cli(args):
 		logger.error('ERROR:SCORING:{} is not a valid scoring index file'.format(args.scoring_index_file))
 		exit(1)
 
+	check_scoring_index_out_of_scope(args.reference_dir, scoring_index, "valence_continuous")
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "valence_continuous")
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "valence_continuous")
 
@@ -98,6 +101,7 @@ def score_ad_submission_dir_cli(args):
 		logger.error('ERROR:SCORING:{} is not a valid scoring index file'.format(args.scoring_index_file))
 		exit(1)
 
+	check_scoring_index_out_of_scope(args.reference_dir, scoring_index, "arousal_continuous")
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "arousal_continuous")
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "arousal_continuous")
 
@@ -118,6 +122,7 @@ def score_cd_submission_dir_cli(args):
 		logger.error('ERROR:SCORING:{} is not a valid scoring index file'.format(args.scoring_index_file))
 		exit(1)
 
+	check_scoring_index_out_of_scope(args.reference_dir, scoring_index, "changepoint")
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "changepoint")
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "changepoint")
 

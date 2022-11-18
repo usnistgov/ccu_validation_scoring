@@ -1,5 +1,4 @@
 import os
-import re
 import logging
 import pandas as pd
 import numpy as np
@@ -85,6 +84,25 @@ def load_list(fn):
 	except IOError:
 		print("File not found: '{}'".format(fn))
 		exit(1)
+
+def check_scoring_index_out_of_scope(ref_dir, scoring_index, task):
+
+	if task == "norms" or task == "emotions":
+		data_file = os.path.join(ref_dir,"data","{}.tab".format(task))
+	if task == "valence_continuous" or task == "arousal_continuous":
+		data_file = os.path.join(ref_dir,"data","valence_arousal.tab")
+	if task == "changepoint":
+		data_file = os.path.join(ref_dir,"data","{}.tab".format(task))
+	
+	data_df = pd.read_csv(data_file, dtype={'norm': object}, sep = "\t")
+	ann_file_list = set(data_df["file_id"])
+	scoring_index_file_list = set(scoring_index["file_id"])
+
+	invalid_file = scoring_index_file_list - ann_file_list
+	if invalid_file:
+		logger = logging.getLogger('SCORING')
+		logger.error("Additional file(s) '{}' have been found in scoring_index".format(invalid_file))
+		exit(1)
 				
 def concatenate_submission_file(subm_dir, task):
 	"""
@@ -92,7 +110,7 @@ def concatenate_submission_file(subm_dir, task):
 	"""
 
 	index_file_path = os.path.join(subm_dir, "system_output.index.tab")
-	index_df = pd.read_csv(index_file_path, sep='\t')
+	index_df = pd.read_csv(index_file_path, dtype={'message': object}, sep='\t')
 	subm_file_paths = index_df["file_path"][index_df["is_processed"] == True]
 	
 	submission_dfs = pd.DataFrame()
