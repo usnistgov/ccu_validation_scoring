@@ -44,7 +44,7 @@ def validate_nd_submission_dir_cli(args):
 		logger.error('Validation failed')
 		exit(1)
 	else:
-		logger.info('Validation succedeed')
+		logger.info('Validation succeeded')
 
 def validate_ed_submission_dir_cli(args):
 
@@ -70,7 +70,7 @@ def validate_ed_submission_dir_cli(args):
 		logger.error('Validation failed')
 		exit(1)
 	else:
-		logger.info('Validation succedeed')
+		logger.info('Validation succeeded')
 
 def validate_vd_submission_dir_cli(args):
 
@@ -95,7 +95,7 @@ def validate_vd_submission_dir_cli(args):
 		logger.error('Validation failed')
 		exit(1)
 	else:
-		logger.info('Validation succedeed')
+		logger.info('Validation succeeded')
 
 def validate_ad_submission_dir_cli(args):
 
@@ -120,7 +120,7 @@ def validate_ad_submission_dir_cli(args):
 		logger.error('Validation failed')
 		exit(1)
 	else:
-		logger.info('Validation succedeed')
+		logger.info('Validation succeeded')
 
 def validate_cd_submission_dir_cli(args):
 
@@ -145,7 +145,7 @@ def validate_cd_submission_dir_cli(args):
 		logger.error('Validation failed')
 		exit(1)
 	else:
-		logger.info('Validation succedeed')
+		logger.info('Validation succeeded')
 
 def validate_ndmap_submission_dir_cli(args):
 
@@ -158,7 +158,7 @@ def validate_ndmap_submission_dir_cli(args):
 	
 	hidden_norm_list = load_list(args.hidden_norm_list_file)
 	if individual_file_check("ndmap", None, mapping_file, column_map, header_map, processed_label=None, subm_file=None, length=None, norm_list=hidden_norm_list):
-		logger.info('Validation succedeed')
+		logger.info('Validation succeeded')
 	else:
 		logger.error('Validation failed')
 		exit(1)
