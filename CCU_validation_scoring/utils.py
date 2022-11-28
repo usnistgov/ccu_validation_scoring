@@ -87,15 +87,13 @@ def load_list(fn):
 
 def check_scoring_index_out_of_scope(ref_dir, scoring_index, task):
 
-	if task == "norms" or task == "emotions":
-		data_file = os.path.join(ref_dir,"data","{}.tab".format(task))
+	version_per_df = pd.read_csv(os.path.join(ref_dir,"docs/versions_per_file.tab"), sep = "\t")
+
+	if task == "norms" or task == "emotions" or task == "changepoint":
+		ann_file_list = set(version_per_df.loc[version_per_df["{}_count".format(task)] > 0, "file_id"])
 	if task == "valence_continuous" or task == "arousal_continuous":
-		data_file = os.path.join(ref_dir,"data","valence_arousal.tab")
-	if task == "changepoint":
-		data_file = os.path.join(ref_dir,"data","{}.tab".format(task))
+		ann_file_list = set(version_per_df.loc[version_per_df["valence_arousal_count"] > 0, "file_id"])
 	
-	data_df = pd.read_csv(data_file, dtype={'norm': object}, sep = "\t")
-	ann_file_list = set(data_df["file_id"])
 	scoring_index_file_list = set(scoring_index["file_id"])
 
 	invalid_file = scoring_index_file_list - ann_file_list

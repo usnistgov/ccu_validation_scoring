@@ -7,34 +7,46 @@ from .utils import *
 logger = logging.getLogger('SCORING')
 
 
-def generate_zero_scores_changepoint(labels, delta_cp_text_thresholds, delta_cp_time_thresholds):
+def generate_zero_scores_changepoint(ref, delta_cp_text_thresholds, delta_cp_time_thresholds):
     """
     Generate the result when no match was founded
     """
-    if len(labels)>0:
-        y_text = []
-        y_time = []
-        for idx, act in enumerate(labels):
-            if act == "text":
-                y_text.append( ["cp", act, 0.0, [0.0, 0.0], [0.0, 1.0] ])
-            else:
-                y_time.append( ["cp", act, 0.0, [0.0, 0.0], [0.0, 1.0] ])
-        df_text = pd.DataFrame(y_text, columns=['Class', 'type', 'ap', 'precision', 'recall'])
-        df_time = pd.DataFrame(y_time, columns=['Class', 'type', 'ap', 'precision', 'recall'])
-        pr_iou_scores = {}
-        for iout in delta_cp_text_thresholds:
-            pr_iou_scores[iout] = df_text
-        for iout in delta_cp_time_thresholds:
-            pr_iou_scores[iout] = df_time
+    if len(ref) > 0:
+        labels = ref.loc[ref.Class != 'NO_SCORE_REGION'].type.unique()
+        if len(labels)>0:
+            y_text = []
+            y_time = []
+            for idx, act in enumerate(labels):
+                if act == "text":
+                    y_text.append( ["cp", act, 0.0, [0.0, 0.0], [0.0, 1.0] ])
+                else:
+                    y_time.append( ["cp", act, 0.0, [0.0, 0.0], [0.0, 1.0] ])
+            df_text = pd.DataFrame(y_text, columns=['Class', 'type', 'ap', 'precision', 'recall'])
+            df_time = pd.DataFrame(y_time, columns=['Class', 'type', 'ap', 'precision', 'recall'])
+            pr_iou_scores = {}
+            for iout in delta_cp_text_thresholds:
+                pr_iou_scores[iout] = df_text
+            for iout in delta_cp_time_thresholds:
+                pr_iou_scores[iout] = df_time
 
+        else:
+            y = []
+            logger.error("No matching Types found in system output.")
+            y.append( [ "cp", 'no_macthing_Type', 0.0, [0.0, 0.0], [0.0, 1.0] ])
+            df_whole = pd.DataFrame(y, columns=['Class', 'type', 'ap', 'precision', 'recall'])
+            pr_iou_scores = {}
+            for iout in delta_cp_text_thresholds + delta_cp_time_thresholds:
+                pr_iou_scores[iout] = df_whole
+    
     else:
         y = []
-        logger.error("No matching Types found in system output.")
-        y.append( [ "cp", 'no_macthing_Type', 0.0, [0.0, 0.0], [0.0, 1.0] ])
+        logger.error("No reference to score")
+        y.append( [ 'NA', 'NA', 'NA', 'NA', 'NA' ])
         df_whole = pd.DataFrame(y, columns=['Class', 'type', 'ap', 'precision', 'recall'])
         pr_iou_scores = {}
         for iout in delta_cp_text_thresholds + delta_cp_time_thresholds:
             pr_iou_scores[iout] = df_whole
+
     return pr_iou_scores
 
 
@@ -261,12 +273,15 @@ def score_cp(ref, hyp, delta_cp_text_thresholds, delta_cp_time_thresholds, outpu
     # Add text/audio/video info to hyp   
     tad_add_noscore_region(ref,hyp)
 
-    if len(hyp) > 0:
-        pr_iou_scores, final_alignment_df = compute_multiclass_cp_pr(ref, hyp, delta_cp_text_thresholds, delta_cp_time_thresholds)
+    if len(ref) > 0:
+        if len(hyp) > 0:
+            pr_iou_scores, final_alignment_df = compute_multiclass_cp_pr(ref, hyp, delta_cp_text_thresholds, delta_cp_time_thresholds)
+        else:
+            pr_iou_scores = generate_zero_scores_changepoint(ref, delta_cp_text_thresholds, delta_cp_time_thresholds)
+            final_alignment_df = generate_all_fn_alignment_file(ref, "changepoint")
     else:
-        alist = ref.loc[ref.Class != 'NO_SCORE_REGION'].type.unique()
-        pr_iou_scores = generate_zero_scores_changepoint(alist, delta_cp_text_thresholds, delta_cp_time_thresholds)
-        final_alignment_df = generate_all_fn_alignment_file(ref, "changepoint")
+        pr_iou_scores = generate_zero_scores_changepoint(ref, delta_cp_text_thresholds, delta_cp_time_thresholds)
+        final_alignment_df = pd.DataFrame([["cp","NA","NA","NA","NA","NA","NA"]], columns=["class", "file_id", "eval", "ref", "sys", "llr", "parameters"])
 
     ensure_output_dir(output_dir)
     final_alignment_df_sorted = final_alignment_df.sort_values(by=['class', 'file_id', 'sys', 'ref'])

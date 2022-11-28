@@ -52,11 +52,9 @@ def generate_submission_dir(output_dir, task):
 
 	return output_submission
 
-def write_submission_record(stats_ref, i, j, task_column):
+def write_submission_record(stats, genre, length, i, j, task_column):
 
-	Mean = stats_ref.loc[(stats_ref["file_id"] == i) & (stats_ref["class"] == j), "mean"].values[0]
-	genre = stats_ref.loc[(stats_ref["file_id"] == i) & (stats_ref["class"] == j), "genre"].values[0]
-	length = list(stats_ref.loc[stats_ref["file_id"] == i, "length"])[0]
+	Mean = stats.loc[(stats["class"] == str(j)), "mean"].values[0]
 	
 	if genre == "text":
 		duration = round(PosNormal(Mean))
@@ -94,9 +92,7 @@ def generate_random_submission(task, reference_dir, scoring_index_file, output_d
 	stats_pruned = stats_pruned.loc[stats_pruned["class"] != silence_string]
 	stats_pruned = stats_pruned.fillna(0)
 
-	ref.rename(columns={'Class':'class', 'type':'genre'}, inplace=True)
-
-	stats_ref = ref.merge(stats_pruned, on=["class","genre"])
+	file_info_df = pd.read_csv(os.path.join(reference_dir, "docs", "file_info.tab"), sep='\t')
 
 	output_submission = generate_submission_dir(output_dir, task)
 
@@ -110,15 +106,20 @@ def generate_random_submission(task, reference_dir, scoring_index_file, output_d
 		task_column = task.replace("s","")
 		if task_column == "norm":
 			submission_df = pd.DataFrame(columns=["file_id",task_column,"start","end","status","llr"])
+			norm_info_df = pd.read_csv(os.path.join(reference_dir, "docs", "norm_info.tab"), sep = "\t")
+			Class = list(norm_info_df.loc[norm_info_df["current_type"] == "known", "norm"])
+
 		if task_column == "emotion":
 			submission_df = pd.DataFrame(columns=["file_id",task_column,"start","end","llr"])
+			Class = ["joy", "trust", "fear", "surprise", "sadness", "disgust", "anger", "anticipation"]
 		
-		if i in sorted(list(set(stats_ref.file_id))):
-			Class = stats_ref.loc[stats_ref["file_id"] == i, "class"]
-			for j in sorted(list(set(Class))):
-				for time in range(2):
-					record = write_submission_record(stats_ref, i, j, task_column)
-					submission_df = pd.concat([submission_df,record], ignore_index = True)
+		genre = file_info_df.loc[file_info_df["file_uid"] == i, "type"].values[0]
+		length = file_info_df.loc[file_info_df["file_uid"] == i, "length"].values[0]
+
+		for j in sorted(list(set(Class))):
+			for time in range(3):
+				record = write_submission_record(stats, genre, length, i, j, task_column)
+				submission_df = pd.concat([submission_df,record], ignore_index = True)
 		index_df = generate_submission_file(i, submission_df, output_submission, index_df, "True")
 	
 	index_df.to_csv(os.path.join(output_submission, "system_output.index.tab"), sep = "\t", index = None)

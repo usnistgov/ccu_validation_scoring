@@ -9,17 +9,34 @@ import pdb
 logger = logging.getLogger('SCORING')
 
 
-def generate_zero_scores_norm_emotion(labels):
+def generate_zero_scores_norm_emotion(ref):
     """
     Generate the result when no match was founded
     """
     y = []
-    if len(labels)>0:
-        for i in range(len(labels)):
-            y.append( [labels.loc[i, "Class"], labels.loc[i, "type"], 0.0, [0.0, 0.0], [0.0, 1.0] ])
+    if len(ref) > 0:
+        pr_iou_scores = {}
+        unique_combo = ref[["Class", "type"]].value_counts().reset_index()
+        unique_combo_pruned = unique_combo.loc[unique_combo.Class != 'NO_SCORE_REGION']
+        unique_all = ref[["Class"]].value_counts().reset_index()
+        unique_all["type"] = "all"
+        unique_all_pruned = unique_all.loc[unique_all.Class != 'NO_SCORE_REGION']
+        
+        combine_combo_pruned = pd.concat([unique_combo_pruned, unique_all_pruned])
+        combine_combo_pruned.sort_values(["Class", "type"], inplace=True)
+
+        final_combo_pruned = combine_combo_pruned.reset_index()
+        final_combo_pruned = final_combo_pruned[["Class","type"]]
+
+        if len(final_combo_pruned)>0:
+            for i in range(len(final_combo_pruned)):
+                y.append( [final_combo_pruned.loc[i, "Class"], final_combo_pruned.loc[i, "type"], 0.0, [0.0, 0.0], [0.0, 1.0] ])
+        else:
+            logger.error("No matching Classes and types found in system output.")
+            y.append( [ 'no_macthing_class', 'no_macthing_type', 0.0, [0.0, 0.0], [0.0, 1.0] ]) 
     else:
-        logger.error("No matching Classes and types found in system output.")
-        y.append( [ 'no_macthing_class', 'no_macthing_type', 0.0, [0.0, 0.0], [0.0, 1.0] ]) 
+        logger.error("No reference to score")
+        y.append( ["NA", "NA", "NA", "NA", "NA"])
     return pd.DataFrame(y, columns=['Class', 'type', 'ap', 'precision', 'recall'])
 
 
@@ -259,15 +276,22 @@ def sumup_tad_system_level_scores(pr_iou_scores, iou_thresholds, class_type, out
     map_scores_threshold = pd.DataFrame()
     for iout in sorted(iou_thresholds):
         pr_scores = pr_iou_scores[iout]
-        map_scores = pr_scores.groupby('type')['ap'].mean().reset_index()
-        map_scores.ap = map_scores.ap.round(3)
-        map_scores["metric"] = "mAP"
+        if pr_scores["ap"].values[0] != "NA":
+            map_scores = pr_scores.groupby('type')['ap'].mean().reset_index()
+            map_scores.ap = map_scores.ap.round(3)
+            
+            map_scores = map_scores.rename(columns={'type': 'genre', 'ap': 'value'})
+        else:
+            map_scores = pd.DataFrame([["NA","NA"]], columns=["genre","value"])
+        
         map_scores["correctness_criteria"] = "{iou>=%s}" % iout
+        map_scores["metric"] = "mAP"
+
         if class_type == "norm":
             map_scores["task"] = "nd"
         if class_type == "emotion":
             map_scores["task"] = "ed"
-        map_scores = map_scores.rename(columns={'type': 'genre', 'ap': 'value'})
+        
         map_scores = map_scores[["task","genre","metric","value","correctness_criteria"]]
         map_scores_threshold = pd.concat([map_scores, map_scores_threshold])
     
@@ -280,7 +304,8 @@ def sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir):
     prs_threshold = pd.DataFrame()   
     for iout in sorted(iou_thresholds):        
         prs = pr_iou_scores[iout]
-        prs.ap = prs.ap.round(3)
+        if prs["ap"].values[0] != "NA":
+            prs.ap = prs.ap.round(3)
         prs["metric"] = "AP"        
         prs["correctness_criteria"] = "{iou>=%s}" % iout
         prs = prs.rename(columns={'Class': 'class', 'type': 'genre', 'ap': 'value'})
@@ -313,23 +338,19 @@ def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df):
     # FIXME: Use a No score-region parameter
     tad_add_noscore_region(ref,hyp)
 
-    if len(hyp) > 0:
-        pr_iou_scores, final_alignment_df = compute_multiclass_iou_pr(ref, hyp, iou_thresholds, mapping_df, class_type)
+    if len(ref) > 0:
+        if len(hyp) > 0:
+            pr_iou_scores, final_alignment_df = compute_multiclass_iou_pr(ref, hyp, iou_thresholds, mapping_df, class_type)
+        else:
+            pr_iou_scores = {}
+            for iout in iou_thresholds:
+                pr_iou_scores[iout] = generate_zero_scores_norm_emotion(ref)
+            final_alignment_df = generate_all_fn_alignment_file(ref, class_type)
     else:
         pr_iou_scores = {}
-        unique_combo = ref[["Class", "type"]].value_counts().reset_index()
-        unique_combo_pruned = unique_combo.loc[unique_combo.Class != 'NO_SCORE_REGION']
-        unique_all = ref[["Class"]].value_counts().reset_index()
-        unique_all["type"] = "all"
-        unique_all_pruned = unique_all.loc[unique_all.Class != 'NO_SCORE_REGION']
-        
-        combine_combo_pruned = pd.concat([unique_combo_pruned, unique_all_pruned])
-        combine_combo_pruned.sort_values(["Class", "type"], inplace=True)
-
-        final_combo_pruned = combine_combo_pruned.reset_index()
-        final_combo_pruned = final_combo_pruned[["Class","type"]]
-        [ pr_iou_scores.setdefault(iout, generate_zero_scores_norm_emotion(final_combo_pruned)) for iout in iou_thresholds ]
-        final_alignment_df = generate_all_fn_alignment_file(ref, class_type)
+        for iout in iou_thresholds:
+            pr_iou_scores[iout] = generate_zero_scores_norm_emotion(ref)
+        final_alignment_df = pd.DataFrame([["NA","NA","NA","NA","NA","NA","NA","NA"]], columns=["class", "file_id", "eval", "ref", "sys", "llr", "parameters","sort"])
 
     ensure_output_dir(output_dir)
     final_alignment_df_sorted = final_alignment_df.sort_values(by=['class', 'file_id', 'sort'])

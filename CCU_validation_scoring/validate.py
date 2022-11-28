@@ -375,6 +375,11 @@ def check_start_end_timestamp_within_length(file, task, length, type):
 			for i in range(df.shape[0]):
 				if df.iloc[i]["timestamp"] > length:
 					invalid_point.append(df.iloc[i]["timestamp"])
+
+			if len(invalid_point) > 0:
+				logger.error('Invalid file {}:'.format(file))
+				logger.error("The number of timestamp column in {} is larger than the number of length in file_info.tab".format(file))
+				return False
 			
 		else:
 			for i in range(df.shape[0]):
@@ -387,12 +392,13 @@ def check_start_end_timestamp_within_length(file, task, length, type):
 					if df.iloc[i]["start"] >= length:
 						invalid_point.append(df.iloc[i]["start"])
 					if df.iloc[i]["end"] > length:
-						invalid_point.append(df.iloc[i]["end"])					
-			
-		if len(invalid_point) > 0:
-			logger.error('Invalid file {}:'.format(file))
-			logger.error("Start/end/timestamp in {} is not within the file length".format(file))
-			return False
+						invalid_point.append(df.iloc[i]["end"])
+
+			if len(invalid_point) > 0:
+				logger.error('Invalid file {}:'.format(file))
+				logger.error("The number of start/end column in {} is larger than the number of length in file_info.tab".format(file))
+				return False					
+
 	return True
 
 def check_value_range(file, task):

@@ -509,8 +509,11 @@ def preprocess_reference_dir(ref_dir, scoring_index, task):
 		ref = preprocess_norm_emotion_reference_df(reference_prune, column_name)
 		ref.drop_duplicates(inplace = True)
 		ref_inter = ref.merge(index_df)
-		ref_final = fill_start_end(ref_inter)
-		ref_final = ref_final[ref_final.Class != "none"]
+		if len(ref_inter) > 0:
+			ref_final = fill_start_end(ref_inter)
+			ref_final = ref_final[ref_final.Class != "none"]
+		else:
+			ref_final = ref_inter
 
 	if task == "valence_continuous" or task == "arousal_continuous":
 		data_file = os.path.join(ref_dir,"data","valence_arousal.tab")
@@ -524,7 +527,10 @@ def preprocess_reference_dir(ref_dir, scoring_index, task):
 		ref = preprocess_valence_arousal_reference_df(reference_prune, column_name)
 		ref = ref.merge(index_df)
 		ref_inter = extend_gap_segment(ref)
-		ref_final = fill_start_end(ref_inter)
+		if len(ref_inter) > 0:
+			ref_final = fill_start_end(ref_inter)
+		else:
+			ref_final = ref_inter		
 
 	if task == "changepoint":
 		data_file = os.path.join(ref_dir,"data","{}.tab".format(task))
