@@ -86,8 +86,8 @@ def individual_file_check(task, type, subm_file_path, column_map, header_map, pr
 			check_start_small_end(subm_file_path, type) and
 			check_time_no_gap(subm_file_path, type) and
 			check_duration_cover(subm_file_path, length) and
-			check_start_end_timestamp_within_length(subm_file_path, task, length, type) and
-			check_value_range(subm_file_path, task))
+			check_value_range(subm_file_path, task) and
+			check_start_end_timestamp_within_length(subm_file_path, task, length, type))
 
 	if task == "changepoint":
 		file_checks = (check_valid_tab(subm_file_path) and
@@ -378,7 +378,7 @@ def check_start_end_timestamp_within_length(file, task, length, type):
 
 			if len(invalid_point) > 0:
 				logger.error('Invalid file {}:'.format(file))
-				logger.error("The number of timestamp column in {} is larger than the number of length in file_info.tab".format(file))
+				logger.error("The value of timestamp column in {} is larger than the value of length in file_info.tab".format(file))
 				return False
 			
 		else:
@@ -396,7 +396,7 @@ def check_start_end_timestamp_within_length(file, task, length, type):
 
 			if len(invalid_point) > 0:
 				logger.error('Invalid file {}:'.format(file))
-				logger.error("The number of start/end column in {} is larger than the number of length in file_info.tab".format(file))
+				logger.error("The value of start/end column in {} is larger than the value of length in file_info.tab".format(file))
 				return False					
 
 	return True
