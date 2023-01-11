@@ -18,7 +18,9 @@ def score_nd_submission_dir_cli(args):
 		exit(1)
 
 	check_scoring_index_out_of_scope(args.reference_dir, scoring_index, "norms")
-	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "norms")
+	merge_ref_text_gap = int(args.merge_ref_text_gap)
+	merge_ref_time_gap = float(args.merge_ref_time_gap)
+	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "norms", text_gap = merge_ref_text_gap, time_gap = merge_ref_time_gap)
 	if args.norm_list_file:
 		ref = process_subset_norm_emotion(args.norm_list_file, ref)
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "norms")
@@ -52,7 +54,9 @@ def score_ed_submission_dir_cli(args):
 		exit(1)
 
 	check_scoring_index_out_of_scope(args.reference_dir, scoring_index, "emotions")
-	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "emotions")
+	merge_ref_text_gap = int(args.merge_ref_text_gap)
+	merge_ref_time_gap = float(args.merge_ref_time_gap)
+	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "emotions", text_gap = merge_ref_text_gap, time_gap = merge_ref_time_gap)
 	if args.emotion_list_file:
 		ref = process_subset_norm_emotion(args.emotion_list_file, ref)
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "emotions")
