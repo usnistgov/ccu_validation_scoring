@@ -135,7 +135,7 @@ def read_dedupe_file(path):
 
 	return df
 
-def get_raw_file_id_dict(file_ids, data_frame, class_type):
+def get_raw_file_id_dict(file_ids, data_frame, class_type, text_gap, time_gap):
 	"""
 		Generate a dictionary based on file_id
 		
@@ -154,13 +154,17 @@ def get_raw_file_id_dict(file_ids, data_frame, class_type):
 	for file_id in file_ids:
 		sorted_df = extract_df(data_frame, file_id) 
 		class_count_vote_dict = get_highest_vote_based_on_time(sorted_df, class_type)
-		# Check file type to determine the gap of merging
-		if list(sorted_df["type"])[0] == "text":
-			gap = 10
-		else:
-			gap = 1
 
-		vote_array_per_file = merge_vote_time_periods(class_count_vote_dict, gap)
+		# Check file type to determine the gap of merging
+		if list(sorted_df["type"])[0] == "text" and text_gap is not None:
+			vote_array_per_file = merge_vote_time_periods(class_count_vote_dict, text_gap)
+		if list(sorted_df["type"])[0] == "text" and text_gap is None:
+			vote_array_per_file = merge_vote_time_periods(class_count_vote_dict)		
+		if list(sorted_df["type"])[0] != "text" and time_gap is not None:
+			vote_array_per_file = merge_vote_time_periods(class_count_vote_dict, time_gap)
+		if list(sorted_df["type"])[0] != "text" and time_gap is None:
+			vote_array_per_file = merge_vote_time_periods(class_count_vote_dict)		
+
 		result_dict[file_id] = vote_array_per_file
 	return result_dict  
 		
@@ -284,7 +288,7 @@ def get_highest_vote_based_on_time(data_frame, class_type):
 
 	return emo_dict  
 	
-def merge_vote_time_periods(vote_dict, allowed_gap = 0):
+def merge_vote_time_periods(vote_dict, allowed_gap = None):
 	"""
 	Merge (time) periods if gap is allowed. allowed_gap is set to 0 by default
 	
@@ -306,9 +310,10 @@ def merge_vote_time_periods(vote_dict, allowed_gap = 0):
 		while i < len(time_array):
 			first_time_period = time_array[i]
 			current_time_period = time_array[i]
-			while i + 1 < len(time_array) and float(current_time_period['end']) + allowed_gap > float(time_array[i + 1]['start']):
-				i = i + 1
-				current_time_period = time_array[i]
+			if allowed_gap is not None:
+				while i + 1 < len(time_array) and float(current_time_period['end']) + allowed_gap > float(time_array[i + 1]['start']):
+					i = i + 1
+					current_time_period = time_array[i]
 			merged_time_array.append({'start': first_time_period['start'], 'end': current_time_period['end']})
 			i = i + 1
 		for item in merged_time_array:
@@ -457,7 +462,7 @@ def convert_valence_arousal_dict_df(result_dict, class_type):
 		result_df["Class_type"] = class_type
 		return result_df
 
-def preprocess_norm_emotion_reference_df(reference_df, class_type):
+def preprocess_norm_emotion_reference_df(reference_df, class_type, text_gap, time_gap):
 	"""
 	The wrapper of preprocess for norm/emotion dataframe 
 	"""
@@ -466,7 +471,7 @@ def preprocess_norm_emotion_reference_df(reference_df, class_type):
 	# Split input_file into parts based on file_id column
 	file_ids = get_unique_items_in_array(new_reference_df['file_id'])
 	# Generate file_id map for vote processing
-	result = get_raw_file_id_dict(file_ids, new_reference_df, class_type)
+	result = get_raw_file_id_dict(file_ids, new_reference_df, class_type, text_gap, time_gap)
 	# Convert the result dictionary into dataframe
 	result_df = convert_norm_emotion_dict_df(result, class_type)
 
@@ -487,7 +492,7 @@ def preprocess_valence_arousal_reference_df(reference_df, class_type):
 
 	return result_df
 
-def preprocess_reference_dir(ref_dir, scoring_index, task):
+def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap, time_gap):
 	"""
 	For each task, read and merge corresponding data file, segment file and index file
 	and then preprocess the merged data frame
@@ -506,7 +511,7 @@ def preprocess_reference_dir(ref_dir, scoring_index, task):
 		reference_df = data_df.merge(segment_df.merge(index_df))
 		reference_prune = check_remove_start_end_same(reference_df)
 		column_name = task.replace("s","")
-		ref = preprocess_norm_emotion_reference_df(reference_prune, column_name)
+		ref = preprocess_norm_emotion_reference_df(reference_prune, column_name, text_gap, time_gap)
 		ref.drop_duplicates(inplace = True)
 		ref_inter = ref.merge(index_df)
 		if len(ref_inter) > 0:

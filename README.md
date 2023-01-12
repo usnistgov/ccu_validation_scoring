@@ -229,14 +229,14 @@ CCU_scoring score-nd -s <norm_submission_directory> -m <norm_mapping_submission_
 CCU_scoring score-nd \
 -s test/pass_submissions/pass_submissions_LDC_reference_sample/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220815_164235 \
 -ref test/reference/LDC_reference_sample \
--i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
+-i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab
 
 # an example of ndmap scoring
 CCU_scoring score-nd \
 -s test/pass_submissions/pass_submissions_LDC_reference_sample/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220531_050236 \
 -m test/pass_submissions/pass_submissions_LDC_reference_sample/NDMAP/CCU_P1_TA1_NDMAP_NIST_mini-eval1_20220605_050236 \
 -ref test/reference/LDC_reference_sample \
--i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
+-i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab
 ```
 
 **Emotion Detection (ED) Scoring Subcommand**
@@ -268,7 +268,7 @@ CCU_scoring score-ed -s <emotion_submission_directory> -ref <reference_directory
 CCU_scoring score-ed \
 -s test/pass_submissions/pass_submissions_LDC_reference_sample/ED/CCU_P1_TA1_ED_NIST_mini-eval1_20220531_050236 \
 -ref test/reference/LDC_reference_sample \
--i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
+-i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.ED.scoring.index.tab
 ```
 
 **Valence Detection (VD) and Arousal Detection (AD) Scoring Subcommands**
@@ -297,13 +297,13 @@ CCU_scoring score-ad -s <arousal_submission_directory> -ref <reference_directory
 CCU_scoring score-vd \
 -s test/pass_submissions/pass_submissions_LDC_reference_sample/VD/CCU_P1_TA1_VD_NIST_mini-eval1_20220531_050236 \
 -ref test/reference/LDC_reference_sample \
--i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
+-i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.VD.scoring.index.tab
 
 # an example of ad scoring
 CCU_scoring score-ad \
 -s test/pass_submissions/pass_submissions_LDC_reference_sample/AD/CCU_P1_TA1_AD_NIST_mini-eval1_20220531_050236 \
 -ref test/reference/LDC_reference_sample \
--i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab
+-i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.AD.scoring.index.tab
 ```
 
 **Change Detection (CD) Scoring Subcommand**
@@ -335,7 +335,7 @@ CCU_scoring score-cd -s <change_submission_directory> -ref <reference_directory>
 CCU_scoring score-cd \
 -s test/pass_submissions/pass_submissions_LDC_reference_sample/CD/CCU_P1_TA1_CD_NIST_mini-eval1_20220531_050236 \
 -ref test/reference/LDC_reference_sample \
--i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab 
+-i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.CD.scoring.index.tab 
 ```
 ### Reference Statistics Computing Tool
 
@@ -356,7 +356,7 @@ python3 scripts/ccu_ref_analysis.py -r <reference_directory> -t <task_string> -i
 # an example of statistics computing
 python3 scripts/ccu_ref_analysis.py -r test/reference/LDC_reference_sample \
 -t norms \
--i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab \
+-i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab \
 -o tmp.tab
 ```
 
@@ -379,7 +379,7 @@ python3 scripts/generate_random_submission.py -ref <reference_directory> -t <tas
 # an example of statistics computing
 python3 scripts/generate_random_submission.py -ref test/reference/LDC_reference_sample \
 -t norms \
--i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.scoring.index.tab \
+-i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab \
 -o tmp
 ```
 
