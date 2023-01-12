@@ -68,8 +68,6 @@ def main():
     score_nd_parser.add_argument('-n', '--norm_list_file', type=str, required=False, help="Use to filter norm from scoring (REF)")
     score_nd_parser.add_argument("-t", "--iou_thresholds", nargs='?', default="0.2", help="A comma separated list of IoU thresholds.")
     score_nd_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output directory")
-    score_nd_parser.add_argument("-x", "--merge_ref_text_gap", nargs='?', default="10", help="merge reference text gap character")
-    score_nd_parser.add_argument("-a", "--merge_ref_time_gap", nargs='?', default="1", help="merge reference time gap second")
 
     score_nd_parser.set_defaults(func=score_submission.score_nd_submission_dir_cli)
 
@@ -80,8 +78,6 @@ def main():
     score_ed_parser.add_argument('-e', '--emotion_list_file', type=str, required=False, help="Use to filter emotion from scoring (REF)")
     score_ed_parser.add_argument("-t", "--iou_thresholds", nargs='?', default="0.2", help="A comma separated list of IoU thresholds.")
     score_ed_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output directory")
-    score_ed_parser.add_argument("-x", "--merge_ref_text_gap", nargs='?', default="10", help="merge reference text gap character")
-    score_ed_parser.add_argument("-a", "--merge_ref_time_gap", nargs='?', default="1", help="merge reference time gap second")
 
     score_ed_parser.set_defaults(func=score_submission.score_ed_submission_dir_cli)
 
