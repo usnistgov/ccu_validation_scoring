@@ -317,7 +317,7 @@ def merge_vote_time_periods(vote_dict, allowed_gap = None):
 			merged_time_array.append({'start': first_time_period['start'], 'end': current_time_period['end']})
 			i = i + 1
 		for item in merged_time_array:
-			result_array.append({'range': item, 'Class': key});
+			result_array.append({'range': item, 'Class': key})
 	
 	return sorted(result_array, key=lambda emo_range: float(emo_range['range']['start']))
 

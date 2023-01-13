@@ -70,6 +70,10 @@ def main():
     score_nd_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output directory")
     score_nd_parser.add_argument("-xR", "--merge_ref_text_gap", type=str, required=False, help="merge reference text gap character")
     score_nd_parser.add_argument("-aR", "--merge_ref_time_gap", type=str, required=False, help="merge reference time gap second")
+    score_nd_parser.add_argument("-xS", "--merge_sys_text_gap", type=str, required=False, help="merge system text gap character")
+    score_nd_parser.add_argument("-aS", "--merge_sys_time_gap", type=str, required=False, help="merge system time gap second")
+    score_nd_parser.add_argument("-lS", "--combine_sys_llrs", type=str, choices=['min_llr', 'max_llr'], required=False, help="choose min_llr or max_llr to combine system llrs for the system instances merging")
+    score_nd_parser.add_argument("-vS", "--merge_sys_label", type=str, choices=['class', 'status'], required=False, help="choose class or status to define how to handle the status labels for the system instances merging. class is to only use the class label to merge and status is to use the class and status label to merge")
 
 
     score_nd_parser.set_defaults(func=score_submission.score_nd_submission_dir_cli)
@@ -83,6 +87,10 @@ def main():
     score_ed_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output directory")
     score_ed_parser.add_argument("-xR", "--merge_ref_text_gap", type=str, required=False, help="merge reference text gap character")
     score_ed_parser.add_argument("-aR", "--merge_ref_time_gap", type=str, required=False, help="merge reference time gap second")
+    score_ed_parser.add_argument("-xS", "--merge_sys_text_gap", type=str, required=False, help="merge system text gap character")
+    score_ed_parser.add_argument("-aS", "--merge_sys_time_gap", type=str, required=False, help="merge system time gap second")
+    score_ed_parser.add_argument("-lS", "--combine_sys_llrs", type=str, choices=['min_llr', 'max_llr'], required=False, help="choose min_llr or max_llr to combine system llrs for the system instances merging")
+    score_ed_parser.add_argument("-vS", "--merge_sys_label", type=str, choices=['class', 'status'], required=False, help="choose class or status to define how to handle the status labels for the system instances merging. class is to only use the class label to merge and status is to use the class and status label to merge")
 
 
     score_ed_parser.set_defaults(func=score_submission.score_ed_submission_dir_cli)

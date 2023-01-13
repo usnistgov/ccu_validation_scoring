@@ -40,18 +40,30 @@ def score_nd_submission_dir_cli(args):
 	else:
 		mapping_df = None
 
-	thresholds = [float(i) for i in args.iou_thresholds.split(',')]
-	score_tad(ref, hyp, "norm", iou_thresholds=thresholds, output_dir=args.output_dir, mapping_df = mapping_df)
+	if args.merge_sys_text_gap:
+		merge_sys_text_gap = int(args.merge_sys_text_gap)
+	else:
+		merge_sys_text_gap = None
 
-	print("Alignment")
-	print("---------------")
-	print(open(os.path.join(args.output_dir, 'instance_alignment.tab')).read())
-	print("Class Scores")
-	print("---------------")
-	print(open(os.path.join(args.output_dir, 'scores_by_class.tab')).read())
-	print("Aggregated Scores")
-	print("-------------")
-	print(open(os.path.join(args.output_dir, 'scores_aggregated.tab')).read())
+	if args.merge_sys_time_gap:
+		merge_sys_time_gap = float(args.merge_sys_time_gap)
+	else:
+		merge_sys_time_gap = None
+
+	merged_hyp = merge_sys_instance(hyp, "norms", merge_sys_text_gap, merge_sys_time_gap, args.combine_sys_llrs, args.merge_sys_label)
+
+	thresholds = [float(i) for i in args.iou_thresholds.split(',')]
+	score_tad(ref, merged_hyp, "norm", iou_thresholds=thresholds, output_dir=args.output_dir, mapping_df = mapping_df)
+
+	# print("Alignment")
+	# print("---------------")
+	# print(open(os.path.join(args.output_dir, 'instance_alignment.tab')).read())
+	# print("Class Scores")
+	# print("---------------")
+	# print(open(os.path.join(args.output_dir, 'scores_by_class.tab')).read())
+	# print("Aggregated Scores")
+	# print("-------------")
+	# print(open(os.path.join(args.output_dir, 'scores_aggregated.tab')).read())
 
 
 def score_ed_submission_dir_cli(args):
@@ -79,18 +91,30 @@ def score_ed_submission_dir_cli(args):
 		ref = process_subset_norm_emotion(args.emotion_list_file, ref)
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "emotions")
 
+	if args.merge_sys_text_gap:
+		merge_sys_text_gap = int(args.merge_sys_text_gap)
+	else:
+		merge_sys_text_gap = None
+
+	if args.merge_sys_time_gap:
+		merge_sys_time_gap = float(args.merge_sys_time_gap)
+	else:
+		merge_sys_time_gap = None
+
+	merge_sys_instance(hyp, "emotions", merge_sys_text_gap, merge_sys_time_gap, args.combine_sys_llrs, args.merge_sys_label)
+
 	thresholds = [float(i) for i in args.iou_thresholds.split(',')]
 	score_tad(ref, hyp, "emotion", iou_thresholds=thresholds, output_dir=args.output_dir, mapping_df = None)
 
-	print("Alignment")
-	print("---------------")
-	print(open(os.path.join(args.output_dir, 'instance_alignment.tab')).read())
-	print("Class Scores")
-	print("---------------")
-	print(open(os.path.join(args.output_dir, 'scores_by_class.tab')).read())
-	print("Aggregated Scores")
-	print("-------------")
-	print(open(os.path.join(args.output_dir, 'scores_aggregated.tab')).read())
+	# print("Alignment")
+	# print("---------------")
+	# print(open(os.path.join(args.output_dir, 'instance_alignment.tab')).read())
+	# print("Class Scores")
+	# print("---------------")
+	# print(open(os.path.join(args.output_dir, 'scores_by_class.tab')).read())
+	# print("Aggregated Scores")
+	# print("-------------")
+	# print(open(os.path.join(args.output_dir, 'scores_aggregated.tab')).read())
 
 
 def score_vd_submission_dir_cli(args):
