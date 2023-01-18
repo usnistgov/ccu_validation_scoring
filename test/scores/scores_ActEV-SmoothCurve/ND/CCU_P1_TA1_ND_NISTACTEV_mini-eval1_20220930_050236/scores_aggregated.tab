@@ -1,3 +1,3 @@
 task	genre	metric	value	correctness_criteria
-nd	all	mAP	0.56	{iou>=0.2}
-nd	video	mAP	0.56	{iou>=0.2}
+nd	all	mAP	0.56	{iou=0.2}
+nd	video	mAP	0.56	{iou=0.2}

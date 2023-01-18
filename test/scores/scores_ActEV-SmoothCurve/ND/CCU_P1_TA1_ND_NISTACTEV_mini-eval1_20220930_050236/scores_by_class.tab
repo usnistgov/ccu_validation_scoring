@@ -1,3 +1,3 @@
 class	genre	metric	value	correctness_criteria
-closing	all	AP	0.56	{iou>=0.2}
-closing	video	AP	0.56	{iou>=0.2}
+closing	all	AP	0.56	{iou=0.2}
+closing	video	AP	0.56	{iou=0.2}

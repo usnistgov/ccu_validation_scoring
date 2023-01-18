@@ -492,7 +492,7 @@ def preprocess_valence_arousal_reference_df(reference_df, class_type):
 
 	return result_df
 
-def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap, time_gap):
+def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time_gap = None):
 	"""
 	For each task, read and merge corresponding data file, segment file and index file
 	and then preprocess the merged data frame

@@ -103,7 +103,7 @@ def test_run_score_submissions(dataset, system_input_index, system_dir, task, op
         
         for subdir in subdirs:            
             sys.argv[1:] = ["score-{}".format(task.lower()), "-ref", refdir,
-                            "-s", subdir, "-i", scoring_index_path, "-o", tmp_dir]
+                            "-s", subdir, "-i", scoring_index_path, "-o", tmp_dir, "-aR", "1.0", "-xR", "10"]
             ### Add opt2 if there
             if (opt2 != ''):
                 sys.argv.append("-n")
@@ -125,7 +125,7 @@ def test_run_score_submissions(dataset, system_input_index, system_dir, task, op
             assert (len(orig_system) == 1), "Error:  NDMAP system is not uniq"
                     
             sys.argv[1:] = ["score-nd", "-ref", refdir, "-s", orig_system[0],
-                            "-m", subdir, "-i", scoring_index_path, "-o", tmp_dir]
+                            "-m", subdir, "-i", scoring_index_path, "-o", tmp_dir, "-aR", "1.0", "-xR", "10"]
             ### Add opt2 if there
             if (opt2 != ''):
                 sys.argv.append("-n")

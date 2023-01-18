@@ -197,46 +197,54 @@ def merge_sys_time_periods(result_dict, llr_value, allowed_gap):
 				llr_merge = min(llr_list)
 			if llr_value == "max_llr":
 				llr_merge = max(llr_list)
-			merged_time_array.append({'start': first_time_period['start'], 'end': current_time_period['end'], 'status': "adhere", 'llr': llr_merge, 'type': first_time_period['type']})
+				merged_time_array.append({'start': first_time_period['start'], 'end': current_time_period['end'], 'llr': llr_merge, 'type': first_time_period['type']})
 			i = i + 1
 		for item in merged_time_array:
-			result_array.append({'content': item, 'Class': key})
-	return result_array
+			result_array.append({'content': item, 'group': key})
+		return result_array
 
 def get_result_dict(sorted_df, merge_label):
+
 	result_dict = {}
 	if merge_label == "class":
 		for i in sorted_df.Class.unique():
 			result_dict_list = []
 			sub_df = sorted_df.loc[sorted_df["Class"] == i].reset_index()
 			for j in range(sub_df.shape[0]):
-				result_dict_list.append({"start": sub_df.iloc[j]['start'], "end": sub_df.iloc[j]['end'], "status": sub_df.iloc[j]['status'], "llr": sub_df.iloc[j]['llr'], "type": sub_df.iloc[j]['type']})
+				result_dict_list.append({"start": sub_df.iloc[j]['start'], "end": sub_df.iloc[j]['end'], "llr": sub_df.iloc[j]['llr'], "type": sub_df.iloc[j]['type']})
 			result_dict[i] = result_dict_list
+	if merge_label == "class-status":
+		for i in list(sorted_df.groupby(["Class","status"]).groups.keys()):
+			result_dict_list = []
+			sub_df = sorted_df.loc[(sorted_df["Class"] == i[0]) & (sorted_df["status"] == i[1])].reset_index()
+			for j in range(sub_df.shape[0]):
+				result_dict_list.append({"start": sub_df.iloc[j]['start'], "end": sub_df.iloc[j]['end'], "llr": sub_df.iloc[j]['llr'], "type": sub_df.iloc[j]['type']})
+			result_dict[i] = result_dict_list
+
 	return result_dict
 
-def get_merged_dict(file_ids, data_frame, class_type, text_gap, time_gap, llr_value, merge_label):
+def get_merged_dict(file_ids, data_frame, text_gap, time_gap, llr_value, merge_label):
 
 	data_frame.set_index("file_id")
 	results_dict = {}
 	for file_id in file_ids:
 		sorted_df = extract_df(data_frame, file_id)
+		result_dict = get_result_dict(sorted_df, merge_label)
 
 		# Check file type to determine the gap of merging
 		if list(sorted_df["type"])[0] == "text" and text_gap is not None:
-			result_dict = get_result_dict(sorted_df, merge_label)
 			result_array = merge_sys_time_periods(result_dict, llr_value, text_gap)
 
 		if list(sorted_df["type"])[0] != "text" and time_gap is not None:
-			result_dict = get_result_dict(sorted_df, merge_label)
 			result_array = merge_sys_time_periods(result_dict, llr_value, time_gap)
 
 		results_dict[file_id] = result_array
 
 	# Convert the result dictionary into dataframe
-	merged_df = convert_merge_dict_df(results_dict)
+	merged_df = convert_merge_dict_df(results_dict, merge_label)
 	return merged_df
 
-def convert_merge_dict_df(results_dict):
+def convert_merge_dict_df(results_dict, merge_label):
 	"""
 	Convert dictionary of norm/emotion into a dataframe
 	"""
@@ -249,13 +257,18 @@ def convert_merge_dict_df(results_dict):
 	llrs = []
 	types = []
 
+	
 	for file_id in results_dict:
 		for segment in results_dict[file_id]:
 			file_ids.append(file_id)
 			starts.append(float(segment['content']['start']))
 			ends.append(float(segment['content']['end']))
-			Class.append(segment['Class'])
-			status.append(segment['content']['status'])
+			if merge_label == "class":
+				Class.append(segment['group'])
+				status.append("adhere")
+			if merge_label == "class-status":
+				Class.append(segment['group'][0])
+				status.append(segment['group'][1])
 			llrs.append(segment['content']['llr'])
 			types.append(segment['content']['type'])
 
@@ -270,7 +283,7 @@ def preprocess_submission_file(subm_dir, ref_dir, scoring_index, task):
 
 	return hyp_final
 
-def merge_sys_instance(hyp, class_type, text_gap, time_gap, llr_value, merge_label):
+def merge_sys_instance(hyp, text_gap, time_gap, llr_value, merge_label):
 
 	if text_gap is None and time_gap is None:
 		return hyp
@@ -278,7 +291,7 @@ def merge_sys_instance(hyp, class_type, text_gap, time_gap, llr_value, merge_lab
 	# Split input_file into parts based on file_id column
 	file_ids = get_unique_items_in_array(hyp['file_id'])
 	# Generate file_id map for vote processing
-	merged_df = get_merged_dict(file_ids, hyp, class_type, text_gap, time_gap, llr_value, merge_label)
+	merged_df = get_merged_dict(file_ids, hyp, text_gap, time_gap, llr_value, merge_label)
 
 	return merged_df
 

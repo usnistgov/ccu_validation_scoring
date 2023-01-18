@@ -284,7 +284,7 @@ def sumup_tad_system_level_scores(pr_iou_scores, iou_thresholds, class_type, out
         else:
             map_scores = pd.DataFrame([["NA","NA"]], columns=["genre","value"])
         
-        map_scores["correctness_criteria"] = "{iou>=%s}" % iout
+        map_scores["correctness_criteria"] = "{iou=%s}" % iout
         map_scores["metric"] = "mAP"
 
         if class_type == "norm":
@@ -307,7 +307,7 @@ def sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir):
         if prs["ap"].values[0] != "NA":
             prs.ap = prs.ap.round(3)
         prs["metric"] = "AP"        
-        prs["correctness_criteria"] = "{iou>=%s}" % iout
+        prs["correctness_criteria"] = "{iou=%s}" % iout
         prs = prs.rename(columns={'Class': 'class', 'type': 'genre', 'ap': 'value'})
         prs = prs[["class","genre","metric","value","correctness_criteria"]]
         prs_threshold = pd.concat([prs, prs_threshold])

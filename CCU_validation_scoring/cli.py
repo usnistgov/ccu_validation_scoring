@@ -1,12 +1,32 @@
 import argparse
-import logging
-
 from . import validate_submission
 from . import validate_reference
 from . import score_submission
 
 def print_package_version(args):
     print(__import__(__package__).__version__)
+
+def check_valid_argument_pair(args):
+
+    if "score_nd" in str(vars(args)['func']):
+        if not args.merge_sys_text_gap and not args.merge_sys_time_gap and not args.combine_sys_llrs and not args.merge_sys_label:
+            return True
+        if args.merge_sys_text_gap and args.merge_sys_time_gap and args.combine_sys_llrs and args.merge_sys_label:
+            return True
+        if args.merge_sys_text_gap and not args.merge_sys_time_gap and args.combine_sys_llrs and args.merge_sys_label:
+            return True
+        if not args.merge_sys_text_gap and args.merge_sys_time_gap and args.combine_sys_llrs and args.merge_sys_label:
+            return True
+    
+    if "score_ed" in str(vars(args)['func']):
+        if not args.merge_sys_text_gap and not args.merge_sys_time_gap and not args.combine_sys_llrs and not args.merge_sys_label:
+            return True
+        if args.merge_sys_text_gap and args.merge_sys_time_gap and args.combine_sys_llrs and args.merge_sys_label:
+            return True
+        if args.merge_sys_text_gap and not args.merge_sys_time_gap and args.combine_sys_llrs and args.merge_sys_label:
+            return True
+        if not args.merge_sys_text_gap and args.merge_sys_time_gap and args.combine_sys_llrs and args.merge_sys_label:
+            return True
 
 def main():
         
@@ -73,7 +93,7 @@ def main():
     score_nd_parser.add_argument("-xS", "--merge_sys_text_gap", type=str, required=False, help="merge system text gap character")
     score_nd_parser.add_argument("-aS", "--merge_sys_time_gap", type=str, required=False, help="merge system time gap second")
     score_nd_parser.add_argument("-lS", "--combine_sys_llrs", type=str, choices=['min_llr', 'max_llr'], required=False, help="choose min_llr or max_llr to combine system llrs for the system instances merging")
-    score_nd_parser.add_argument("-vS", "--merge_sys_label", type=str, choices=['class', 'status'], required=False, help="choose class or status to define how to handle the status labels for the system instances merging. class is to only use the class label to merge and status is to use the class and status label to merge")
+    score_nd_parser.add_argument("-vS", "--merge_sys_label", type=str, choices=['class', 'class-status'], required=False, help="choose class or class-status to define how to handle the adhere/violate labels for the system instances merging. class is to use the class label only to merge and class-status is to use the class and status label to merge")
 
 
     score_nd_parser.set_defaults(func=score_submission.score_nd_submission_dir_cli)
@@ -90,7 +110,7 @@ def main():
     score_ed_parser.add_argument("-xS", "--merge_sys_text_gap", type=str, required=False, help="merge system text gap character")
     score_ed_parser.add_argument("-aS", "--merge_sys_time_gap", type=str, required=False, help="merge system time gap second")
     score_ed_parser.add_argument("-lS", "--combine_sys_llrs", type=str, choices=['min_llr', 'max_llr'], required=False, help="choose min_llr or max_llr to combine system llrs for the system instances merging")
-    score_ed_parser.add_argument("-vS", "--merge_sys_label", type=str, choices=['class', 'status'], required=False, help="choose class or status to define how to handle the status labels for the system instances merging. class is to only use the class label to merge and status is to use the class and status label to merge")
+    score_ed_parser.add_argument("-vS", "--merge_sys_label", type=str, choices=['class'], required=False, help="provide class only to define how to handle the status labels for the system instances merging. class is to use the class label only to merge")
 
 
     score_ed_parser.set_defaults(func=score_submission.score_ed_submission_dir_cli)
@@ -123,6 +143,12 @@ def main():
 
 
     args = parser.parse_args()
+
+    if not check_valid_argument_pair(args):
+        if "score_nd" in str(vars(args)['func']):
+            score_nd_parser.error('The -xS or -aS argument requires the -lS and -vS')
+        if "score_ed" in str(vars(args)['func']):
+            score_ed_parser.error('The -xS or -aS argument requires the -lS and -vS')
 
     if hasattr(args, 'func') and args.func:    
         args.func(args)
