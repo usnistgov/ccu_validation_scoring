@@ -110,7 +110,7 @@ def test_run_score_submissions(dataset, system_input_index, system_dir, task, op
                 sys.argv.append(os.path.join(test_dir_path, opt2))
             run_scorer()
                 
-            for filename in ["scores_by_class.tab", "scores_aggregated.tab", "instance_alignment.tab"]:
+            for filename in ["scores_by_class.tab", "scores_aggregated.tab", "instance_alignment.tab", "scoring_parameters.tab"]:
                 tmp_file = os.path.join(tmp_dir, filename)
                 byte_compare_file(tmp_file,
                                   os.path.join(score_path, "scores_" + dataset, task, os.path.basename(subdir), filename))
@@ -132,7 +132,7 @@ def test_run_score_submissions(dataset, system_input_index, system_dir, task, op
                 sys.argv.append(os.path.join(test_dir_path, opt2))
             run_scorer()
             
-            for filename in ["scores_by_class.tab", "scores_aggregated.tab", "instance_alignment.tab"]:
+            for filename in ["scores_by_class.tab", "scores_aggregated.tab", "instance_alignment.tab", "scoring_parameters.tab"]:
                 tmp_file = os.path.join(tmp_dir, filename)
                 byte_compare_file(tmp_file,
                                   os.path.join(score_path, "scores_" + dataset, task, os.path.basename(subdir), filename))

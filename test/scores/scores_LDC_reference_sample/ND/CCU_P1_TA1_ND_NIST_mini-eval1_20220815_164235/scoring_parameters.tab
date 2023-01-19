@@ -1,0 +1,7 @@
+metric	value
+merge_ref_text_gap	10.0
+merge_ref_time_gap	1.0
+merge_sys_text_gap	None
+merge_sys_time_gap	None
+combine_sys_llrs	None
+merge_sys_label	None

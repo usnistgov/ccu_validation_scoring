@@ -187,21 +187,23 @@ def merge_sys_time_periods(result_dict, llr_value, allowed_gap):
 		while i < len(time_array):
 			first_time_period = time_array[i]
 			current_time_period = time_array[i]
+			llr_merge = time_array[i]["llr"]
 			llr_list = []
 			llr_list.append(time_array[i]["llr"])
 			while i + 1 < len(time_array) and float(current_time_period['end']) + allowed_gap > float(time_array[i + 1]['start']):
 				i = i + 1
 				llr_list.append(time_array[i]["llr"])
 				current_time_period = time_array[i]
-			if llr_value == "min_llr":
-				llr_merge = min(llr_list)
-			if llr_value == "max_llr":
-				llr_merge = max(llr_list)
-				merged_time_array.append({'start': first_time_period['start'], 'end': current_time_period['end'], 'llr': llr_merge, 'type': first_time_period['type']})
+				if llr_value == "min_llr":
+					llr_merge = min(llr_list)
+				if llr_value == "max_llr":
+					llr_merge = max(llr_list)
+			merged_time_array.append({'start': first_time_period['start'], 'end': current_time_period['end'], 'llr': llr_merge, 'type': first_time_period['type']})
 			i = i + 1
 		for item in merged_time_array:
 			result_array.append({'content': item, 'group': key})
-		return result_array
+
+	return result_array
 
 def get_result_dict(sorted_df, merge_label):
 
@@ -226,25 +228,34 @@ def get_result_dict(sorted_df, merge_label):
 def get_merged_dict(file_ids, data_frame, text_gap, time_gap, llr_value, merge_label):
 
 	data_frame.set_index("file_id")
-	results_dict = {}
+	final_df = pd.DataFrame()
 	for file_id in file_ids:
 		sorted_df = extract_df(data_frame, file_id)
-		result_dict = get_result_dict(sorted_df, merge_label)
 
 		# Check file type to determine the gap of merging
-		if list(sorted_df["type"])[0] == "text" and text_gap is not None:
-			result_array = merge_sys_time_periods(result_dict, llr_value, text_gap)
+		if list(sorted_df["type"])[0] == "text":
+			if text_gap is not None:
+				result_dict = get_result_dict(sorted_df, merge_label)
+				result_array = merge_sys_time_periods(result_dict, llr_value, text_gap)
+				merged_df = convert_merge_dict_df(file_id, result_array, merge_label)
+			else:
+				merged_df = sorted_df
 
-		if list(sorted_df["type"])[0] != "text" and time_gap is not None:
-			result_array = merge_sys_time_periods(result_dict, llr_value, time_gap)
+		if list(sorted_df["type"])[0] != "text":
+			if time_gap is not None:
+				result_dict = get_result_dict(sorted_df, merge_label)
+				result_array = merge_sys_time_periods(result_dict, llr_value, time_gap)
+				merged_df = convert_merge_dict_df(file_id, result_array, merge_label)
+			else:
+				merged_df = sorted_df
+		
+		merged_sorted_df = merged_df.sort_values(by=['Class','start','end'])
+		print(merged_sorted_df)
+		final_df = pd.concat([final_df,merged_sorted_df], ignore_index = True)
 
-		results_dict[file_id] = result_array
+	return final_df
 
-	# Convert the result dictionary into dataframe
-	merged_df = convert_merge_dict_df(results_dict, merge_label)
-	return merged_df
-
-def convert_merge_dict_df(results_dict, merge_label):
+def convert_merge_dict_df(file_id, results_array, merge_label):
 	"""
 	Convert dictionary of norm/emotion into a dataframe
 	"""
@@ -258,19 +269,18 @@ def convert_merge_dict_df(results_dict, merge_label):
 	types = []
 
 	
-	for file_id in results_dict:
-		for segment in results_dict[file_id]:
-			file_ids.append(file_id)
-			starts.append(float(segment['content']['start']))
-			ends.append(float(segment['content']['end']))
-			if merge_label == "class":
-				Class.append(segment['group'])
-				status.append("adhere")
-			if merge_label == "class-status":
-				Class.append(segment['group'][0])
-				status.append(segment['group'][1])
-			llrs.append(segment['content']['llr'])
-			types.append(segment['content']['type'])
+	for segment in results_array:
+		file_ids.append(file_id)
+		starts.append(float(segment['content']['start']))
+		ends.append(float(segment['content']['end']))
+		if merge_label == "class":
+			Class.append(segment['group'])
+			status.append("adhere")
+		if merge_label == "class-status":
+			Class.append(segment['group'][0])
+			status.append(segment['group'][1])
+		llrs.append(segment['content']['llr'])
+		types.append(segment['content']['type'])
 
 	result_df = pd.DataFrame({"file_id":file_ids,"Class":Class,"start":starts,"end":ends,"status":status,"llr":llrs,"type":types})
 	return result_df
@@ -450,3 +460,15 @@ def generate_all_fn_alignment_file(ref, task):
 		ref_new = ref_new[["class","file_id","eval","ref","sys","llr","parameters"]]
 
 	return ref_new
+
+def generate_scoring_parameter_file(output_dir, merge_ref_text_gap = None, merge_ref_time_gap = None, merge_sys_text_gap = None, merge_sys_time_gap = None, combine_sys_llrs = None, merge_sys_label = None):
+
+	sp_d = {'metric': ["merge_ref_text_gap", "merge_ref_time_gap", "merge_sys_text_gap", "merge_sys_time_gap", "combine_sys_llrs", "merge_sys_label"], 
+					'value': [merge_ref_text_gap, merge_ref_time_gap, merge_sys_text_gap, merge_sys_time_gap, combine_sys_llrs, merge_sys_label]}
+	sp_df = pd.DataFrame(data = sp_d)
+	sp_df = sp_df.replace(np.nan, "None")
+
+	sp_df.to_csv(os.path.join(output_dir, "scoring_parameters.tab"), sep = "\t", index = None)
+
+	
+

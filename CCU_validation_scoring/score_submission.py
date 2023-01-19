@@ -54,16 +54,17 @@ def score_nd_submission_dir_cli(args):
 
 	thresholds = [float(i) for i in args.iou_thresholds.split(',')]
 	score_tad(ref, merged_hyp, "norm", iou_thresholds=thresholds, output_dir=args.output_dir, mapping_df = mapping_df)
+	generate_scoring_parameter_file(args.output_dir, merge_ref_text_gap, merge_ref_time_gap, merge_sys_text_gap, merge_sys_time_gap, args.combine_sys_llrs, args.merge_sys_label)
 
-	print("Alignment")
-	print("---------------")
-	print(open(os.path.join(args.output_dir, 'instance_alignment.tab')).read())
-	print("Class Scores")
-	print("---------------")
-	print(open(os.path.join(args.output_dir, 'scores_by_class.tab')).read())
-	print("Aggregated Scores")
-	print("-------------")
-	print(open(os.path.join(args.output_dir, 'scores_aggregated.tab')).read())
+	# print("Alignment")
+	# print("---------------")
+	# print(open(os.path.join(args.output_dir, 'instance_alignment.tab')).read())
+	# print("Class Scores")
+	# print("---------------")
+	# print(open(os.path.join(args.output_dir, 'scores_by_class.tab')).read())
+	# print("Aggregated Scores")
+	# print("-------------")
+	# print(open(os.path.join(args.output_dir, 'scores_aggregated.tab')).read())
 
 
 def score_ed_submission_dir_cli(args):
@@ -105,6 +106,7 @@ def score_ed_submission_dir_cli(args):
 
 	thresholds = [float(i) for i in args.iou_thresholds.split(',')]
 	score_tad(ref, merged_hyp, "emotion", iou_thresholds=thresholds, output_dir=args.output_dir, mapping_df = None)
+	generate_scoring_parameter_file(args.output_dir, merge_ref_text_gap, merge_ref_time_gap, merge_sys_text_gap, merge_sys_time_gap, args.combine_sys_llrs, args.merge_sys_label)
 
 	print("Alignment")
 	print("---------------")
