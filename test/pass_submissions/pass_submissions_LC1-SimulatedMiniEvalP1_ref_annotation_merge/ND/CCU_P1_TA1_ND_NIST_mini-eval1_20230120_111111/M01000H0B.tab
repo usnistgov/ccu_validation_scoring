@@ -1,0 +1,8 @@
+file_id	norm	start	end	status	llr
+M01000H0B	002	0	30	adhere	0.8
+M01000H0B	002	40	70	adhere	0.8
+M01000H0B	002	120	200	violate	0.9
+M01000H0B	002	220	240	adhere	0.7
+M01000H0B	002	260	320	violate	0.8
+M01000H0B	002	370	420	adhere	0.6
+M01000H0B	002	430	490	violate	0.9

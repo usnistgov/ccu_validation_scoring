@@ -250,7 +250,6 @@ def get_merged_dict(file_ids, data_frame, text_gap, time_gap, llr_value, merge_l
 				merged_df = sorted_df
 		
 		merged_sorted_df = merged_df.sort_values(by=['Class','start','end'])
-		print(merged_sorted_df)
 		final_df = pd.concat([final_df,merged_sorted_df], ignore_index = True)
 
 	return final_df
@@ -461,14 +460,24 @@ def generate_all_fn_alignment_file(ref, task):
 
 	return ref_new
 
-def generate_scoring_parameter_file(output_dir, merge_ref_text_gap = None, merge_ref_time_gap = None, merge_sys_text_gap = None, merge_sys_time_gap = None, combine_sys_llrs = None, merge_sys_label = None):
+def generate_scoring_parameter_file(args):
 
-	sp_d = {'metric': ["merge_ref_text_gap", "merge_ref_time_gap", "merge_sys_text_gap", "merge_sys_time_gap", "combine_sys_llrs", "merge_sys_label"], 
-					'value': [merge_ref_text_gap, merge_ref_time_gap, merge_sys_text_gap, merge_sys_time_gap, combine_sys_llrs, merge_sys_label]}
+	metrics = []
+	values = []
+
+	for i in vars(args):
+		if i != 'func':
+			metrics.append(i)
+			values.append(vars(args)[i])		
+	
+	sp_d = {}
+	sp_d["metric"] = metrics
+	sp_d["value"] = values
+
 	sp_df = pd.DataFrame(data = sp_d)
 	sp_df = sp_df.replace(np.nan, "None")
 
-	sp_df.to_csv(os.path.join(output_dir, "scoring_parameters.tab"), sep = "\t", index = None)
+	sp_df.to_csv(os.path.join(args.output_dir, "scoring_parameters.tab"), sep = "\t", index = None)
 
 	
 

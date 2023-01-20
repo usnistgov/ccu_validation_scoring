@@ -1,0 +1,5 @@
+metric	value
+submission_dir	/Users/yny16/Downloads/CCU_validation_scoring/test/pass_submissions/pass_submissions_LDC_reference_sample/AD/CCU_P1_TA1_AD_NIST_mini-eval1_20220809_161036
+reference_dir	/Users/yny16/Downloads/CCU_validation_scoring/test/reference/LDC_reference_sample
+scoring_index_file	/Users/yny16/Downloads/CCU_validation_scoring/test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.AD.scoring.index.tab
+output_dir	/Users/yny16/Downloads/CCU_validation_scoring/test

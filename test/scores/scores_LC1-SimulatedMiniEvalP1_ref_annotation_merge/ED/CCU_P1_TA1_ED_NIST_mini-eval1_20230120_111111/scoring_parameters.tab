@@ -1,0 +1,13 @@
+metric	value
+submission_dir	/Users/yny16/Downloads/CCU_validation_scoring/test/pass_submissions/pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation_merge/ED/CCU_P1_TA1_ED_NIST_mini-eval1_20230120_111111
+reference_dir	/Users/yny16/Downloads/CCU_validation_scoring/test/reference/LC1-SimulatedMiniEvalP1_ref_annotation_merge
+scoring_index_file	/Users/yny16/Downloads/CCU_validation_scoring/test/reference/LC1-SimulatedMiniEvalP1_ref_annotation_merge/index_files/LC1-SimulatedMiniEvalP1.20220909.ED.scoring.index.tab
+emotion_list_file	None
+iou_thresholds	0.2
+output_dir	/Users/yny16/Downloads/CCU_validation_scoring/test
+merge_ref_text_gap	10
+merge_ref_time_gap	1.0
+merge_sys_text_gap	30
+merge_sys_time_gap	3
+combine_sys_llrs	min_llr
+merge_sys_label	class

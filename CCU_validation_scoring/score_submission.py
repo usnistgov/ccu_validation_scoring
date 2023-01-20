@@ -54,17 +54,17 @@ def score_nd_submission_dir_cli(args):
 
 	thresholds = [float(i) for i in args.iou_thresholds.split(',')]
 	score_tad(ref, merged_hyp, "norm", iou_thresholds=thresholds, output_dir=args.output_dir, mapping_df = mapping_df)
-	generate_scoring_parameter_file(args.output_dir, merge_ref_text_gap, merge_ref_time_gap, merge_sys_text_gap, merge_sys_time_gap, args.combine_sys_llrs, args.merge_sys_label)
+	generate_scoring_parameter_file(args)
 
-	# print("Alignment")
-	# print("---------------")
-	# print(open(os.path.join(args.output_dir, 'instance_alignment.tab')).read())
-	# print("Class Scores")
-	# print("---------------")
-	# print(open(os.path.join(args.output_dir, 'scores_by_class.tab')).read())
-	# print("Aggregated Scores")
-	# print("-------------")
-	# print(open(os.path.join(args.output_dir, 'scores_aggregated.tab')).read())
+	print("Alignment")
+	print("---------------")
+	print(open(os.path.join(args.output_dir, 'instance_alignment.tab')).read())
+	print("Class Scores")
+	print("---------------")
+	print(open(os.path.join(args.output_dir, 'scores_by_class.tab')).read())
+	print("Aggregated Scores")
+	print("-------------")
+	print(open(os.path.join(args.output_dir, 'scores_aggregated.tab')).read())
 
 
 def score_ed_submission_dir_cli(args):
@@ -106,7 +106,7 @@ def score_ed_submission_dir_cli(args):
 
 	thresholds = [float(i) for i in args.iou_thresholds.split(',')]
 	score_tad(ref, merged_hyp, "emotion", iou_thresholds=thresholds, output_dir=args.output_dir, mapping_df = None)
-	generate_scoring_parameter_file(args.output_dir, merge_ref_text_gap, merge_ref_time_gap, merge_sys_text_gap, merge_sys_time_gap, args.combine_sys_llrs, args.merge_sys_label)
+	generate_scoring_parameter_file(args)
 
 	print("Alignment")
 	print("---------------")
@@ -132,6 +132,7 @@ def score_vd_submission_dir_cli(args):
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "valence_continuous")
 
 	score_valence_arousal(ref, hyp, output_dir = args.output_dir, task = "valence_continuous")
+	generate_scoring_parameter_file(args)
 
 	print("Diarization")
 	print("---------------")
@@ -154,6 +155,7 @@ def score_ad_submission_dir_cli(args):
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "arousal_continuous")
 
 	score_valence_arousal(ref, hyp, output_dir = args.output_dir, task = "arousal_continuous")
+	generate_scoring_parameter_file(args)
 
 	print("Diarization")
 	print("---------------")
@@ -177,6 +179,7 @@ def score_cd_submission_dir_cli(args):
 	text_thresholds = [int(i) for i in args.delta_cp_text_thresholds.split(',')]
 	time_thresholds = [float(i) for i in args.delta_cp_time_thresholds.split(',')]
 	score_cp(ref, hyp, delta_cp_text_thresholds=text_thresholds, delta_cp_time_thresholds=time_thresholds, output_dir=args.output_dir)
+	generate_scoring_parameter_file(args)
 
 	print("Alignment")
 	print("---------------")

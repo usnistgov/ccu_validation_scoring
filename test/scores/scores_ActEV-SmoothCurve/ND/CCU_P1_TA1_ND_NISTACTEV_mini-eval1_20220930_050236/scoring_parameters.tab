@@ -1,5 +1,12 @@
 metric	value
-merge_ref_text_gap	10.0
+submission_dir	/Users/yny16/Downloads/CCU_validation_scoring/test/pass_submissions/pass_submissions_ActEV-SmoothCurve/ND/CCU_P1_TA1_ND_NISTACTEV_mini-eval1_20220930_050236
+reference_dir	/Users/yny16/Downloads/CCU_validation_scoring/test/reference/ActEV-SmoothCurve
+scoring_index_file	/Users/yny16/Downloads/CCU_validation_scoring/test/reference/ActEV-SmoothCurve/index_files/ActEV-SmoothCurve.ND.scoring.index.tab
+mapping_submission_dir	None
+norm_list_file	None
+iou_thresholds	0.2
+output_dir	/Users/yny16/Downloads/CCU_validation_scoring/test
+merge_ref_text_gap	10
 merge_ref_time_gap	1.0
 merge_sys_text_gap	None
 merge_sys_time_gap	None

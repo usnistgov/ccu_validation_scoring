@@ -1,0 +1,7 @@
+metric	value
+submission_dir	/Users/yny16/Downloads/CCU_validation_scoring/test/pass_submissions/pass_submissions_LDC_reference_sample/CD/CCU_P1_TA1_CD_NIST_mini-eval1_20220531_050236
+reference_dir	/Users/yny16/Downloads/CCU_validation_scoring/test/reference/LDC_reference_sample
+scoring_index_file	/Users/yny16/Downloads/CCU_validation_scoring/test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.CD.scoring.index.tab
+delta_cp_text_thresholds	100
+delta_cp_time_thresholds	10
+output_dir	/Users/yny16/Downloads/CCU_validation_scoring/test

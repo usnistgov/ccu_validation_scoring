@@ -1,0 +1,4 @@
+catalog_id	version	file_uid	data_type	url	lang_id_manual	wrapped_md5	unwrapped_md5	download_date	content_date	status_in_corpus	legacy_catalog_id	original_file_id	type	file_path	length
+LDC2022E11	V1.0	M010005NJ	.flac.ldcc	na	cmn	0e9942346f2972d73815ab63d2074efb	1c797fd8bd832fe4c7244a7b9b0aa2a7	na	na	present	LDC2015R18	VVC008300	audio	./data/audio/M010005NJ.flac.ldcc	50
+LDC2022E11	V1.0	M01000H0B	.ltf.xml	na	cmn	0e9942346f2972d73815ab63d2074efb	1c797fd8bd832fe4c7244a7b9b0aa2a7	na	na	present	LDC2015R18	VVC008300	text	./data/text/M01000H0B.ltf.xml	500
+LDC2022E11	V1.0	M01000G2T	.mp4.ldcc	na	cmn	0e9942346f2972d73815ab63d2074efb	1c797fd8bd832fe4c7244a7b9b0aa2a7	na	na	present	LDC2015R18	VVC008300	video	./data/video/M01000G2T.mp4.ldcc	50
