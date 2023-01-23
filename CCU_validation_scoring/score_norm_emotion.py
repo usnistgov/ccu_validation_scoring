@@ -163,7 +163,8 @@ def compute_average_precision_tad(ref, hyp, iou_thresholds=[0.2], task=None):
         ihyp.loc[~ihyp['start_ref'].isna() & (ihyp['IoU'] >= iout), ['tp', 'fp']] = [ 1, 0 ]
         # Mark TP as FP for duplicate ref matches at lower CS
         nhyp = ihyp.duplicated(subset = ['file_id', 'start_ref', 'end_ref', 'tp'], keep='first')
-        ihyp.loc[ihyp.loc[nhyp == True].index, ['tp', 'fp']] = [ 0, 1 ]      
+        ihyp.loc[ihyp.loc[nhyp == True].index, ['tp', 'fp']] = [ 0, 1 ]
+        ihyp.sort_values(["llr", "tp", "file_id"], ascending=[False, False, True], inplace=True)
         tp = np.cumsum(ihyp.tp).astype(float)
         fp = np.cumsum(ihyp.fp).astype(float)                 
         rec = (tp / npos).values

@@ -1,4 +1,4 @@
 task	genre	metric	value	correctness_criteria
-ed	all	mAP	0.519	{iou=0.2}
-ed	audio	mAP	0.396	{iou=0.2}
-ed	text	mAP	0.844	{iou=0.2}
+ed	all	mAP	0.639	{iou=0.2}
+ed	audio	mAP	0.479	{iou=0.2}
+ed	text	mAP	0.958	{iou=0.2}
