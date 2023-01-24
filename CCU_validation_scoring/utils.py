@@ -1,4 +1,5 @@
 import os
+import fnmatch
 import subprocess
 import logging
 import pandas as pd
@@ -469,10 +470,14 @@ def generate_scoring_parameter_file(args):
 	for i in vars(args):
 		if i != 'func':
 			metrics.append(i)
-			values.append(vars(args)[i])
+			Value = vars(args)[i]
+			if (fnmatch.fnmatch(i, "*_dir") or fnmatch.fnmatch(i, "*_file")) and Value is not None:
+				values.append(os.path.abspath(Value))
+			else:
+				values.append(Value)
 
 	metrics.append("git.commit")
-	
+
 	try:
 		lib_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../")
 		commit_id = subprocess.check_output(["git", "--git-dir="+ lib_path +".git", "show", "--oneline", "-s", "--no-abbrev-commit","--pretty=format:%H--%aI"]).strip()
