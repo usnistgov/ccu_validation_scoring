@@ -37,7 +37,8 @@ setup(name=PACKAGE_NAME,
         'pandas',
         'pathlib',
         'numpy',
-        'pytest'
+        'pytest',
+        'subprocess'
     ],
       version=CCU_validation_scoring.__version__,
       entry_points='''

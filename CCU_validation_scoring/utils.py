@@ -1,4 +1,5 @@
 import os
+import subprocess
 import logging
 import pandas as pd
 import numpy as np
@@ -468,8 +469,18 @@ def generate_scoring_parameter_file(args):
 	for i in vars(args):
 		if i != 'func':
 			metrics.append(i)
-			values.append(vars(args)[i])		
+			values.append(vars(args)[i])
+
+	metrics.append("git.commit")
 	
+	try:
+		lib_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../")
+		commit_id = subprocess.check_output(["git", "--git-dir="+ lib_path +".git", "show", "--oneline", "-s", "--no-abbrev-commit","--pretty=format:%H--%aI"]).strip()
+	except:
+		commit_id = "None"
+
+	values.append(commit_id)
+
 	sp_d = {}
 	sp_d["metric"] = metrics
 	sp_d["value"] = values
