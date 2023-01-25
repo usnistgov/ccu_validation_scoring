@@ -2,6 +2,6 @@ class	genre	metric	value	correctness_criteria
 joy	all	AP	0.833	{iou=0.2}
 joy	audio	AP	1.0	{iou=0.2}
 joy	text	AP	0.75	{iou=0.2}
-surprise	all	AP	0.688	{iou=0.2}
+surprise	all	AP	0.625	{iou=0.2}
 surprise	audio	AP	0.25	{iou=0.2}
 surprise	text	AP	1.0	{iou=0.2}

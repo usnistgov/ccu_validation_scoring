@@ -164,11 +164,21 @@ def compute_average_precision_tad(ref, hyp, iou_thresholds=[0.2], task=None):
         # Mark TP as FP for duplicate ref matches at lower CS
         nhyp = ihyp.duplicated(subset = ['file_id', 'start_ref', 'end_ref', 'tp'], keep='first')
         ihyp.loc[ihyp.loc[nhyp == True].index, ['tp', 'fp']] = [ 0, 1 ]
-        ihyp.sort_values(["llr", "tp", "file_id"], ascending=[False, False, True], inplace=True)
+        ihyp.sort_values(["llr", "file_id"], ascending=[False, True], inplace=True)
         tp = np.cumsum(ihyp.tp).astype(float)
-        fp = np.cumsum(ihyp.fp).astype(float)                 
-        rec = (tp / npos).values
-        prec = (tp / (tp + fp)).values
+        fp = np.cumsum(ihyp.fp).astype(float)
+
+        # after filtering 
+        ihyp["cum_tp"] = tp
+        ihyp["cum_fp"] = fp
+
+        fhyp = ihyp
+        thyp = fhyp.duplicated(subset = ['llr'], keep='last')
+        fhyp = fhyp.loc[thyp == False]
+                     
+        rec = (np.array(fhyp["cum_tp"]) / npos)
+        prec = (np.array(fhyp["cum_tp"]) / (np.array(fhyp["cum_tp"]) + np.array(fhyp["cum_fp"])))
+
         output[iout] = ap_interp(prec, rec), prec, rec
 
         ihyp = ihyp[["Class","type","tp","fp","file_id","start_ref","end_ref","start_hyp","end_hyp","IoU","llr"]]
