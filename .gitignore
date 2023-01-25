@@ -12,3 +12,4 @@ __pycache__/
 test/.swp**
 test/.DS_Store
 test/__pycache__/
+test/scoring_parameters.tab
