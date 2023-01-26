@@ -1,0 +1,5 @@
+task	genre	metric	value	correctness_criteria
+nd	all	mAP	0.64	{iou=0.2}
+nd	audio	mAP	0.562	{iou=0.2}
+nd	text	mAP	0.9	{iou=0.2}
+nd	video	mAP	0.569	{iou=0.2}
