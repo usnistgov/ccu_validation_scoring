@@ -40,6 +40,8 @@ def compute_stats(df):
 def main():
     parser = argparse.ArgumentParser(description="Compute some statistics on the reference data.")
     parser.add_argument('-r', '--ref-dir', type=str, required=True, help="path to the reference directory")
+    parser.add_argument("-xR", "--merge_ref_text_gap", type=str, required=False, help="merge reference text gap character")
+    parser.add_argument("-aR", "--merge_ref_time_gap", type=str, required=False, help="merge reference time gap second")
     parser.add_argument('-t', '--task', choices=['norms', 'emotions'], required=True, help = 'norms, emotions')
     parser.add_argument('-i', '--scoring-index-file', type=str, required=True, help='use to filter file from scoring (REF)')
     parser.add_argument('-o', '--output-file', type=str, required=True, help='file where the statistics will be output')    
@@ -56,7 +58,17 @@ def main():
         print('ERROR:GENERATING:{} is not a valid scoring index file'.format(scoring_index_file))
         exit(1)
 
-    ref = preprocess_reference_dir(ref_dir, scoring_index, task)
+    if args.merge_ref_text_gap:
+        merge_ref_text_gap = int(args.merge_ref_text_gap)
+    else:
+        merge_ref_text_gap = None
+    
+    if args.merge_ref_time_gap:
+        merge_ref_time_gap = float(args.merge_ref_time_gap)
+    else:
+        merge_ref_time_gap = None
+
+    ref = preprocess_reference_dir(ref_dir, scoring_index, task, merge_ref_text_gap, merge_ref_time_gap)
 
     stats = compute_stats(ref)
     stats.to_csv(output_file, sep='\t', index=False, float_format='%.2f')

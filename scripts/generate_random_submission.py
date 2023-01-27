@@ -78,7 +78,7 @@ def write_submission_record(stats, genre, length, i, j, task_column):
 
 	return submission_record
 
-def generate_random_submission(task, reference_dir, scoring_index_file, output_dir):
+def generate_random_submission(task, reference_dir, scoring_index_file, output_dir, text_gap, time_gap):
 
 	try:
 		scoring_index = pd.read_csv(scoring_index_file, usecols = ['file_id'], sep = "\t")
@@ -86,7 +86,7 @@ def generate_random_submission(task, reference_dir, scoring_index_file, output_d
 		logger.error('ERROR:GENERATING:{} is not a valid scoring index file'.format(scoring_index_file))
 		exit(1)
 
-	ref = preprocess_reference_dir(reference_dir, scoring_index, task)
+	ref = preprocess_reference_dir(reference_dir, scoring_index, task, text_gap, time_gap)
 	stats = ccu_ref_analysis.compute_stats(ref)
 	stats_pruned = stats[["class","genre","mean","stdev"]]
 	stats_pruned = stats_pruned.loc[stats_pruned["class"] != silence_string]
@@ -129,11 +129,24 @@ def main():
 	parser = argparse.ArgumentParser(description='Generate a random norm/emotion submission')
 	parser.add_argument('-t', '--task', choices=['norms', 'emotions'], required=True, help = 'norms, emotions')
 	parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
+	parser.add_argument("-xR", "--merge_ref_text_gap", type=str, required=False, help="merge reference text gap character")
+	parser.add_argument("-aR", "--merge_ref_time_gap", type=str, required=False, help="merge reference time gap second")
 	parser.add_argument('-i','--scoring-index-file', type=str, required=True, help='Use to filter file from scoring (REF)')
 	parser.add_argument("-o", "--output_dir", type=str, required=True, help="Output directory")
 
 	args = parser.parse_args()
-	generate_random_submission(args.task, args.reference_dir, args.scoring_index_file, args.output_dir)
+
+	if args.merge_ref_text_gap:
+		merge_ref_text_gap = int(args.merge_ref_text_gap)
+	else:
+		merge_ref_text_gap = None
+
+	if args.merge_ref_time_gap:
+		merge_ref_time_gap = float(args.merge_ref_time_gap)
+	else:
+		merge_ref_time_gap = None
+
+	generate_random_submission(args.task, args.reference_dir, args.scoring_index_file, args.output_dir, merge_ref_text_gap, merge_ref_time_gap)
 
 if __name__ == '__main__':
 	main()

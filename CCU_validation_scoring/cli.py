@@ -11,22 +11,29 @@ def check_valid_argument_pair(args):
     if "score_nd" in str(vars(args)['func']):
         if not args.merge_sys_text_gap and not args.merge_sys_time_gap and not args.combine_sys_llrs and not args.merge_sys_label:
             return True
-        if args.merge_sys_text_gap and args.merge_sys_time_gap and args.combine_sys_llrs and args.merge_sys_label:
+        elif args.merge_sys_text_gap and args.merge_sys_time_gap and args.combine_sys_llrs and args.merge_sys_label:
             return True
-        if args.merge_sys_text_gap and not args.merge_sys_time_gap and args.combine_sys_llrs and args.merge_sys_label:
+        elif args.merge_sys_text_gap and not args.merge_sys_time_gap and args.combine_sys_llrs and args.merge_sys_label:
             return True
-        if not args.merge_sys_text_gap and args.merge_sys_time_gap and args.combine_sys_llrs and args.merge_sys_label:
+        elif not args.merge_sys_text_gap and args.merge_sys_time_gap and args.combine_sys_llrs and args.merge_sys_label:
             return True
-    
-    if "score_ed" in str(vars(args)['func']):
+        else:
+            return False
+
+    elif "score_ed" in str(vars(args)['func']):
         if not args.merge_sys_text_gap and not args.merge_sys_time_gap and not args.combine_sys_llrs and not args.merge_sys_label:
             return True
-        if args.merge_sys_text_gap and args.merge_sys_time_gap and args.combine_sys_llrs and args.merge_sys_label:
+        elif args.merge_sys_text_gap and args.merge_sys_time_gap and args.combine_sys_llrs and args.merge_sys_label:
             return True
-        if args.merge_sys_text_gap and not args.merge_sys_time_gap and args.combine_sys_llrs and args.merge_sys_label:
+        elif args.merge_sys_text_gap and not args.merge_sys_time_gap and args.combine_sys_llrs and args.merge_sys_label:
             return True
-        if not args.merge_sys_text_gap and args.merge_sys_time_gap and args.combine_sys_llrs and args.merge_sys_label:
+        elif not args.merge_sys_text_gap and args.merge_sys_time_gap and args.combine_sys_llrs and args.merge_sys_label:
             return True
+        else:
+            return False
+
+    else:
+        return True
 
 def main():
         

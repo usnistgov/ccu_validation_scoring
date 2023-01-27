@@ -86,6 +86,7 @@ def reference_statistic(reference_dir, scoring_index, task):
 	unique_file_count_result = unique_file_count(system_input_index_df)
 	print("The number of unique files in reference: {}".format(unique_file_count_result))
 	ref = preprocess_reference_dir(reference_dir, scoring_index, task)
+	print(ref)
 	unique_file_count_annotation_result = unique_file_count(ref)
 	print("The number of unique files in reference for {} scoring: {}".format(task, unique_file_count_annotation_result))
 	ref_noann_prune = ref[(ref['Class'] != "noann")]
@@ -119,9 +120,6 @@ def reference_statistic(reference_dir, scoring_index, task):
 		ref_noann_prune_copy['total_seconds/characters'] = ref_noann_prune_copy.apply(generate_diff, axis=1)
 		type_time_sum_result = type_time_sum(ref_noann_prune_copy)
 		print(type_time_sum_result)
-
-	# if task == "changepoint":
-	# 	print(ref_noann_prune)
 
 def submission_statistic(submission_dir, reference_dir, scoring_index, task):
 
@@ -161,9 +159,6 @@ def submission_statistic(submission_dir, reference_dir, scoring_index, task):
 		hyp_copy['total_seconds/characters'] = hyp_copy.apply(generate_diff, axis=1)
 		type_time_sum_result = type_time_sum(hyp_copy)
 		print(type_time_sum_result)
-
-	# if task == "changepoint":
-	# 	print(hyp)
 
 def main():
 
