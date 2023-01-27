@@ -159,12 +159,23 @@ def compute_average_precision_cps(ref, hyp, delta_cp_thresholds):
         # Mark TP as FP for duplicate ref matches at lower CS
         nhyp = ihyp.duplicated(subset = ['file_id', 'Class_ref', 'tp'], keep='first')
         ihyp.loc[ihyp.loc[nhyp == True].index, ['tp', 'fp']] = [ 0, 1 ]
+        ihyp.sort_values(["llr", "file_id"], ascending=[False, True], inplace=True)
         tp = np.cumsum(ihyp.tp).astype(float)
-        fp = np.cumsum(ihyp.fp).astype(float)                  
-        rec = (tp / npos).values
-        prec = (tp / (tp + fp)).values
-        output[iout] = ap_interp(prec, rec), prec, rec 
-        
+        fp = np.cumsum(ihyp.fp).astype(float)
+                  
+        # after filtering 
+        ihyp["cum_tp"] = tp
+        ihyp["cum_fp"] = fp
+
+        fhyp = ihyp
+        thyp = fhyp.duplicated(subset = ['llr'], keep='last')
+        fhyp = fhyp.loc[thyp == False]
+                     
+        rec = (np.array(fhyp["cum_tp"]) / npos)
+        prec = (np.array(fhyp["cum_tp"]) / (np.array(fhyp["cum_tp"]) + np.array(fhyp["cum_fp"])))
+
+        output[iout] = ap_interp(prec, rec), prec, rec
+
         ihyp = ihyp[["tp","fp","file_id","type","Class_ref","Class_hyp","delta_cp","llr"]]
         alignment_df = pd.concat([alignment_df, ihyp])
     final_alignment_df = generate_alignment_file(ref.loc[ref.Class != 'NO_SCORE_REGION'], alignment_df, "changepoint")
@@ -241,7 +252,7 @@ def write_type_level_scores(output_dir, results, delta_cp_text_thresholds, delta
     type_level_scores = pd.DataFrame()
     for cp in delta_cp_text_thresholds + delta_cp_time_thresholds:
         result_cp = results[cp]
-        result_cp["correctness_criteria"] = "{delta_cp<=" + str(cp) + "}"
+        result_cp["correctness_criteria"] = "{delta_cp=" + str(cp) + "}"
         result_cp.rename(columns={'ap': 'value', 'type': 'genre'}, inplace = True)
         result_cp['metric'] = 'AP'
         result_cp["class"] = 'cp'

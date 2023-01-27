@@ -3,6 +3,7 @@ import pandas as pd
 import logging
 from .preprocess_reference import *
 from .utils import *
+from .build_statistic import *
 from .score_norm_emotion import score_tad
 from .score_valence_arousal import *
 from .score_changepoint import *
@@ -53,6 +54,10 @@ def score_nd_submission_dir_cli(args):
 	merged_hyp = merge_sys_instance(hyp, merge_sys_text_gap, merge_sys_time_gap, args.combine_sys_llrs, args.merge_sys_label)
 
 	thresholds = [float(i) for i in args.iou_thresholds.split(',')]
+
+	reference_statistic(args.reference_dir, ref, "norms")
+	submission_statistic(args.submission_dir, merged_hyp, "norms")
+
 	score_tad(ref, merged_hyp, "norm", iou_thresholds=thresholds, output_dir=args.output_dir, mapping_df = mapping_df)
 	generate_scoring_parameter_file(args)
 
@@ -105,6 +110,10 @@ def score_ed_submission_dir_cli(args):
 	merged_hyp = merge_sys_instance(hyp, merge_sys_text_gap, merge_sys_time_gap, args.combine_sys_llrs, args.merge_sys_label)
 
 	thresholds = [float(i) for i in args.iou_thresholds.split(',')]
+
+	reference_statistic(args.reference_dir, ref, "emotions")
+	submission_statistic(args.submission_dir, merged_hyp, "emotions")
+
 	score_tad(ref, merged_hyp, "emotion", iou_thresholds=thresholds, output_dir=args.output_dir, mapping_df = None)
 	generate_scoring_parameter_file(args)
 
@@ -131,8 +140,11 @@ def score_vd_submission_dir_cli(args):
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "valence_continuous")
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "valence_continuous")
 
+	reference_statistic(args.reference_dir, ref, "valence_continuous")
+	submission_statistic(args.submission_dir, hyp, "valence_continuous")
+
 	score_valence_arousal(ref, hyp, output_dir = args.output_dir, task = "valence_continuous")
-	generate_scoring_parameter_file(args)
+	generate_scoring_parameter_file(args)	
 
 	print("Diarization")
 	print("---------------")
@@ -154,8 +166,11 @@ def score_ad_submission_dir_cli(args):
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "arousal_continuous")
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "arousal_continuous")
 
+	reference_statistic(args.reference_dir, ref, "arousal_continuous")
+	submission_statistic(args.submission_dir, hyp, "arousal_continuous")
+
 	score_valence_arousal(ref, hyp, output_dir = args.output_dir, task = "arousal_continuous")
-	generate_scoring_parameter_file(args)
+	generate_scoring_parameter_file(args)	
 
 	print("Diarization")
 	print("---------------")
@@ -178,6 +193,10 @@ def score_cd_submission_dir_cli(args):
 
 	text_thresholds = [int(i) for i in args.delta_cp_text_thresholds.split(',')]
 	time_thresholds = [float(i) for i in args.delta_cp_time_thresholds.split(',')]
+
+	reference_statistic(args.reference_dir, ref, "changepoint")
+	submission_statistic(args.submission_dir, hyp, "changepoint")
+
 	score_cp(ref, hyp, delta_cp_text_thresholds=text_thresholds, delta_cp_time_thresholds=time_thresholds, output_dir=args.output_dir)
 	generate_scoring_parameter_file(args)
 

@@ -1,7 +1,5 @@
 import os,glob
-import argparse
 import pandas as pd
-from CCU_validation_scoring.preprocess_reference import *
 
 global_known_norm_list = ["101","102","103","104","105"]
 global_hidden_norm_list = ["106","107"]
@@ -78,15 +76,13 @@ def unique_class(df):
 	Class = sorted(list(df.Class.unique()))
 	return Class
 
-def reference_statistic(reference_dir, scoring_index, task):
+def reference_statistic(reference_dir, ref, task):
 
 	system_input_index_file_path = os.path.join(reference_dir, "index_files", "*system_input.index.tab")
 	system_input_index_file_path = glob.glob(system_input_index_file_path)[0]
 	system_input_index_df = pd.read_csv(system_input_index_file_path, sep='\t')
 	unique_file_count_result = unique_file_count(system_input_index_df)
 	print("The number of unique files in reference: {}".format(unique_file_count_result))
-	ref = preprocess_reference_dir(reference_dir, scoring_index, task)
-	print(ref)
 	unique_file_count_annotation_result = unique_file_count(ref)
 	print("The number of unique files in reference for {} scoring: {}".format(task, unique_file_count_annotation_result))
 	ref_noann_prune = ref[(ref['Class'] != "noann")]
@@ -121,13 +117,12 @@ def reference_statistic(reference_dir, scoring_index, task):
 		type_time_sum_result = type_time_sum(ref_noann_prune_copy)
 		print(type_time_sum_result)
 
-def submission_statistic(submission_dir, reference_dir, scoring_index, task):
+def submission_statistic(submission_dir, hyp, task):
 
 	index_file_path = os.path.join(submission_dir, "system_output.index.tab")
 	index_df = pd.read_csv(index_file_path, dtype={'message': object}, sep='\t')
 	unique_file_count_result = unique_file_count(index_df)
 	print("The number of unique files in submission: {}".format(unique_file_count_result))
-	hyp = preprocess_submission_file(submission_dir, reference_dir, scoring_index, task)
 	unique_file_count_annotation_result = unique_file_count(hyp)
 	print("The number of unique files in submission for {} scoring: {}".format(task, unique_file_count_annotation_result))
 	print("The number of segments in submission for {} scoring: {}".format(task, len(hyp)))
@@ -159,21 +154,3 @@ def submission_statistic(submission_dir, reference_dir, scoring_index, task):
 		hyp_copy['total_seconds/characters'] = hyp_copy.apply(generate_diff, axis=1)
 		type_time_sum_result = type_time_sum(hyp_copy)
 		print(type_time_sum_result)
-
-def main():
-
-	parser = argparse.ArgumentParser(description='generate statistic for reference or submission')
-	parser.add_argument('-r','--reference-dir', type=str, required=True, help='reference-dir')
-	parser.add_argument('-s','--submission-dir', type=str, help='submission-dir')
-	parser.add_argument('-i','--scoring-index-file', type=str, required=True, help='Use to filter file from scoring')
-	parser.add_argument('-t','--task', choices=['norms', 'emotions', 'valence_continuous', 'arousal_continuous', 'changepoint'], required=True, help = 'norms, emotions, valence_continuous, arousal_continuous, changepoint')
-	args = parser.parse_args()
-
-	scoring_index = pd.read_csv(args.scoring_index_file, usecols = ['file_id'], sep = "\t")
-	if not args.submission_dir:
-		reference_statistic(args.reference_dir, scoring_index, args.task)
-	if args.submission_dir and args.reference_dir:
-		submission_statistic(args.submission_dir, args.reference_dir, scoring_index, args.task)	
-
-if __name__ == '__main__':
-	main()

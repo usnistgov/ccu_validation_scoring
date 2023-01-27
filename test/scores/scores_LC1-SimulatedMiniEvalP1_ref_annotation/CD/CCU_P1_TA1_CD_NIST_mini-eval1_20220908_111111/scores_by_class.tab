@@ -1,4 +1,4 @@
 class	genre	metric	value	correctness_criteria
-cp	audio	AP	1.0	{delta_cp<=10.0}
-cp	text	AP	0.5	{delta_cp<=100}
-cp	video	AP	0.6666666666666666	{delta_cp<=10.0}
+cp	audio	AP	1.0	{delta_cp=10.0}
+cp	text	AP	0.5	{delta_cp=100}
+cp	video	AP	0.6666666666666666	{delta_cp=10.0}
