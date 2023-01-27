@@ -1,0 +1,25 @@
+class	file_id	eval	ref	sys	llr	parameters
+001	M010005NJ	unmapped	{}	{start=1,end=4}	0.6	{}
+001	M010005NJ	mapped	{start=0,end=15}	{start=6,end=10}	0.8	{iou=0.267}
+001	M010005NJ	unmapped	{}	{start=12,end=16}	0.9	{}
+001	M010005NJ	mapped	{start=20,end=27}	{start=23,end=31}	0.9	{iou=0.364}
+001	M010005NJ	unmapped	{start=36.8,end=41}	{}		{}
+001	M010005NJ	unmapped	{}	{start=43,end=47}	0.7	{}
+001	M010005NJ	mapped	{start=44,end=50}	{start=48,end=50}	0.9	{iou=0.333}
+002	M01000G2T	unmapped	{}	{start=1,end=4}	0.6	{}
+002	M01000G2T	unmapped	{}	{start=6,end=10}	0.5	{}
+002	M01000G2T	unmapped	{}	{start=10.5,end=15}	0.4	{}
+002	M01000G2T	mapped	{start=0,end=20}	{start=15.5,end=21}	0.9	{iou=0.214}
+002	M01000G2T	unmapped	{}	{start=23.5,end=27}	0.8	{}
+002	M01000G2T	mapped	{start=25.5,end=30}	{start=28,end=32}	0.9	{iou=0.308}
+002	M01000G2T	unmapped	{start=31,end=35}	{}		{}
+002	M01000G2T	mapped	{start=36,end=40}	{start=36,end=40}	0.6	{iou=1.000}
+002	M01000G2T	mapped	{start=42,end=45}	{start=44,end=47}	0.7	{iou=0.200}
+002	M01000G2T	unmapped	{start=46,end=49}	{}		{}
+002	M01000H0B	mapped	{start=0,end=70}	{start=0,end=30}	0.8	{iou=0.429}
+002	M01000H0B	unmapped	{}	{start=40,end=70}	0.8	{}
+002	M01000H0B	mapped	{start=80,end=150}	{start=120,end=200}	0.9	{iou=0.250}
+002	M01000H0B	mapped	{start=220,end=280}	{start=220,end=240}	0.7	{iou=0.333}
+002	M01000H0B	mapped	{start=290,end=350}	{start=260,end=320}	0.8	{iou=0.333}
+002	M01000H0B	unmapped	{}	{start=370,end=420}	0.6	{}
+002	M01000H0B	mapped	{start=360,end=500}	{start=430,end=490}	0.9	{iou=0.429}
