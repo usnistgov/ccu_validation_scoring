@@ -100,7 +100,7 @@ def test_run_score_submissions(dataset, system_input_index, system_dir, task, op
             run_scorer()
 
 #            for filename in ["scores_aggregated.tab", "segment_diarization.tab"]:
-            for filename in ["segment_diarization.tab"]:                
+            for filename in ["segment_diarization.tab", "statistics_aggregated.tab"]:                
                 tmp_file = os.path.join(tmp_dir, filename)
                 tmp_out_dir_name = os.path.basename(subdir) + ('' if (score_tag == '') else '-' + score_tag)
                 byte_compare_file(tmp_file,
@@ -123,7 +123,7 @@ def test_run_score_submissions(dataset, system_input_index, system_dir, task, op
                 sys.argv.extend(opt3.split())
             run_scorer()
                 
-            for filename in ["scores_by_class.tab", "scores_aggregated.tab", "instance_alignment.tab"]:
+            for filename in ["scores_by_class.tab", "scores_aggregated.tab", "instance_alignment.tab", "statistics_by_class.tab", "statistics_aggregated.tab"]:
                 tmp_file = os.path.join(tmp_dir, filename)
                 tmp_out_dir_name = os.path.basename(subdir) + ('' if (score_tag == '') else '-' + score_tag)
                 byte_compare_file(tmp_file,
@@ -146,7 +146,7 @@ def test_run_score_submissions(dataset, system_input_index, system_dir, task, op
                 sys.argv.append(os.path.join(test_dir_path, opt2))
             run_scorer()
             
-            for filename in ["scores_by_class.tab", "scores_aggregated.tab", "instance_alignment.tab"]:
+            for filename in ["scores_by_class.tab", "scores_aggregated.tab", "instance_alignment.tab", "statistics_by_class.tab", "statistics_aggregated.tab"]:
                 tmp_file = os.path.join(tmp_dir, filename)
                 tmp_out_dir_name = os.path.basename(subdir) + ('' if (score_tag == '') else '-' + score_tag)
                 byte_compare_file(tmp_file,
@@ -161,7 +161,7 @@ def test_run_score_submissions(dataset, system_input_index, system_dir, task, op
 
             run_scorer()
                 
-            for filename in ["scores_by_class.tab", "instance_alignment.tab"]:
+            for filename in ["scores_by_class.tab", "instance_alignment.tab", "statistics_by_class.tab", "statistics_aggregated.tab"]:
                 tmp_file = os.path.join(tmp_dir, filename)
                 tmp_out_dir_name = os.path.basename(subdir) + ('' if (score_tag == '') else '-' + score_tag)
                 byte_compare_file(tmp_file,

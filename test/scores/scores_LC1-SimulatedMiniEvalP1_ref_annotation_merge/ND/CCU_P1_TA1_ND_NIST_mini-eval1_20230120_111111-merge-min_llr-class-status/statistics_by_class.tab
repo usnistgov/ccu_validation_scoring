@@ -1,0 +1,11 @@
+data	class	genre	metric	value
+ref	001	audio	instance_counts	4
+ref	002	text	instance_counts	5
+ref	002	video	instance_counts	6
+sys	001	audio	instance_counts	6
+sys	002	text	instance_counts	6
+sys	002	video	instance_counts	8
+sys	AAA	audio	instance_counts	6
+sys	BBB	audio	instance_counts	6
+sys	CCC	audio	instance_counts	6
+sys	DDD	audio	instance_counts	6

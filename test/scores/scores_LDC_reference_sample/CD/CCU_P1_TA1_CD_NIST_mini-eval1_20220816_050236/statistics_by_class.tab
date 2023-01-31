@@ -1,0 +1,5 @@
+data	class	genre	metric	value
+ref	cp	audio	instance_counts	2
+ref	cp	text	instance_counts	2
+ref	cp	video	instance_counts	1
+sys	cp	video	instance_counts	1

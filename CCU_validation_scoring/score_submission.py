@@ -55,8 +55,7 @@ def score_nd_submission_dir_cli(args):
 
 	thresholds = [float(i) for i in args.iou_thresholds.split(',')]
 
-	reference_statistic(args.reference_dir, ref, "norms")
-	submission_statistic(args.submission_dir, merged_hyp, "norms")
+	statistic(args.reference_dir, ref, args.submission_dir, merged_hyp, args.output_dir, "norms")
 
 	score_tad(ref, merged_hyp, "norm", iou_thresholds=thresholds, output_dir=args.output_dir, mapping_df = mapping_df)
 	generate_scoring_parameter_file(args)
@@ -111,8 +110,7 @@ def score_ed_submission_dir_cli(args):
 
 	thresholds = [float(i) for i in args.iou_thresholds.split(',')]
 
-	reference_statistic(args.reference_dir, ref, "emotions")
-	submission_statistic(args.submission_dir, merged_hyp, "emotions")
+	statistic(args.reference_dir, ref, args.submission_dir, merged_hyp, args.output_dir, "emotions")
 
 	score_tad(ref, merged_hyp, "emotion", iou_thresholds=thresholds, output_dir=args.output_dir, mapping_df = None)
 	generate_scoring_parameter_file(args)
@@ -140,8 +138,7 @@ def score_vd_submission_dir_cli(args):
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "valence_continuous")
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "valence_continuous")
 
-	reference_statistic(args.reference_dir, ref, "valence_continuous")
-	submission_statistic(args.submission_dir, hyp, "valence_continuous")
+	statistic(args.reference_dir, ref, args.submission_dir, hyp, args.output_dir, "valence_continuous")
 
 	score_valence_arousal(ref, hyp, output_dir = args.output_dir, task = "valence_continuous")
 	generate_scoring_parameter_file(args)	
@@ -166,8 +163,7 @@ def score_ad_submission_dir_cli(args):
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "arousal_continuous")
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "arousal_continuous")
 
-	reference_statistic(args.reference_dir, ref, "arousal_continuous")
-	submission_statistic(args.submission_dir, hyp, "arousal_continuous")
+	statistic(args.reference_dir, ref, args.submission_dir, hyp, args.output_dir, "arousal_continuous")
 
 	score_valence_arousal(ref, hyp, output_dir = args.output_dir, task = "arousal_continuous")
 	generate_scoring_parameter_file(args)	
@@ -194,8 +190,7 @@ def score_cd_submission_dir_cli(args):
 	text_thresholds = [int(i) for i in args.delta_cp_text_thresholds.split(',')]
 	time_thresholds = [float(i) for i in args.delta_cp_time_thresholds.split(',')]
 
-	reference_statistic(args.reference_dir, ref, "changepoint")
-	submission_statistic(args.submission_dir, hyp, "changepoint")
+	statistic(args.reference_dir, ref, args.submission_dir, hyp, args.output_dir, "changepoint")
 
 	score_cp(ref, hyp, delta_cp_text_thresholds=text_thresholds, delta_cp_time_thresholds=time_thresholds, output_dir=args.output_dir)
 	generate_scoring_parameter_file(args)

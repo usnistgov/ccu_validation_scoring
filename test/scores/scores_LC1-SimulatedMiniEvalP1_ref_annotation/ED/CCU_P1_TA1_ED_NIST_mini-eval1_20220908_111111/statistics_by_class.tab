@@ -1,0 +1,9 @@
+data	class	genre	metric	value
+ref	joy	audio	instance_counts	2
+ref	joy	text	instance_counts	4
+ref	surprise	audio	instance_counts	2
+ref	surprise	text	instance_counts	2
+sys	joy	audio	instance_counts	6
+sys	joy	text	instance_counts	7
+sys	surprise	audio	instance_counts	6
+sys	surprise	text	instance_counts	7

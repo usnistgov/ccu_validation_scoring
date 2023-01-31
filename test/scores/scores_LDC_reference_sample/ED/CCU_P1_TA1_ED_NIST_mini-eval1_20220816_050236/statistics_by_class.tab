@@ -1,0 +1,12 @@
+data	class	genre	metric	value
+ref	anger	audio	instance_counts	2
+ref	anger	text	instance_counts	1
+ref	disgust	audio	instance_counts	1
+ref	fear	audio	instance_counts	1
+ref	fear	video	instance_counts	2
+ref	joy	audio	instance_counts	2
+ref	joy	text	instance_counts	1
+ref	sadness	text	instance_counts	1
+ref	sadness	video	instance_counts	1
+ref	surprise	audio	instance_counts	1
+ref	surprise	text	instance_counts	1

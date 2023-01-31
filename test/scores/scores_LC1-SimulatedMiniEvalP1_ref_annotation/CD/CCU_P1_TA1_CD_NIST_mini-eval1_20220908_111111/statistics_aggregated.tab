@@ -1,0 +1,6 @@
+data	genre	metric	value
+ref	all	file_counts	3
+ref	all	file_scoring_counts	3
+ref	all	noann_segment_scoring_counts	0
+sys	all	file_counts	3
+sys	all	file_scoring_counts	3
