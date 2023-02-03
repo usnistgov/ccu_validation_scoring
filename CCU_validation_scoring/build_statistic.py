@@ -102,16 +102,20 @@ def statistic(reference_dir, ref, submission_dir, hyp, output_dir, task):
 
 	system_input_index_file_path = glob.glob(os.path.join(reference_dir, "index_files", "*system_input.index.tab"))[0]
 	system_input_index_df = pd.read_csv(system_input_index_file_path, sep='\t')
+	#file_count: ref file counts in system input index
 	ref_unique_file_count = generate_agg_row(unique_file_count(system_input_index_df), "ref", "file_counts")
 
 	system_output_index_file_path = os.path.join(submission_dir, "system_output.index.tab")
 	system_output_index_df = pd.read_csv(system_output_index_file_path, dtype={'message': object}, sep='\t')
+	#file_count: sys file counts in system output index
 	sys_unique_file_count = generate_agg_row(unique_file_count(system_output_index_df), "sys", "file_counts")
 
 	ref_ann_prune = ref[(ref['Class'] != "noann")]
+	#file_scoring_counts: file counts in ref/sys that ready to score for specific task
 	ref_unique_file_count_ann = generate_agg_row(unique_file_count(ref_ann_prune), "ref", "file_scoring_counts")
 	sys_unique_file_count_ann = generate_agg_row(unique_file_count(hyp), "sys", "file_scoring_counts")
 	ref_noann_prune = ref[(ref['Class'] == "noann")]
+	#noann_segment_scoring_counts: “noann” segment counts in ref that ready to score for specific task
 	ref_unique_file_count_noann = generate_agg_row(len(ref_noann_prune), "ref", "noann_segment_scoring_counts")
 
 	if task == "norms" or task == "emotions":

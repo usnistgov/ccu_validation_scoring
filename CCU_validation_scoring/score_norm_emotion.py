@@ -91,7 +91,7 @@ def compute_ious(row, ref):
         rout[['start_hyp', 'end_hyp', 'llr']] = row.start, row.end, row.llr
         return rout
 
-def compute_average_precision_tad(ref, hyp, iou_thresholds=[0.2], task=None):
+def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=[0.2], task=None):
     """ 
     Compute average precision and precision-recall curve at specific IoU
     thresholds between ground truth and predictions data frames. If multiple
@@ -139,13 +139,34 @@ def compute_average_precision_tad(ref, hyp, iou_thresholds=[0.2], task=None):
         alignment_df = generate_all_fn_alignment_file(ref, task)
         return output,alignment_df
 
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.width', 1000)
+    pd.set_option('display.max_rows', None)
+    
+    if (False):
+        print("------------Remove Noscores-----------")
+        print(ref.loc[ref.Class.str.contains('NO_SCORE_REGION') == True])
+        print("------------Residual Noscores-----------")
+        ref = ref.loc[ref.Class.str.contains('NO_SCORE_REGION') == False]
+        print(ref)
+    
     # Compute IoU for all hyps incl. NO_SCORE_REGION
     for idx, myhyp in hyp.iterrows():
         out.append(compute_ious(myhyp, ref))
     ihyp = pd.concat(out)
+    #print("-----------------------")
+    #print(ihyp)
 
+    # Capture naked false alarms that have no overlap with anything regardless of if it is a NO_SCORE_REGION
+    #ihyp_naked_fa = ihyp.loc[ihyp.IoU == 0.0]
+    #print("---- Naked FAs -----")
+    #print(ihyp_naked_fa)
+    
     # Exclude NO_SCORE_REGIONs but keep FP NA's
-    ihyp = ihyp.loc[(ihyp.Class.str.contains('NO_SCORE_REGION') == False) | ihyp.start_ref.isna()]
+    #ihyp = ihyp.loc[(ihyp.Class.str.contains('NO_SCORE_REGION') == False) | ihyp.start_ref.isna()]
+    ihyp = ihyp.loc[(ihyp.Class.str.contains('NO_SCORE_REGION') == False) | ((ihyp.Class.str.contains('NO_SCORE_REGION') == True) & (ihyp['IoU'] == 0.0)) | ihyp.start_ref.isna()]
+    #print("----- ihyp keep ------------------")
+    #print(ihyp)
 
     if ihyp.empty:
         for iout in iou_thresholds:
@@ -157,6 +178,7 @@ def compute_average_precision_tad(ref, hyp, iou_thresholds=[0.2], task=None):
     ihyp.sort_values(["llr"], ascending=False, inplace=True)        
     ihyp.reset_index(inplace=True, drop=True)
 
+        
     # Determine TP/FP @ IoU-Threshold
     for iout in iou_thresholds:        
         ihyp[['tp', 'fp']] = [ 0, 1 ]        
@@ -165,6 +187,12 @@ def compute_average_precision_tad(ref, hyp, iou_thresholds=[0.2], task=None):
         nhyp = ihyp.duplicated(subset = ['file_id', 'start_ref', 'end_ref', 'tp'], keep='first')
         ihyp.loc[ihyp.loc[nhyp == True].index, ['tp', 'fp']] = [ 0, 1 ]
         ihyp.sort_values(["llr", "file_id"], ascending=[False, True], inplace=True)
+        #print("------------PRe Alignment--------------");
+        #print(ihyp)
+ 
+        ### Update the data for naked false alarms
+        ihyp.loc[ihyp.loc[ihyp['IoU'] == 0.0].index, ['Class', 'tp', 'fp', 'start_ref', 'end_ref']] = [ Class, 0, 1 , -1, -1]
+       
         tp = np.cumsum(ihyp.tp).astype(float)
         fp = np.cumsum(ihyp.fp).astype(float)
 
@@ -181,9 +209,15 @@ def compute_average_precision_tad(ref, hyp, iou_thresholds=[0.2], task=None):
 
         output[iout] = ap_interp(prec, rec), prec, rec
 
+
         ihyp = ihyp[["Class","type","tp","fp","file_id","start_ref","end_ref","start_hyp","end_hyp","IoU","llr"]]
         alignment_df = pd.concat([alignment_df, ihyp])
+        #print("-------------------------Alignment--------------");
+        #print(ihyp)
+        #exit(1)
 
+
+        
     final_alignment_df = generate_alignment_file(ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False], alignment_df, task)
 
     return output,final_alignment_df
@@ -260,6 +294,7 @@ def compute_multiclass_iou_pr(ref, hyp, iou_thresholds=0.2, mapping_df = None, c
         apScore, alignment = compute_average_precision_tad(
                 ref=ref.loc[((ref.Class == final_combo_pruned.loc[i, "Class"]) | (ref.Class == 'NO_SCORE_REGION')) & (ref.type.isin(match_type))].reset_index(drop=True),                        
                 hyp=hyp_scoring,
+                Class=final_combo_pruned.loc[i, "Class"],
                 iou_thresholds=iou_thresholds,
                 task=class_type)
                     

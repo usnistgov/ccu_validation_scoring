@@ -224,6 +224,18 @@ CCU_scoring score-nd -s <norm_submission_directory> -m <norm_mapping_submission_
 
  * `-o`: output directory containing the score and alignment file
 
+ * `-xR`: character gap for the text reference instances merging
+
+ * `-aR`: second gap for the time reference instances merging
+
+ * `-xS`: character gap for the text system instances merging
+
+ * `-aS`: second gap for the time system instances merging
+
+ * `-lS`: choose min_llr or max_llr to combine system llrs for the system instances merging
+
+ * `-vS`: choose class or class-status to define how to handle the adhere/violate labels for the system instances merging. class is to use the class label only to merge and class-status is to use the class and status label to merge
+
 ```bash
 # an example of norm scoring
 CCU_scoring score-nd \
@@ -262,6 +274,18 @@ CCU_scoring score-ed -s <emotion_submission_directory> -ref <reference_directory
  * `-t`: comma separated list of IoU thresholds
 
  * `-o`: output directory containing the score and alignment file
+
+ * `-xR`: character gap for the text reference instances merging
+
+ * `-aR`: second gap for the time reference instances merging
+
+ * `-xS`: character gap for the text system instances merging
+
+ * `-aS`: second gap for the time system instances merging
+
+ * `-lS`: choose min_llr or max_llr to combine system llrs for the system instances merging
+
+ * `-vS`: choose class or class-status to define how to handle the adhere/violate labels for the system instances merging. class is to use the class label only to merge and class-status is to use the class and status label to merge
 
 ```bash
 # an example of ed scoring

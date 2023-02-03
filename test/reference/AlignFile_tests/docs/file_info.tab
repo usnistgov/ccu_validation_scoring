@@ -1,0 +1,2 @@
+catalog_id	version	file_uid	data_type	url	lang_id_manual	wrapped_md5	unwrapped_md5	download_date	content_date	status_in_corpus	legacy_catalog_id	original_file_id	type	file_path	length
+LDC2022E22	V1.0	AlignFile	.flac.ldcc	na	cmn	67c35c42f0717bdea6eddaf4f60b14f9	07f42ed12b7f501f15ae20c174cd9a39	na	na	present	na	na	audio	data/audio/AlignFile.flac.ldcc	1481

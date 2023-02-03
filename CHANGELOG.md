@@ -12,3 +12,13 @@ All notable changes to this project will be documented in this file.
 - Remove EMPTY_TBD string from annotation
 - Update REAMDE
 - Add CHANGELOG
+
+## [1.1.0] - 2023-02-02
+### Added
+- Add four arguments to ND and ED scoring for reference and system merging
+- Add more test cases to test the reference and system merging
+- Add scoring_parameters.tab to output directory
+- Add two statistic results (statistic_aggregated.tab and statistic_by_class.tab) to output directory
+
+### Updated
+- Fix the calculation of AP when system have duplicate llrs

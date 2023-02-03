@@ -25,8 +25,10 @@ CCUTEST_UPDATE_SCORES, the following occurs:
      expected scores directory so that the test case will pass.  This
      supports the use case that a vetted change is complete.
 
+Pytest
 
+- Use this to test without an install of the libraries:
+    % python3 -m pytest test
 
-
-
+- The option '--capture=no' prints stdout.
 
