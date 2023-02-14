@@ -502,6 +502,8 @@ def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time
 	index_df = index_df[["file_id", "type", "length"]]
 	index_df.drop_duplicates(inplace = True)
 
+	pd.set_option('display.max_columns', None)
+	pd.set_option('display.width', 1000)
 	if task == "norms" or task == "emotions":
 		data_file = os.path.join(ref_dir,"data","{}.tab".format(task))
 		data_df = read_dedupe_file(data_file)
@@ -511,6 +513,10 @@ def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time
 		reference_df = data_df.merge(segment_df.merge(index_df))
 		reference_prune = check_remove_start_end_same(reference_df)
 		column_name = task.replace("s","")
+		if (task == 'norms'):
+                        reference_prune['norm_status'] = [ n if (n in ['none', 'noann']) else n + "_" + s for n,s in zip(reference_prune['norm'], reference_prune['status']) ]
+                        #column_name = 'norm_status'
+                        #Begin to keep the status here.  Stopping for now
 		ref = preprocess_norm_emotion_reference_df(reference_prune, column_name, text_gap, time_gap)
 		ref.drop_duplicates(inplace = True)
 		ref_inter = ref.merge(index_df)
@@ -537,14 +543,46 @@ def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time
 		else:
 			ref_final = ref_inter		
 
+	### Change
 	if task == "changepoint":
 		data_file = os.path.join(ref_dir,"data","{}.tab".format(task))
 		data_df = read_dedupe_file(data_file)
 		data_df = data_df[~data_df.isin(['EMPTY_TBD']).any(axis=1)]  
 		ref = data_df.merge(index_df)
 		ref = ref[ref.timestamp != "none"]
-		ref_final = change_class_type(ref, convert_task_column(task))
+		ref['start'] = ref['timestamp']  ### Add the timestamp to handle noscore segments with duration
+		ref['end'] = ref['timestamp']  ### Add the timestamp to handle noscore segments with duration
+		#print("before class change")
+		#print(ref)
+		ref_final = change_class_type(ref, convert_task_column(task))  ### Changes the timestamp to Class
+		#print("Ref before tweaks")
+		#print(ref_final)
+		## Load the segment file to add Noscore segments
+		segment_file = os.path.join(ref_dir,"docs","segments.tab")
+		segment_df = read_dedupe_file(segment_file)
+		segment_df = segment_df.merge(index_df)
+		#print("Segment file")
+		#print(segment_df)
+		#Add the noscore regions 
+		if (True):
+		        for file_id in set(segment_df['file_id']):
+                                #print("File {}".format(file_id))
+                                ref_sub = segment_df[segment_df['file_id'] == file_id]
+                                #print(ref_sub)
+                                start = min(list(ref_sub["start"]))
+                                end = max(list(ref_sub["end"]))
+                                length = ref_sub.loc[ref_sub.index[0], 'length'] 
+                                type_col = ref_sub.loc[ref_sub.index[0], 'type'] 
+                                #print("file {} {} {} {}".format(file_id, start, end, length))
+                                if (start > 0):
+                                        ref_final.loc[len(ref_final)] = [0, file_id, 0,   'NO_SCORE_REGION', "StartNoScore", type_col, length, 0, start]
+                                if (end < length):
+                                        ref_final.loc[len(ref_final)] = [0, file_id, end, 'NO_SCORE_REGION', "EndNoScore", type_col, length, end, length]
+                
 
+	#print("DONE - ref_final")
+	#print(ref_final)
+	#exit(0)
 	return ref_final
 
 
