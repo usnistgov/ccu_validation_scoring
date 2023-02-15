@@ -13,7 +13,7 @@ All notable changes to this project will be documented in this file.
 - Update REAMDE
 - Add CHANGELOG
 
-## [1.1.0] - 2023-02-02
+## [1.1.0] - 2023-02-15
 ### Added
 - Add four arguments to ND and ED scoring for reference and system merging
 - Add more test cases to test the reference and system merging
@@ -21,4 +21,7 @@ All notable changes to this project will be documented in this file.
 - Add two statistic results (statistic_aggregated.tab and statistic_by_class.tab) to output directory
 
 ### Updated
-- Fix the calculation of AP when system have duplicate llrs
+- Fixed the calculation of AP when system have duplicate llrs.  This is a minor score changes and affects systems with high frequency common LLRs.
+- Fixed the change detection scorer to exclude system detections in no score regions as defined by the segments annotation.
+- Fixed the norm and emotion detection scorre to include false alarms that have no overlap with reference annotations.
+
