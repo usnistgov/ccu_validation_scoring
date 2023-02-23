@@ -363,8 +363,14 @@ def generate_alignment_file(ref, hyp, task):
 		ref_format['start'] = [formatNumber(x) for x in ref['start']]
 		ref_format['end'] = [formatNumber(x) for x in ref['end']]
 		ref_format['sort'] = [x for x in ref['start']]
+		#print("ref_format")
+		#print(ref_format)
 		
 		hyp_format = hyp.copy()
+		#print("hyp_format")
+		#print(hyp_format)
+		#exit(1)
+
 		hyp_format['start_ref'] = [formatNumber(x) for x in hyp['start_ref']]
 		hyp_format['end_ref'] = [formatNumber(x) for x in hyp['end_ref']]
 		hyp_format['start_hyp'] = [formatNumber(x) for x in hyp['start_hyp']]
@@ -374,15 +380,25 @@ def generate_alignment_file(ref, hyp, task):
 		hyp_format["ref"] = "{start=" + hyp_format["start_ref"].astype(str) + ",end=" + hyp_format["end_ref"].astype(str) + "}"
 		hyp_format["sys"] = "{start=" + hyp_format["start_hyp"].astype(str) + ",end=" + hyp_format["end_hyp"].astype(str) + "}"
 		hyp_format["IoU_format"] = hyp_format["IoU"].apply(lambda x: "{:,.3f}".format(x))
-		hyp_format["parameters"] = '{iou=' + hyp_format["IoU_format"] + '}'
+		hyp_format["parameters"] = '{iou=' + hyp_format["IoU_format"] + "}" #, hyp_status=" + hyp_format['hyp_status'] + '}'
 
 		hyp_format.loc[hyp_format["eval"] == "unmapped", "ref"] = "{}"
 		hyp_format.loc[hyp_format["eval"] == "unmapped", "parameters"] = "{}"
-
-		hyp_format = hyp_format[["Class","file_id","eval","ref","sys","llr","parameters","sort"]]
+		if (task == "norm"):
+		        hyp_format.loc[hyp_format["eval"] == "unmapped", "status"] = "EMPTY_NA"
+		        hyp_format = hyp_format[["Class","file_id","eval","ref","sys","llr","parameters","sort","status", "hyp_status"]]
+		        hyp_format = hyp_format.rename(columns={"status": "ref_status"})
+		else:
+		        hyp_format = hyp_format[["Class","file_id","eval","ref","sys","llr","parameters","sort"]]                        
+                
 		ref_new = ref_format.copy()
 		ref_new["ref"] = "{start=" + ref_format["start"].astype(str) + ",end=" + ref_format["end"].astype(str) + "}"
-		ref_new = ref_new[["file_id","Class","ref","sort"]]
+		if (task == "norm"):
+		        ref_new = ref_new[["file_id","Class","ref","sort","status"]]
+		        ref_new = ref_new.rename(columns={"status": "ref_status"})
+		        ref_new['hyp_status'] = "EMPTY_NA"
+		else:
+		        ref_new = ref_new[["file_id","Class","ref","sort"]]
 		ref_new = ref_new.loc[~(ref_new["ref"].isin(hyp_format["ref"]))]
 		ref_new["eval"] = "unmapped"
 		ref_new["sys"] = "{}"
@@ -391,6 +407,10 @@ def generate_alignment_file(ref, hyp, task):
 
 		alignment = pd.concat([hyp_format, ref_new])
 		alignment = alignment.rename(columns={'Class':'class'})
+
+		#print("final alignment")
+		#print(alignment)
+		#exit(1)
 	if task == "changepoint":
 
 		ref_format = ref.copy()
@@ -431,20 +451,28 @@ def generate_all_fn_alignment_file(ref, task):
 	if task in ["norm","emotion"]:
 
 		ref_format = ref.copy()
+		#print(ref_format)
 		ref_format['start'] = [formatNumber(x) for x in ref['start']]
 		ref_format['end'] = [formatNumber(x) for x in ref['end']]
 		ref_format['sort'] = [x for x in ref['start']]
 
 		ref_new = ref_format.loc[ref_format.Class.str.contains('NO_SCORE_REGION')==False].copy()
 		ref_new["ref"] = "{start=" + ref_format["start"].astype(str) + ",end=" + ref_format["end"].astype(str) + "}"
-		ref_new = ref_new[["file_id","Class","ref"]]
+		#ref_new = ref_new[["file_id","Class","ref"]]
 		ref_new["eval"] = "unmapped"
 		ref_new["sys"] = "{}"
 		ref_new["parameters"] = "{}"
 		ref_new["llr"] = np.nan
 		ref_new["sort"] = ref_format['sort']
 		ref_new = ref_new.rename(columns={'Class':'class'})
-		ref_new = ref_new[["class","file_id","eval","ref","sys","llr","parameters","sort"]]
+
+		co = ["class","file_id","eval","ref","sys","llr","parameters","sort"]
+		if (task == "norm"):
+                        ref_new['hyp_status'] = "EMPTY_NA"
+                        ref_new = ref_new.rename(columns={'status': "ref_status"})
+                        co.append("ref_status")
+                        co.append("hyp_status")
+		ref_new = ref_new[ co ];
 	if task == "changepoint":
 
 		ref_format = ref.copy()

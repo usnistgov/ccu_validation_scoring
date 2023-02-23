@@ -97,15 +97,16 @@ def main():
     score_nd_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output directory")
     score_nd_parser.add_argument("-xR", "--merge_ref_text_gap", type=str, required=False, help="merge reference text gap character")
     score_nd_parser.add_argument("-aR", "--merge_ref_time_gap", type=str, required=False, help="merge reference time gap second")
+    score_nd_parser.add_argument("-vR", "--merge_ref_label", type=str, choices=['class', 'class-status'], required=False, help="choose class or class-status to define how to handle the adhere/violate labels for the reference norm instances merging. class is to use the class label only (ignoring status) to merge and class-status is to use the class and status label to merge")
     score_nd_parser.add_argument("-xS", "--merge_sys_text_gap", type=str, required=False, help="merge system text gap character")
     score_nd_parser.add_argument("-aS", "--merge_sys_time_gap", type=str, required=False, help="merge system time gap second")
     score_nd_parser.add_argument("-lS", "--combine_sys_llrs", type=str, choices=['min_llr', 'max_llr'], required=False, help="choose min_llr or max_llr to combine system llrs for the system instances merging")
-    score_nd_parser.add_argument("-vS", "--merge_sys_label", type=str, choices=['class', 'class-status'], required=False, help="choose class or class-status to define how to handle the adhere/violate labels for the system instances merging. class is to use the class label only to merge and class-status is to use the class and status label to merge")
+    score_nd_parser.add_argument("-vS", "--merge_sys_label", type=str, choices=['class', 'class-status'], required=False, help="choose class or class-status to define how to handle the adhere/violate labels for the system instances merging. class is to use the class label only (ignoring status) to merge and class-status is to use the class and status label to merge")
 
 
     score_nd_parser.set_defaults(func=score_submission.score_nd_submission_dir_cli)
 
-    score_ed_parser = subs.add_parser('score-ed', description='Score a emotion detection submission directory')
+    score_ed_parser = subs.add_parser('score-ed', description='Score an emotion detection submission directory')
     score_ed_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a emotion detection submission')
     score_ed_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
     score_ed_parser.add_argument('-i','--scoring-index-file', type=str, required=True, help='Use to filter file from scoring (REF)')

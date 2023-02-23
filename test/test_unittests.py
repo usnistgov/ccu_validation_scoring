@@ -35,7 +35,7 @@ class NormDiscoveryTests(unittest.TestCase):
             input_dict = json.loads(data)
 
             # Create a dictionary that is returned by merge_vote_time_periods
-            generated_list = merge_vote_time_periods(input_dict)
+            generated_list = merge_vote_time_periods(input_dict, "emotion")
                 
             # Create expected list
             with open(expected_file_path) as file:

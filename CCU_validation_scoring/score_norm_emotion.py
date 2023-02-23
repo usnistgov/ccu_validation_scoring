@@ -1,5 +1,6 @@
 import os
 import logging
+import pprint
 from re import M
 import numpy as np
 import pandas as pd
@@ -70,15 +71,18 @@ def segment_iou(ref_start, ref_end, tgts):
     return tIoU
 
 
-def compute_ious(row, ref):
+def compute_ious(row, ref, class_type):
     """
     Compute the ref/hyp matching table
     """
-    refs = ref.loc[ ref['file_id'] == row.file_id ].copy()    
+    refs = ref.loc[ ref['file_id'] == row.file_id ].copy()
+    print(f"------Compute iOU class_type={class_type} Hyp={row.to_dict()}")
+    #print(ref)
+    #exit
     # If there are no references for this hypothesis it's IoU is 0/FP
     if len(refs) == 0:
-        return pd.DataFrame(data=[[row.Class, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0]],
-            columns=['Class', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU'])
+        return pd.DataFrame(data=[[row.Class, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0, row.status]],
+            columns=['Class', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU', 'hyp_status'])
     else:        
         refs['IoU'] = segment_iou(row.start, row.end, [refs.start, refs.end])
         if (len(refs.loc[refs.IoU > 0]) > 1) & ("NO_SCORE_REGION" in refs.loc[refs.IoU == refs.IoU.max()].Class.values):
@@ -89,6 +93,8 @@ def compute_ious(row, ref):
             rmax = rmax_candidate.loc[rmax_candidate.start == rmax_candidate.start.min()]
         rout = rmax.rename(columns={'start':'start_ref', 'end':'end_ref'})
         rout[['start_hyp', 'end_hyp', 'llr']] = row.start, row.end, row.llr
+        if (class_type == "norm"):
+            rout['hyp_status'] = row.status
         return rout
 
 def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=[0.2], task=None):
@@ -126,6 +132,13 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=[0.2], task=No
 
     final_alignment_df: instance alignment dataframe
     """
+    print(f"\n=========================================================================")
+    print(f"=============  compute_average_precision_tad Class={Class} =====================")
+    print(ref[ref.Class == Class])
+    print(hyp[hyp.Class == Class])
+    print(f"=============  compute_average_precision_tad Class={Class} =====================")
+
+
     # REF has same amount of !score_regions for all runs, which need to be
     # excluded from overall REF count.
     npos = len(ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False])    
@@ -151,12 +164,14 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=[0.2], task=No
         print(ref)
     
     # Compute IoU for all hyps incl. NO_SCORE_REGION
+    print("---  Computing_ious  -")
     for idx, myhyp in hyp.iterrows():
-        out.append(compute_ious(myhyp, ref))
+        out.append(compute_ious(myhyp, ref, task))
     ihyp = pd.concat(out)
-    #print("-----------------------")
-    #print(ihyp)
-
+    print("-----------------------")
+    print(out)
+    #exit(1)
+    
     # Capture naked false alarms that have no overlap with anything regardless of if it is a NO_SCORE_REGION
     #ihyp_naked_fa = ihyp.loc[ihyp.IoU == 0.0]
     #print("---- Naked FAs -----")
@@ -167,7 +182,8 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=[0.2], task=No
     ihyp = ihyp.loc[(ihyp.Class.str.contains('NO_SCORE_REGION') == False) | ((ihyp.Class.str.contains('NO_SCORE_REGION') == True) & (ihyp['IoU'] == 0.0)) | ihyp.start_ref.isna()]
     #print("----- ihyp keep ------------------")
     #print(ihyp)
-
+    #exit(1)
+    
     if ihyp.empty:
         for iout in iou_thresholds:
             output[iout] = 0.0, [0.0, 0.0], [0.0, 1.0]
@@ -209,12 +225,15 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=[0.2], task=No
 
         output[iout] = ap_interp(prec, rec), prec, rec
 
-
-        ihyp = ihyp[["Class","type","tp","fp","file_id","start_ref","end_ref","start_hyp","end_hyp","IoU","llr"]]
+        ihyp_fields = ["Class","type","tp","fp","file_id","start_ref","end_ref","start_hyp","end_hyp","IoU","llr"]
+        if (task == "norm"):
+            ihyp_fields.append("status")
+            ihyp_fields.append("hyp_status")
+        ihyp = ihyp[ihyp_fields]
+        
         alignment_df = pd.concat([alignment_df, ihyp])
-        #print("-------------------------Alignment--------------");
-        #print(ihyp)
-        #exit(1)
+        #print("-------------------------Alignment_df--------------");
+        #print(alignment_df)
 
 
         
@@ -252,6 +271,14 @@ def compute_multiclass_iou_pr(ref, hyp, iou_thresholds=0.2, mapping_df = None, c
 
     final_alignment_df: instance alignment dataframe
     """
+    #print(f"\n**************************************************************************")
+    #print(f"************ compute_multiclass_iou_pr ioU_thresdholdd={iou_thresholds} ******************")
+    #print("Ref")
+    #print(ref)
+    #print("Hyp")
+    #print(hyp)
+    #print(f"*************************************************************************")
+
     # Initialize
     scores = {}
     [ scores.setdefault(iout, []) for iout in iou_thresholds ]
@@ -396,12 +423,13 @@ def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df):
         pr_iou_scores = {}
         for iout in iou_thresholds:
             pr_iou_scores[iout] = generate_zero_scores_norm_emotion(ref)
-        final_alignment_df = pd.DataFrame([["NA","NA","NA","NA","NA","NA","NA","NA"]], columns=["class", "file_id", "eval", "ref", "sys", "llr", "parameters","sort"])
+        final_alignment_df = pd.DataFrame([["NA","NA","NA","NA","NA","NA","NA","NA", (["",""] if (class_type == "norm") else [])]],
+                                          columns=["class", "file_id", "eval", "ref", "sys", "llr", "parameters","sort",(["ref_status","hyp_status"] if (class_type == "norm") else [])])
 
     ensure_output_dir(output_dir)
     final_alignment_df_sorted = final_alignment_df.sort_values(by=['class', 'file_id', 'sort'])
     final_alignment_df_sorted.to_csv(os.path.join(output_dir, "instance_alignment.tab"), index = False, quoting=3, sep="\t", escapechar="\t",
-                                     columns = ["class","file_id","eval","ref","sys","llr","parameters"])
+                                     columns = ["class","file_id","eval","ref","sys","llr","parameters"]) # + (["ref_status","hyp_status"] if (class_type == "norm") else []))
     sumup_tad_system_level_scores(pr_iou_scores, iou_thresholds, class_type, output_dir)
     sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir)
 

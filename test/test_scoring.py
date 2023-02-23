@@ -33,7 +33,7 @@ def byte_compare_file(generated, expected):
         #os.remove(generated)
     else:
         if not tst:
-            print(f"Files differ.  Use the command:\ndiff {generated}\\\n   {expected}")
+            print(f"Files differ.  Use the command:\ntkdiff {generated}\\\n   {expected}")
             assert tst, "Files differ"
         #else:
         #    os.remove(generated)

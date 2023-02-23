@@ -29,11 +29,15 @@ def score_nd_submission_dir_cli(args):
 		merge_ref_time_gap = float(args.merge_ref_time_gap)
 	else:
 		merge_ref_time_gap = None
-
-	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "norms", text_gap = merge_ref_text_gap, time_gap = merge_ref_time_gap)
+        
+	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "norms", text_gap = merge_ref_text_gap, time_gap = merge_ref_time_gap, merge_label = args.merge_ref_label)
 	if args.norm_list_file:
 		ref = process_subset_norm_emotion(args.norm_list_file, ref)
+	#print(f"post processesd Ref merge_label={args.merge_ref_label}")
+	#print(ref)
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "norms")
+	print("Pre merge hyp")
+	print(hyp)
 
 	if args.mapping_submission_dir:
 		mapping_file = os.path.join(args.mapping_submission_dir, "nd.map.tab")
@@ -52,6 +56,8 @@ def score_nd_submission_dir_cli(args):
 		merge_sys_time_gap = None
 
 	merged_hyp = merge_sys_instance(hyp, merge_sys_text_gap, merge_sys_time_gap, args.combine_sys_llrs, args.merge_sys_label)
+	print("post processesd hyp")
+	print(merged_hyp)
 
 	thresholds = [float(i) for i in args.iou_thresholds.split(',')]
 
