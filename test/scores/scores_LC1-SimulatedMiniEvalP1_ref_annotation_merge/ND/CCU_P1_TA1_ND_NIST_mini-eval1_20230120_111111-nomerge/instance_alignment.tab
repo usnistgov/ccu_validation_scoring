@@ -22,4 +22,4 @@ class	file_id	eval	ref	sys	llr	parameters	ref_status	hyp_status
 002	M01000H0B	mapped	{start=220,end=280}	{start=220,end=240}	0.7	{iou=0.333}	adhere	adhere
 002	M01000H0B	mapped	{start=290,end=350}	{start=260,end=320}	0.8	{iou=0.333}	adhere	violate
 002	M01000H0B	unmapped	{}	{start=370,end=420}	0.6	{}	EMPTY_NA	adhere
-002	M01000H0B	mapped	{start=360,end=500}	{start=430,end=490}	0.9	{iou=0.429}	violate,adhere	violate
+002	M01000H0B	mapped	{start=360,end=500}	{start=430,end=490}	0.9	{iou=0.429}	adhere,violate	violate

@@ -1,5 +1,6 @@
 import os
 import fnmatch
+import pprint
 import subprocess
 import logging
 import pandas as pd
@@ -178,11 +179,15 @@ def filter_hyp_use_scoring_index(hyp, scoring_index):
 
 	return hyp_pruned
 
-def merge_sys_time_periods(result_dict, llr_value, allowed_gap):
+def merge_sys_time_periods(result_dict, llr_value, allowed_gap, merge_label, task):
 
+	#print("merge input")
+	#print(pprint.pprint(result_dict, width=200))
 	result_array = []
 	for key in result_dict.keys():
-		time_array = result_dict[key]
+		time_array = sorted(result_dict[key], key=lambda d: d['start'])
+		#print(f"Data for key {key}")
+		#print(pprint.pprint(time_array, width=200))
 		# Merge time array
 		merged_time_array = []
 		i = 0
@@ -192,7 +197,14 @@ def merge_sys_time_periods(result_dict, llr_value, allowed_gap):
 			llr_merge = time_array[i]["llr"]
 			llr_list = []
 			llr_list.append(time_array[i]["llr"])
-			while i + 1 < len(time_array) and float(current_time_period['end']) + allowed_gap > float(time_array[i + 1]['start']):
+			if (task == "norms"):
+			        status_dict = {}
+			        status_dict[first_time_period['status']] = 1
+			while ((i + 1 < len(time_array)) and
+                               (float(current_time_period['end']) + allowed_gap > float(time_array[i + 1]['start'])) and
+                               ((task != "norms") or
+                                ((task == "norms") and
+                                 ((merge_label == "class") or (first_time_period['status'] == time_array[i+1]['status']))))):
 				i = i + 1
 				llr_list.append(time_array[i]["llr"])
 				current_time_period = time_array[i]
@@ -200,63 +212,87 @@ def merge_sys_time_periods(result_dict, llr_value, allowed_gap):
 					llr_merge = min(llr_list)
 				if llr_value == "max_llr":
 					llr_merge = max(llr_list)
-			merged_time_array.append({'start': first_time_period['start'], 'end': current_time_period['end'], 'llr': llr_merge, 'type': first_time_period['type']})
+				if (task == "norms"):
+                                        status_dict[current_time_period['status']] = 1
+			med = {'start': first_time_period['start'], 'end': current_time_period['end'], 'llr': llr_merge, 'type': first_time_period['type']}
+			if (task == "norms"):
+                                st =list(status_dict.keys())
+                                st.sort()
+                                med['status'] = ",".join(st)
+			merged_time_array.append(med)
 			i = i + 1
 		for item in merged_time_array:
 			result_array.append({'content': item, 'group': key})
 
+	#print("merge output")
+	#print(pprint.pprint(result_array, width=200))
+	#exit(0)
 	return result_array
 
-def get_result_dict(sorted_df, merge_label):
-
+def get_result_dict(sorted_df, merge_label, task):
+        
+	print(f"get result_dict {merge_label}")
 	result_dict = {}
-	if merge_label == "class":
-		for i in sorted_df.Class.unique():
-			result_dict_list = []
-			sub_df = sorted_df.loc[sorted_df["Class"] == i].reset_index()
-			for j in range(sub_df.shape[0]):
-				result_dict_list.append({"start": sub_df.iloc[j]['start'], "end": sub_df.iloc[j]['end'], "llr": sub_df.iloc[j]['llr'], "type": sub_df.iloc[j]['type']})
-			result_dict[i] = result_dict_list
-	if merge_label == "class-status":
-		for i in list(sorted_df.groupby(["Class","status"]).groups.keys()):
-			result_dict_list = []
-			sub_df = sorted_df.loc[(sorted_df["Class"] == i[0]) & (sorted_df["status"] == i[1])].reset_index()
-			for j in range(sub_df.shape[0]):
-				result_dict_list.append({"start": sub_df.iloc[j]['start'], "end": sub_df.iloc[j]['end'], "llr": sub_df.iloc[j]['llr'], "type": sub_df.iloc[j]['type']})
-			result_dict[i] = result_dict_list
+	# if merge_label == "class":
+	# 	for i in sorted_df.Class.unique():
+	# 		result_dict_list = []
+	# 		sub_df = sorted_df.loc[sorted_df["Class"] == i].reset_index()
+	# 		for j in range(sub_df.shape[0]):
+	# 			result_dict_list.append({"start": sub_df.iloc[j]['start'], "end": sub_df.iloc[j]['end'], "llr": sub_df.iloc[j]['llr'], "type": sub_df.iloc[j]['type']})
+	# 		result_dict[i] = result_dict_list
+	# if merge_label == "class-status":
+	# 	for i in list(sorted_df.groupby(["Class","status"]).groups.keys()):
+	# 		result_dict_list = []
+	# 		sub_df = sorted_df.loc[(sorted_df["Class"] == i[0]) & (sorted_df["status"] == i[1])].reset_index()
+	# 		for j in range(sub_df.shape[0]):
+	# 			result_dict_list.append({"start": sub_df.iloc[j]['start'], "end": sub_df.iloc[j]['end'], "llr": sub_df.iloc[j]['llr'], "type": sub_df.iloc[j]['type']})
+	# 		result_dict[i] = result_dict_list
+	for i in sorted_df.Class.unique():
+		result_dict_list = []
+		sub_df = sorted_df.loc[sorted_df["Class"] == i].reset_index()
+		if (task == "norms"):
+		        for j in range(sub_df.shape[0]):
+			        result_dict_list.append({"start": sub_df.iloc[j]['start'], "end": sub_df.iloc[j]['end'], "llr": sub_df.iloc[j]['llr'], "type": sub_df.iloc[j]['type'], "status":  sub_df.iloc[j]['status']})
+		else:
+		        for j in range(sub_df.shape[0]):
+			        result_dict_list.append({"start": sub_df.iloc[j]['start'], "end": sub_df.iloc[j]['end'], "llr": sub_df.iloc[j]['llr'], "type": sub_df.iloc[j]['type']})
+		result_dict[i] = result_dict_list
 
+	#print(pprint.pprint(result_dict, width=200))
+	#exit(0)
 	return result_dict
 
-def get_merged_dict(file_ids, data_frame, text_gap, time_gap, llr_value, merge_label):
+def get_merged_dict(file_ids, data_frame, text_gap, time_gap, llr_value, merge_label, task):
 
+	print(f"----- Get merge dict {text_gap}, {time_gap}, {llr_value}, {merge_label}, {task}")
 	data_frame.set_index("file_id")
 	final_df = pd.DataFrame()
 	for file_id in file_ids:
 		sorted_df = extract_df(data_frame, file_id)
-
+                
 		# Check file type to determine the gap of merging
 		if list(sorted_df["type"])[0] == "text":
 			if text_gap is not None:
-				result_dict = get_result_dict(sorted_df, merge_label)
-				result_array = merge_sys_time_periods(result_dict, llr_value, text_gap)
-				merged_df = convert_merge_dict_df(file_id, result_array, merge_label)
+				result_dict = get_result_dict(sorted_df, merge_label, task)
+				result_array = merge_sys_time_periods(result_dict, llr_value, text_gap, merge_label, task)
+				merged_df = convert_merge_dict_df(file_id, result_array, merge_label, task)
 			else:
 				merged_df = sorted_df
 
 		if list(sorted_df["type"])[0] != "text":
 			if time_gap is not None:
-				result_dict = get_result_dict(sorted_df, merge_label)
-				result_array = merge_sys_time_periods(result_dict, llr_value, time_gap)
-				merged_df = convert_merge_dict_df(file_id, result_array, merge_label)
+				result_dict = get_result_dict(sorted_df, merge_label, task)
+				result_array = merge_sys_time_periods(result_dict, llr_value, time_gap, merge_label, task)
+				merged_df = convert_merge_dict_df(file_id, result_array, merge_label, task)
 			else:
 				merged_df = sorted_df
 		
 		merged_sorted_df = merged_df.sort_values(by=['Class','start','end'])
-		final_df = pd.concat([final_df,merged_sorted_df], ignore_index = True)
+		final_df = pd.concat([final_df,merged_sorted_df], ignore_index = True) 
 
 	return final_df
 
-def convert_merge_dict_df(file_id, results_array, merge_label):
+def convert_merge_dict_df(file_id, results_array, merge_label, task):
 	"""
 	Convert dictionary of norm/emotion into a dataframe
 	"""
@@ -268,22 +304,23 @@ def convert_merge_dict_df(file_id, results_array, merge_label):
 	status = []
 	llrs = []
 	types = []
-
-	
+        	
+	print(f"Converting {task}")
 	for segment in results_array:
 		file_ids.append(file_id)
 		starts.append(float(segment['content']['start']))
 		ends.append(float(segment['content']['end']))
-		if merge_label == "class":
-			Class.append(segment['group'])
-			status.append("adhere")
-		if merge_label == "class-status":
-			Class.append(segment['group'][0])
-			status.append(segment['group'][1])
+		Class.append(segment['group'])
+		if (task == "norms"):
+			status.append(segment['content']['status'])
 		llrs.append(segment['content']['llr'])
 		types.append(segment['content']['type'])
-
-	result_df = pd.DataFrame({"file_id":file_ids,"Class":Class,"start":starts,"end":ends,"status":status,"llr":llrs,"type":types})
+                
+	if (task == "norms"):
+                result_df = pd.DataFrame({"file_id":file_ids,"Class":Class,"start":starts,"end":ends,"status":status,"llr":llrs,"type":types})
+	else:
+                result_df = pd.DataFrame({"file_id":file_ids,"Class":Class,"start":starts,"end":ends,"llr":llrs,"type":types})
+                
 	return result_df
 
 def preprocess_submission_file(subm_dir, ref_dir, scoring_index, task):
@@ -294,15 +331,16 @@ def preprocess_submission_file(subm_dir, ref_dir, scoring_index, task):
 
 	return hyp_final
 
-def merge_sys_instance(hyp, text_gap, time_gap, llr_value, merge_label):
-
+def merge_sys_instance(hyp, text_gap, time_gap, llr_value, merge_label, task):
+        
+	print(f"Merging hyp {text_gap} {time_gap} {llr_value} {merge_label} {task}")
 	if text_gap is None and time_gap is None:
 		return hyp
 
 	# Split input_file into parts based on file_id column
 	file_ids = get_unique_items_in_array(hyp['file_id'])
 	# Generate file_id map for vote processing
-	merged_df = get_merged_dict(file_ids, hyp, text_gap, time_gap, llr_value, merge_label)
+	merged_df = get_merged_dict(file_ids, hyp, text_gap, time_gap, llr_value, merge_label, task)
 
 	return merged_df
 

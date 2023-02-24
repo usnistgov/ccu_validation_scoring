@@ -481,7 +481,9 @@ def merge_vote_time_periods(vote_dict, class_type, allowed_gap = None, merge_lab
 					current_time_period = time_array[i]
 			info = {'Class': key, 'range': {'start': first_time_period['start'], 'end': current_time_period['end']}}
 			if (class_type == "norm"):
-                                info['status'] = ','.join(status_dict.keys())
+                                st = list(status_dict.keys())
+                                st.sort()
+                                info['status'] = ','.join(st)
                         
 			merged_time_array.append(info)
 			i = i + 1

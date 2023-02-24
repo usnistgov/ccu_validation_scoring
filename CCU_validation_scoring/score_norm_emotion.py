@@ -134,7 +134,7 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=[0.2], task=No
     """
     print(f"\n=========================================================================")
     print(f"=============  compute_average_precision_tad Class={Class} =====================")
-    print(ref[ref.Class == Class])
+    print(ref[((ref.Class == Class) | (ref.Class == 'NO_SCORE_REGION'))])
     print(hyp[hyp.Class == Class])
     print(f"=============  compute_average_precision_tad Class={Class} =====================")
 

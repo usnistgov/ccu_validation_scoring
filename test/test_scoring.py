@@ -40,7 +40,7 @@ def byte_compare_file(generated, expected):
             
 
 def run_scorer():
-    print("Scoring Command: CCU_scoring " + " ".join(sys.argv[1:]))
+    print("Scoring Command: python -m CCU_validation_scoring.cli " + " ".join(sys.argv[1:]))
     try:
         rtn = cli.main()
         
@@ -74,10 +74,17 @@ def run_scorer():
                           ('LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'LC1-SimulatedMiniEvalP1.20220909.ED.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'ED', '', '',                    '-aS 3 -lS max_llr -vS class -xS 30', 'merge-max_llr-class'),
 
                           ('AlignFile_tests', 'AlignFile_tests.scoring_input.index.tab', 'pass_submissions_AlignFile_tests', 'ND', '', 'known_norms_AlignFile_tests.txt', '', ''),
+                          ('AlignFile_tests', 'AlignFile_tests.scoring_input.index.tab', 'pass_submissions_AlignFile_tests', 'ND', '', 'known_norms_AlignFile_tests.txt', '-aR 30 -xR 300 -vR class', 'refM_class'),
+                          ('AlignFile_tests', 'AlignFile_tests.scoring_input.index.tab', 'pass_submissions_AlignFile_tests', 'ND', '', 'known_norms_AlignFile_tests.txt', '-aR 30 -xR 300 -vR class-status', 'refM_class_status'),
+
+                          ('AlignFile_tests', 'AlignFile_tests.scoring_input.index.tab', 'pass_submissions_AlignFile_tests', 'ND', '', 'known_norms_AlignFile_tests.txt', '-aS 0.4 -xS 30 -vS class -lS max_llr ', 'sysM_class'),
+                          ('AlignFile_tests', 'AlignFile_tests.scoring_input.index.tab', 'pass_submissions_AlignFile_tests', 'ND', '', 'known_norms_AlignFile_tests.txt', '-aS 0.4 -xS 30 -vS class-status -lS max_llr', 'sysM_class_status'),
+
+                          ('AlignFile_tests', 'AlignFile_tests.scoring_input.index.tab', 'pass_submissions_AlignFile_tests', 'ND', '', 'known_norms_AlignFile_tests.txt', '-aR 30 -xR 300 -vR class-status -aS 0.4 -xS 30 -vS class-status -lS max_llr', 'refM_class_status_sysM_class_status'),
+
                           ('AlignFile_tests', 'AlignFile_tests.scoring_input.index.tab', 'pass_submissions_AlignFile_tests', 'CD', '', 'known_norms_AlignFile_tests.txt', '', '')
 
                           ])
-
 
 def test_run_score_submissions(dataset, system_input_index, system_dir, task, opt1, opt2, opt3, score_tag):
     current_path = os.path.abspath(__file__)

@@ -1,0 +1,11 @@
+class	file_id	eval	ref	sys	llr	parameters	ref_status	hyp_status
+105	AlignFile	unmapped	{}	{start=417.43,end=430.95}	0.3721057792406806	{}	EMPTY_NA	adhere
+105	AlignFile	mapped	{start=428.81,end=443.74}	{start=431.94,end=446.68}	-0.0942033121208331	{iou=0.660}	adhere	adhere
+105	AlignFile	mapped	{start=474.65,end=503.64}	{start=447.31,end=491.21}	0.162294560638525	{iou=0.294}	adhere	adhere
+105	AlignFile	mapped	{start=519.13,end=534.71}	{start=491.72,end=535.96}	0.4503278933457539	{iou=0.352}	adhere	adhere
+105	AlignFile	unmapped	{}	{start=536.38,end=550.46}	-0.218709274785916	{}	EMPTY_NA	adhere
+105	AlignFile	unmapped	{}	{start=551.09,end=565.87}	-0.104485118744117	{}	EMPTY_NA	violate
+105	AlignFile	unmapped	{}	{start=566.2,end=609.96}	-0.6760302283003996	{}	EMPTY_NA	adhere
+105	AlignFile	unmapped	{start=622.93,end=633.84}	{}		{}	violate	EMPTY_NA
+105	AlignFile	mapped	{start=647.04,end=660.45}	{start=640.29,end=653.57}	-0.1937132180681171	{iou=0.324}	adhere	adhere
+105	AlignFile	unmapped	{}	{start=656.18,end=685.34}	-0.5780252749761348	{}	EMPTY_NA	adhere

@@ -1,0 +1,3 @@
+class	genre	metric	value	correctness_criteria
+105	all	AP	0.633	{iou=0.2}
+105	audio	AP	0.633	{iou=0.2}

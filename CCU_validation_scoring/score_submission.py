@@ -10,6 +10,23 @@ from .score_changepoint import *
 
 logger = logging.getLogger('SCORING')
 
+def get_contained_index(ref_row, hyp):
+        if (ref_row['Class'] != "noann"):
+                return([])
+        return hyp[(ref_row['file_id'] == hyp['file_id']) & (ref_row['start'] <= hyp['start']) & (ref_row['end'] >= hyp['end'])].index
+
+def pre_filter_system_in_noann_region(hyp, ref):
+        """
+        Remove any system instances WHOLLY Contained intial or final file noscore regions
+        """
+        for fileid in set(ref['file_id']):
+                sref = ref[ref['file_id'] == fileid]
+                print(sref)
+                hyp.drop(get_contained_index(sref.loc[sref.index[0]], hyp),  inplace = True)
+                hyp.drop(get_contained_index(sref.loc[sref.index[-1]], hyp), inplace = True)
+
+        return(hyp)
+
 def score_nd_submission_dir_cli(args):
 
 	try:
@@ -33,8 +50,8 @@ def score_nd_submission_dir_cli(args):
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "norms", text_gap = merge_ref_text_gap, time_gap = merge_ref_time_gap, merge_label = args.merge_ref_label)
 	if args.norm_list_file:
 		ref = process_subset_norm_emotion(args.norm_list_file, ref)
-	#print(f"post processesd Ref merge_label={args.merge_ref_label}")
-	#print(ref)
+	print(f"post processesd Ref merge_label={args.merge_ref_label}")
+	print(ref)
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "norms")
 	print("Pre merge hyp")
 	print(hyp)
@@ -55,9 +72,9 @@ def score_nd_submission_dir_cli(args):
 	else:
 		merge_sys_time_gap = None
 
-	merged_hyp = merge_sys_instance(hyp, merge_sys_text_gap, merge_sys_time_gap, args.combine_sys_llrs, args.merge_sys_label)
-	print("post processesd hyp")
-	print(merged_hyp)
+	hyp = pre_filter_system_in_noann_region(hyp, ref)
+
+	merged_hyp = merge_sys_instance(hyp, merge_sys_text_gap, merge_sys_time_gap, args.combine_sys_llrs, args.merge_sys_label, "norms")
 
 	thresholds = [float(i) for i in args.iou_thresholds.split(',')]
 
@@ -112,7 +129,9 @@ def score_ed_submission_dir_cli(args):
 	else:
 		merge_sys_time_gap = None
 
-	merged_hyp = merge_sys_instance(hyp, merge_sys_text_gap, merge_sys_time_gap, args.combine_sys_llrs, args.merge_sys_label)
+	hyp = pre_filter_system_in_noann_region(hyp, ref)
+
+	merged_hyp = merge_sys_instance(hyp, merge_sys_text_gap, merge_sys_time_gap, args.combine_sys_llrs, args.merge_sys_label, "emotions")
 
 	thresholds = [float(i) for i in args.iou_thresholds.split(',')]
 
