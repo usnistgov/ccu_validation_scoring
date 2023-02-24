@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from .utils import *
 import pdb
+import matplotlib.pyplot as plt
 
 logger = logging.getLogger('SCORING')
 
@@ -242,6 +243,35 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=[0.2], task=No
     return output,final_alignment_df
 
 
+def make_pr_curve(apScore, title = "", output_dir = "."):
+    """ Plot a Precision Recall Curve for the data.
+    
+    Parameters
+    ----------
+    apScore:
+        - { IoU: [**ap**, **precision** (1darray), **recall** (1darray) , .... }   
+
+    Returns
+    -------
+    """
+    
+    print("Making Precision-Recall Curves")
+    for iou, class_data in apScore.items():
+        for genre in set(class_data['type']):
+            out = os.path.join(output_dir, f"pr_IoU{iou}_{genre}.png")
+            fig, ax = plt.subplots(figsize=(8,6), constrained_layout=True)
+            ax.set(xlim=(0, 1), xticks=np.arange(0, 1, 0.1),
+                   ylim=(0, 1), yticks=np.arange(0, 1, 0.1))
+            ax.set_xlabel('Recall')
+            ax.set_ylabel('Precision')
+            ax.set_title(f"{title} IoU={iou} Genre={genre}")
+            for index, row in class_data[class_data['type'] == genre].iterrows():
+                ax.plot(row['recall'], row['precision'], linewidth=1.0, label=row['Class'])
+            print("    Saving plot {}".format(out))        
+            plt.legend(loc='upper right')
+            plt.savefig(out)
+            plt.close()
+
 def compute_multiclass_iou_pr(ref, hyp, iou_thresholds=0.2, mapping_df = None, class_type = None):
     """ Compute average precision score (AP) and precision-recall curves for
     each class at a set of specific temp. intersection-over-union (tIoU)
@@ -324,7 +354,7 @@ def compute_multiclass_iou_pr(ref, hyp, iou_thresholds=0.2, mapping_df = None, c
                 Class=final_combo_pruned.loc[i, "Class"],
                 iou_thresholds=iou_thresholds,
                 task=class_type)
-                    
+
         apScores.append(apScore)
         if final_combo_pruned.loc[i, "type"] == "all":
             alignment_df = pd.concat([alignment_df, alignment])
@@ -432,5 +462,5 @@ def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df):
                                      columns = ["class","file_id","eval","ref","sys","llr","parameters"] + (["ref_status","hyp_status"] if (class_type == "norm") else []))
     sumup_tad_system_level_scores(pr_iou_scores, iou_thresholds, class_type, output_dir)
     sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir)
-
-
+    make_pr_curve(pr_iou_scores, "title", output_dir)
+    
