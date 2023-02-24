@@ -675,7 +675,7 @@ def preprocess_valence_arousal_reference_df(reference_df, class_type):
 
 	return result_df
 
-def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time_gap = None, merge_label = None):
+def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time_gap = None, merge_label = None, dump_inputs = False, output_dir = None):
 	"""
 	For each task, read and merge corresponding data file, segment file and index file
 	and then preprocess the merged data frame
@@ -694,6 +694,8 @@ def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time
 		segment_file = os.path.join(ref_dir,"docs","segments.tab")
 		segment_df = read_dedupe_file(segment_file)
 		reference_df = data_df.merge(segment_df.merge(index_df))
+		if (dump_inputs):
+                        reference_df.to_csv(os.path.join(output_dir, "inputs.ref.read.tab"), sep = "\t", index = None)
 		reference_prune = check_remove_start_end_same(reference_df)
 		column_name = task.replace("s","")
 		if (task == 'norms'):
