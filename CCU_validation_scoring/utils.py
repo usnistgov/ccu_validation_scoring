@@ -231,7 +231,7 @@ def merge_sys_time_periods(result_dict, llr_value, allowed_gap, merge_label, tas
 
 def get_result_dict(sorted_df, merge_label, task):
         
-	print(f"get result_dict {merge_label}")
+	#print(f"get result_dict {merge_label}")
 	result_dict = {}
 	# if merge_label == "class":
 	# 	for i in sorted_df.Class.unique():
@@ -264,7 +264,7 @@ def get_result_dict(sorted_df, merge_label, task):
 
 def get_merged_dict(file_ids, data_frame, text_gap, time_gap, llr_value, merge_label, task):
 
-	print(f"----- Get merge dict {text_gap}, {time_gap}, {llr_value}, {merge_label}, {task}")
+	#print(f"----- Get merge dict {text_gap}, {time_gap}, {llr_value}, {merge_label}, {task}")
 	data_frame.set_index("file_id")
 	final_df = pd.DataFrame()
 	for file_id in file_ids:
@@ -305,7 +305,7 @@ def convert_merge_dict_df(file_id, results_array, merge_label, task):
 	llrs = []
 	types = []
         	
-	print(f"Converting {task}")
+	#print(f"Converting {task}")
 	for segment in results_array:
 		file_ids.append(file_id)
 		starts.append(float(segment['content']['start']))
@@ -333,7 +333,7 @@ def preprocess_submission_file(subm_dir, ref_dir, scoring_index, task):
 
 def merge_sys_instance(hyp, text_gap, time_gap, llr_value, merge_label, task):
         
-	print(f"Merging hyp {text_gap} {time_gap} {llr_value} {merge_label} {task}")
+	#print(f"Merging hyp {text_gap} {time_gap} {llr_value} {merge_label} {task}")
 	if text_gap is None and time_gap is None:
 		return hyp
 

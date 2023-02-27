@@ -171,8 +171,8 @@ def get_raw_file_id_dict(file_ids, data_frame, class_type, text_gap, time_gap, m
 		#print("Ref data to merge")
 		#print(sorted_df)
 		class_count_vote_dict = get_highest_vote_based_on_time(sorted_df, class_type)
-		print("\nClass count before time vote")
-		print(pprint.pprint(class_count_vote_dict))
+		#print("\nClass count before time vote")
+		#print(pprint.pprint(class_count_vote_dict))
                 
 		# Check file type to determine the gap of merging
 		if list(sorted_df["type"])[0] == "text" and text_gap is not None:
@@ -184,8 +184,8 @@ def get_raw_file_id_dict(file_ids, data_frame, class_type, text_gap, time_gap, m
 		if list(sorted_df["type"])[0] != "text" and time_gap is None:
 			vote_array_per_file = merge_vote_time_periods(class_count_vote_dict, class_type, merge_label=merge_label)		
                                         
-		print("Vote array after time merge")
-		print(pprint.pprint(vote_array_per_file, width=200))
+		#print("Vote array after time merge")
+		#print(pprint.pprint(vote_array_per_file, width=200))
 		#exit(0)
 		result_dict[file_id] = vote_array_per_file
 	return result_dict  
@@ -308,7 +308,7 @@ def get_highest_vote_based_on_time_orig(data_frame, class_type):
 					emo_dict[emo] = []
 				emo_dict[emo].append({'start' : row['start'], 'end' : row['end'] })
 
-	print(pprint.pprint(emo_dict))
+	#print(pprint.pprint(emo_dict))
 	return emo_dict  
 
 def get_highest_vote_based_on_time(data_frame, class_type):
@@ -451,21 +451,21 @@ def merge_vote_time_periods(vote_dict, class_type, allowed_gap = None, merge_lab
 	"""
 	result_array = []
 	for key in vote_dict.keys():
-		print("merge for key {}".format(key))
+		#print("merge for key {}".format(key))
 		time_array = vote_dict[key]
 		# Merge time array
 		merged_time_array = []
 		i = 0
 		while i < len(time_array):                        
 			first_time_period = time_array[i]
-			print("ftp={} i={} start={} merge_label={} allowed_gap={}".format(first_time_period, i, vote_dict[key][i]['start'], merge_label, allowed_gap))
+			#print("ftp={} i={} start={} merge_label={} allowed_gap={}".format(first_time_period, i, vote_dict[key][i]['start'], merge_label, allowed_gap))
 			current_time_period = time_array[i]
 			if (class_type == "norm"):
                                 status_dict = {}
                                 status_dict[current_time_period['status']] = 1  ### add the first one
 			if allowed_gap is not None:
-				if (i + 1 < len(time_array)):
-				        print(f"  test {current_time_period['end']} and {time_array[i + 1]['start']}")
+				#if (i + 1 < len(time_array)):
+				#        print(f"  test {current_time_period['end']} and {time_array[i + 1]['start']}")
 				while ((i + 1 < len(time_array)) and 
                                        (float(current_time_period['end']) + allowed_gap > float(time_array[i + 1]['start'])) and
                                        ((class_type == "emotion") or
@@ -473,10 +473,10 @@ def merge_vote_time_periods(vote_dict, class_type, allowed_gap = None, merge_lab
                                          ((merge_label is None or merge_label == 'class') or
                                           ((merge_label == 'class-status') and (current_time_period['status'] == time_array[i + 1]['status'])))))):
 					if (class_type == "norm"):
-					        print(f"  norm merge {i}+1 {time_array[i+1]} status={status_dict}")
+					        #print(f"  norm merge {i}+1 {time_array[i+1]} status={status_dict}")
 					        status_dict[time_array[i+1]['status']] = 1
-					elif (class_type == "emotion"):
-					        print(f"  emotion merge {i}+1 {time_array[i+1]}")
+					#elif (class_type == "emotion"):
+					        #print(f"  emotion merge {i}+1 {time_array[i+1]}")
 					i = i + 1
 					current_time_period = time_array[i]
 			info = {'Class': key, 'range': {'start': first_time_period['start'], 'end': current_time_period['end']}}

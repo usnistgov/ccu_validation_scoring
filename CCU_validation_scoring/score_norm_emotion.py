@@ -5,6 +5,7 @@ from re import M
 import numpy as np
 import pandas as pd
 from .utils import *
+from .aggregate import *
 import pdb
 import matplotlib.pyplot as plt
 
@@ -77,7 +78,7 @@ def compute_ious(row, ref, class_type):
     Compute the ref/hyp matching table
     """
     refs = ref.loc[ ref['file_id'] == row.file_id ].copy()
-    print(f"------Compute iOU class_type={class_type} Hyp={row.to_dict()}")
+    #print(f"------Compute iOU class_type={class_type} Hyp={row.to_dict()}")
     #print(ref)
     #exit
     # If there are no references for this hypothesis it's IoU is 0/FP
@@ -133,11 +134,11 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=[0.2], task=No
 
     final_alignment_df: instance alignment dataframe
     """
-    print(f"\n=========================================================================")
-    print(f"=============  compute_average_precision_tad Class={Class} =====================")
-    print(ref[((ref.Class == Class) | (ref.Class == 'NO_SCORE_REGION'))])
-    print(hyp[hyp.Class == Class])
-    print(f"=============  compute_average_precision_tad Class={Class} =====================")
+    #print(f"\n=========================================================================")
+    #print(f"=============  compute_average_precision_tad Class={Class} =====================")
+    #print(ref[((ref.Class == Class) | (ref.Class == 'NO_SCORE_REGION'))])
+    #print(hyp[hyp.Class == Class])
+    #print(f"=============  compute_average_precision_tad Class={Class} =====================")
 
 
     # REF has same amount of !score_regions for all runs, which need to be
@@ -158,19 +159,19 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=[0.2], task=No
     pd.set_option('display.max_rows', None)
     
     if (False):
-        print("------------Remove Noscores-----------")
-        print(ref.loc[ref.Class.str.contains('NO_SCORE_REGION') == True])
-        print("------------Residual Noscores-----------")
+        #print("------------Remove Noscores-----------")
+        #print(ref.loc[ref.Class.str.contains('NO_SCORE_REGION') == True])
+        #print("------------Residual Noscores-----------")
         ref = ref.loc[ref.Class.str.contains('NO_SCORE_REGION') == False]
-        print(ref)
+        #print(ref)
     
     # Compute IoU for all hyps incl. NO_SCORE_REGION
-    print("---  Computing_ious  -")
+    #print("---  Computing_ious  -")
     for idx, myhyp in hyp.iterrows():
         out.append(compute_ious(myhyp, ref, task))
     ihyp = pd.concat(out)
-    print("-----------------------")
-    print(out)
+    #print("-----------------------")
+    #print(out)
     #exit(1)
     
     # Capture naked false alarms that have no overlap with anything regardless of if it is a NO_SCORE_REGION
@@ -265,8 +266,12 @@ def make_pr_curve(apScore, title = "", output_dir = "."):
             ax.set_xlabel('Recall')
             ax.set_ylabel('Precision')
             ax.set_title(f"{title} IoU={iou} Genre={genre}")
+            dlist = []
             for index, row in class_data[class_data['type'] == genre].iterrows():
                 ax.plot(row['recall'], row['precision'], linewidth=1.0, label=row['Class'])
+                dlist.append(np.array([ row['recall'], row['precision'] ]))
+            agg_recall, agg_precision, agg_stderr = aggregate_xy(dlist)
+            ax.plot(agg_recall, agg_precision, linewidth=1.0, label="Average")
             print("    Saving plot {}".format(out))        
             plt.legend(loc='upper right')
             plt.savefig(out)
@@ -283,8 +288,12 @@ def make_pr_curve(apScore, title = "", output_dir = "."):
             ax.set_xlabel('Recall')
             ax.set_ylabel('Precision')
             ax.set_title(f"{title} IoU={iou} Class={Class}")
+            dlist = []
             for index, row in class_data[class_data['Class'] == Class].iterrows():
                 ax.plot(row['recall'], row['precision'], linewidth=1.0, label=row['type'])
+                dlist.append(np.array([ row['recall'], row['precision'] ]))
+            agg_recall, agg_precision, agg_stderr = aggregate_xy(dlist)
+            ax.plot(agg_recall, agg_precision, linewidth=1.0, label="Average")
             print("    Saving plot {}".format(out))        
             plt.legend(loc='upper right')
             plt.savefig(out)
