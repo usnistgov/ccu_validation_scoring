@@ -255,10 +255,10 @@ def make_pr_curve(apScore, title = "", output_dir = "."):
     -------
     """
     
-    print("Making Precision-Recall Curves")
+    print("Making Precision-Recall Curves by Genre")
     for iou, class_data in apScore.items():
         for genre in set(class_data['type']):
-            out = os.path.join(output_dir, f"pr_IoU{iou}_{genre}.png")
+            out = os.path.join(output_dir, f"pr_IoU_{iou}_Type_{genre}.png")
             fig, ax = plt.subplots(figsize=(8,6), constrained_layout=True)
             ax.set(xlim=(0, 1), xticks=np.arange(0, 1, 0.1),
                    ylim=(0, 1), yticks=np.arange(0, 1, 0.1))
@@ -267,6 +267,24 @@ def make_pr_curve(apScore, title = "", output_dir = "."):
             ax.set_title(f"{title} IoU={iou} Genre={genre}")
             for index, row in class_data[class_data['type'] == genre].iterrows():
                 ax.plot(row['recall'], row['precision'], linewidth=1.0, label=row['Class'])
+            print("    Saving plot {}".format(out))        
+            plt.legend(loc='upper right')
+            plt.savefig(out)
+            plt.close()
+
+    print("Making Precision-Recall Curves by Class")
+    ### Need to Re-order to be able to iterate over classes
+    for iou, class_data in apScore.items():
+        for Class in set(class_data['Class']):
+            out = os.path.join(output_dir, f"pr_IoU_{iou}_class_{Class}.png")
+            fig, ax = plt.subplots(figsize=(8,6), constrained_layout=True)
+            ax.set(xlim=(0, 1), xticks=np.arange(0, 1, 0.1),
+                   ylim=(0, 1), yticks=np.arange(0, 1, 0.1))
+            ax.set_xlabel('Recall')
+            ax.set_ylabel('Precision')
+            ax.set_title(f"{title} IoU={iou} Class={Class}")
+            for index, row in class_data[class_data['Class'] == Class].iterrows():
+                ax.plot(row['recall'], row['precision'], linewidth=1.0, label=row['type'])
             print("    Saving plot {}".format(out))        
             plt.legend(loc='upper right')
             plt.savefig(out)
