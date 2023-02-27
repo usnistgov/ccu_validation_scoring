@@ -21,7 +21,7 @@ def pre_filter_system_in_noann_region(hyp, ref):
         """
         for fileid in set(ref['file_id']):
                 sref = ref[ref['file_id'] == fileid]
-                print(sref)
+                #print(sref)
                 hyp.drop(get_contained_index(sref.loc[sref.index[0]], hyp),  inplace = True)
                 hyp.drop(get_contained_index(sref.loc[sref.index[-1]], hyp), inplace = True)
 
@@ -51,13 +51,13 @@ def score_nd_submission_dir_cli(args):
 
 	if args.norm_list_file:
 		ref = process_subset_norm_emotion(args.norm_list_file, ref)
-	print(f"post processesd Ref merge_label={args.merge_ref_label}")
-	print(ref)
+	#print(f"post processesd Ref merge_label={args.merge_ref_label}")
+	#print(ref)
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "norms")
 	if (args.dump_inputs):
                 hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.read.tab"), sep = "\t", index = None)
-	print("Pre merge hyp")
-	print(hyp)
+	#print("Pre merge hyp")
+	#print(hyp)
 
 	if args.mapping_submission_dir:
 		mapping_file = os.path.join(args.mapping_submission_dir, "nd.map.tab")
