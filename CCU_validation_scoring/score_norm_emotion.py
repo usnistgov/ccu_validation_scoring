@@ -258,7 +258,7 @@ def make_pr_curve(apScore, title = "", output_dir = "."):
     print("Making Precision-Recall Curves by Genre")
     for iou, class_data in apScore.items():
         for genre in set(class_data['type']):
-            out = os.path.join(output_dir, f"pr_IoU_{iou}_Type_{genre}.png")
+            out = os.path.join(output_dir, f"pr_IoU_{iou}_type_{genre}.png")
             fig, ax = plt.subplots(figsize=(8,6), constrained_layout=True)
             ax.set(xlim=(0, 1), xticks=np.arange(0, 1, 0.1),
                    ylim=(0, 1), yticks=np.arange(0, 1, 0.1))
