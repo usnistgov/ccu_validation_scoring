@@ -1,4 +1,4 @@
-import argparse
+ import argparse
 from . import validate_submission
 from . import validate_reference
 from . import score_submission
@@ -158,11 +158,16 @@ def main():
             score_nd_parser.error('The -xS or -aS argument requires the -lS and -vS')
         if "score_ed" in str(vars(args)['func']):
             score_ed_parser.error('The -xS or -aS argument requires the -lS and -vS')
-
+            
+    if "score_nd" in str(vars(args)['func']) or "score_ed" in str(vars(args)['func']):
+        ### This is to make sure the argument is parsable before anything is done.  The result is ignored for now.  The command throws an assertion error to exit
+        o = (score_submission.parse_thresholds(args.iou_thresholds))
+            
     if hasattr(args, 'func') and args.func:    
         args.func(args)
     else:
         parser.print_help()
 
+    
 if __name__ == '__main__':
     main()

@@ -1,6 +1,8 @@
 import os
 import pandas as pd
 import logging
+import re
+import pprint
 from .preprocess_reference import *
 from .utils import *
 from .build_statistic import *
@@ -9,6 +11,30 @@ from .score_valence_arousal import *
 from .score_changepoint import *
 
 logger = logging.getLogger('SCORING')
+
+def parse_thresholds(arg):
+    ''' Returns the parsed, normalized thresholds
+    '''
+    
+    dic = {}
+    succeed = True
+    for item in arg.split(','):
+        match = re.match('^([\d]*\.[\d]+|[\d]+|[\d]+\.)$', item)
+        if (match is not None):
+            dic['iou=' + match.group()] = {'metric': 'IoU', 'thresh': float(match.group())}
+        else:
+            match = re.match('^(iou|intersection)=([\d]*\.[\d]+|[\d]+|[\d]+\.)$', item)
+            if (match is not None):
+                met = match.group(1)
+                if met == "iou":
+                        met = "IoU"
+                dic[item] = { 'metric':met, 'thresh': float(match.group(2)) }
+            else:
+                succeed = False
+                print(f"Error: Could not parse the threshold {item}")
+                
+    assert succeed, "Parse thresholds failed"
+    return(dic)
 
 def get_contained_index(ref_row, hyp):
         if (ref_row['Class'] != "noann"):
@@ -79,7 +105,7 @@ def score_nd_submission_dir_cli(args):
 
 	merged_hyp = merge_sys_instance(hyp, merge_sys_text_gap, merge_sys_time_gap, args.combine_sys_llrs, args.merge_sys_label, "norms")
 
-	thresholds = [float(i) for i in args.iou_thresholds.split(',')]
+	thresholds = parse_thresholds(args.iou_thresholds)
 
 	statistic(args.reference_dir, ref, args.submission_dir, merged_hyp, args.output_dir, "norms")
 
@@ -139,7 +165,7 @@ def score_ed_submission_dir_cli(args):
 
 	merged_hyp = merge_sys_instance(hyp, merge_sys_text_gap, merge_sys_time_gap, args.combine_sys_llrs, args.merge_sys_label, "emotions")
 
-	thresholds = [float(i) for i in args.iou_thresholds.split(',')]
+	thresholds = parse_thresholds(args.iou_thresholds)
 
 	statistic(args.reference_dir, ref, args.submission_dir, merged_hyp, args.output_dir, "emotions")
 

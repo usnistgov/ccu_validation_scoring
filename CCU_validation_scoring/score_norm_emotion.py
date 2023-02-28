@@ -1,4 +1,5 @@
 import os
+import re
 import logging
 import pprint
 from re import M
@@ -100,7 +101,7 @@ def compute_ious(row, ref, class_type):
             rout['hyp_status'] = row.status
         return rout
 
-def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=[0.2], task=None):
+def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=["ioU=0.2"], task=None):
     """ 
     Compute average precision and precision-recall curve at specific IoU
     thresholds between ground truth and predictions data frames. If multiple
@@ -199,9 +200,10 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=[0.2], task=No
 
         
     # Determine TP/FP @ IoU-Threshold
-    for iout in iou_thresholds:        
-        ihyp[['tp', 'fp']] = [ 0, 1 ]        
-        ihyp.loc[~ihyp['start_ref'].isna() & (ihyp['IoU'] >= iout), ['tp', 'fp']] = [ 1, 0 ]
+    for iout, params in iou_thresholds.items():
+        ihyp[['tp', 'fp']] = [ 0, 1 ]
+        ihyp.loc[~ihyp['start_ref'].isna() & (ihyp[params['metric']] >= params['thresh']), ['tp', 'fp']] = [ 1, 0 ]
+        
         # Mark TP as FP for duplicate ref matches at lower CS
         nhyp = ihyp.duplicated(subset = ['file_id', 'start_ref', 'end_ref', 'tp'], keep='first')
         ihyp.loc[ihyp.loc[nhyp == True].index, ['tp', 'fp']] = [ 0, 1 ]
@@ -237,6 +239,7 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=[0.2], task=No
         alignment_df = pd.concat([alignment_df, ihyp])
         #print("-------------------------Alignment_df--------------");
         #print(alignment_df)
+        #exit(0)
         
     final_alignment_df = generate_alignment_file(ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False], alignment_df, task)
 
@@ -257,8 +260,9 @@ def make_pr_curve(apScore, title = "", output_dir = "."):
     
     print("Making Precision-Recall Curves by Genre")
     for iou, class_data in apScore.items():
+        iou_str = iou.replace('=', '_')
         for genre in set(class_data['type']):
-            out = os.path.join(output_dir, f"pr_IoU_{iou}_type_{genre}.png")
+            out = os.path.join(output_dir, f"pr_{iou_str}_type_{genre}.png")
             fig, ax = plt.subplots(figsize=(8,6), constrained_layout=True)
             ax.set(xlim=(0, 1), xticks=np.arange(0, 1, 0.1),
                    ylim=(0, 1), yticks=np.arange(0, 1, 0.1))
@@ -279,8 +283,9 @@ def make_pr_curve(apScore, title = "", output_dir = "."):
     print("Making Precision-Recall Curves by Class")
     ### Need to Re-order to be able to iterate over classes
     for iou, class_data in apScore.items():
+        iou_str = iou.replace('=', '_')
         for Class in set(class_data['Class']):
-            out = os.path.join(output_dir, f"pr_IoU_{iou}_class_{Class}.png")
+            out = os.path.join(output_dir, f"pr_{iou_str}_class_{Class}.png")
             fig, ax = plt.subplots(figsize=(8,6), constrained_layout=True)
             ax.set(xlim=(0, 1), xticks=np.arange(0, 1, 0.1),
                    ylim=(0, 1), yticks=np.arange(0, 1, 0.1))
@@ -413,7 +418,7 @@ def sumup_tad_system_level_scores(pr_iou_scores, iou_thresholds, class_type, out
         else:
             map_scores = pd.DataFrame([["NA","NA"]], columns=["genre","value"])
         
-        map_scores["correctness_criteria"] = "{iou=%s}" % iout
+        map_scores["correctness_criteria"] = "{%s}" % iout
         map_scores["metric"] = "mAP"
 
         if class_type == "norm":
@@ -436,7 +441,7 @@ def sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir):
         if prs["ap"].values[0] != "NA":
             prs.ap = prs.ap.round(3)
         prs["metric"] = "AP"        
-        prs["correctness_criteria"] = "{iou=%s}" % iout
+        prs["correctness_criteria"] = "{%s}" % iout
         prs = prs.rename(columns={'Class': 'class', 'type': 'genre', 'ap': 'value'})
         prs = prs[["class","genre","metric","value","correctness_criteria"]]
         prs_threshold = pd.concat([prs, prs_threshold])
@@ -463,10 +468,10 @@ def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df):
     mapping_df:
         norm mapping dataframe 
     """    
-
     # FIXME: Use a No score-region parameter
     tad_add_noscore_region(ref,hyp)
-
+    #print(ref)
+    #print(hyp)
     if len(ref) > 0:
         if len(hyp) > 0:
             pr_iou_scores, final_alignment_df = compute_multiclass_iou_pr(ref, hyp, iou_thresholds, mapping_df, class_type)
@@ -486,7 +491,8 @@ def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df):
     final_alignment_df_sorted = final_alignment_df.sort_values(by=['class', 'file_id', 'sort'])
     final_alignment_df_sorted.to_csv(os.path.join(output_dir, "instance_alignment.tab"), index = False, quoting=3, sep="\t", escapechar="\t",
                                      columns = ["class","file_id","eval","ref","sys","llr","parameters"] + (["ref_status","hyp_status"] if (class_type == "norm") else []))
+    generate_alignment_statistics(final_alignment_df, class_type)
+        
     sumup_tad_system_level_scores(pr_iou_scores, iou_thresholds, class_type, output_dir)
     sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir)
     make_pr_curve(pr_iou_scores, "title", output_dir)
-    

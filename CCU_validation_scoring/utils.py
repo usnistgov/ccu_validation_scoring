@@ -384,6 +384,49 @@ def replace_hyp_norm_mapping(sub_mapping_df, hyp, act):
 
 	return final_sub_hyp
 
+def generate_alignment_statistics(ali, task):
+        """
+        Generate statistics from the alignment file.
+        """
+        #print(ali)
+        #print(task)
+        if (task == 'norm'):
+                count_matrix = {}
+                for index, row in ali.iterrows():
+                        rstr = row['ref_status']
+                        hstr = row['hyp_status']
+                        if (rstr not in count_matrix):
+                                count_matrix[rstr] = {}
+                        if (hstr not in count_matrix[rstr]):
+                                count_matrix[rstr][hstr] = 0
+                                count_matrix[rstr][hstr] += 1
+                mat = pd.DataFrame(count_matrix)
+                print("\nInstance Count Matrix")
+                print(mat)
+                # print(mat.columns.tolist())
+                # print(mat.index.tolist())
+                # print(pd.wide_to_long(pd.DataFrame(count_matrix), '', mat.columns.tolist(), mat.index.tolist()))
+
+        at_MinLLR = {'overall': { 'cd': 0, 'fa': 0, 'md': 0} }
+        for index, row in ali.iterrows():
+                if (row['class'] not in at_MinLLR):
+                        at_MinLLR[row['class']] = { 'cd': 0, 'fa': 0, 'md': 0 } 
+                if (row['eval'] == "mapped"):
+                        at_MinLLR['overall']['cd'] += 1
+                        at_MinLLR[row['class']]['cd'] += 1
+                else:
+                        if (row['ref'] == '{}'):
+                                at_MinLLR['overall']['fa'] += 1
+                                at_MinLLR[row['class']]['fa'] += 1
+                        else:
+                                at_MinLLR['overall']['md'] += 1
+                                at_MinLLR[row['class']]['md'] += 1
+
+        print("\nat MinMLLR")
+        print(pd.DataFrame(at_MinLLR))
+        
+        #exit(0)
+
 def generate_alignment_file(ref, hyp, task):
 	"""
 	Generate alignment file using ihyp and ref
@@ -405,8 +448,8 @@ def generate_alignment_file(ref, hyp, task):
 		#print(ref_format)
 		
 		hyp_format = hyp.copy()
-		print("hyp_format")
-		print(hyp_format)
+		#print("hyp_format")
+		#print(hyp_format)
 
 		hyp_format['start_ref'] = [formatNumber(x) for x in hyp['start_ref']]
 		hyp_format['end_ref'] = [formatNumber(x) for x in hyp['end_ref']]

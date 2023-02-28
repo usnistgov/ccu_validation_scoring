@@ -21,7 +21,7 @@ def aggregate_xy(xy_list, method="average", average_resolution=500):
         Interpolated arrays of *precision*, *recall*, *stderr*.
     """
     #pdb.set_trace()
-    print(pprint.pprint(xy_list, width=200))
+    #print(pprint.pprint(xy_list, width=200))
     if xy_list:
         # Filtering data with missing value
         is_valid = lambda dc: dc[0].size != 0 and dc[1].size != 0 and np.all(~np.isnan(dc[0])) and np.all(~np.isnan(dc[1]))        
