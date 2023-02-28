@@ -70,7 +70,7 @@ def segment_iou(ref_start, ref_end, tgts):
     # Segment union.
     union = (tgts[1] - tgts[0]) + (ref_end - ref_start) - inter    
     tIoU = inter.astype(float) / union
-    return tIoU
+    return tIoU, inter, union, inter/union
 
 
 def compute_ious(row, ref, class_type):
@@ -86,7 +86,8 @@ def compute_ious(row, ref, class_type):
         return pd.DataFrame(data=[[row.Class, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0, row.status]],
             columns=['Class', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU', 'hyp_status'])
     else:        
-        refs['IoU'] = segment_iou(row.start, row.end, [refs.start, refs.end])
+        ### This computes the IoU regardless of the threshold for scoring.  We are going to 
+        refs['IoU'], refs['intersection'], refs['union'], ref['cb_IoU'] = segment_iou(row.start, row.end, [refs.start, refs.end])
         if (len(refs.loc[refs.IoU > 0]) > 1) & ("NO_SCORE_REGION" in refs.loc[refs.IoU == refs.IoU.max()].Class.values):
             #If the class of highest iou is no score region, then pick the second highest
             rmax = refs.loc[refs.IoU == refs.loc[refs.Class != "NO_SCORE_REGION"].IoU.max()]
@@ -227,7 +228,7 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=[0.2], task=No
 
         output[iout] = ap_interp(prec, rec), prec, rec
 
-        ihyp_fields = ["Class","type","tp","fp","file_id","start_ref","end_ref","start_hyp","end_hyp","IoU","llr"]
+        ihyp_fields = ["Class","type","tp","fp","file_id","start_ref","end_ref","start_hyp","end_hyp","IoU","llr","intersection", "union", "cb_IoU"]
         if (task == "norm"):
             ihyp_fields.append("status")
             ihyp_fields.append("hyp_status")
@@ -236,8 +237,6 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=[0.2], task=No
         alignment_df = pd.concat([alignment_df, ihyp])
         #print("-------------------------Alignment_df--------------");
         #print(alignment_df)
-
-
         
     final_alignment_df = generate_alignment_file(ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False], alignment_df, task)
 
