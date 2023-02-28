@@ -1,4 +1,4 @@
- import argparse
+import argparse
 from . import validate_submission
 from . import validate_reference
 from . import score_submission
