@@ -462,8 +462,9 @@ def generate_alignment_file(ref, hyp, task):
 		hyp_format["IoU_format"] = hyp_format["IoU"].apply(lambda x: "{:,.3f}".format(x))
 		hyp_format["intersection_format"] = hyp_format["intersection"].apply(lambda x: "{:,.3f}".format(x))
 		hyp_format["union_format"] = hyp_format["union"].apply(lambda x: "{:,.3f}".format(x))
+		hyp_format["cb_intersection_format"] = hyp_format["cb_intersection"].apply(lambda x: "{:,.3f}".format(x))
 		hyp_format["cb_IoU_format"] = hyp_format["cb_IoU"].apply(lambda x: "{:,.3f}".format(x))
-		hyp_format["parameters"] = '{iou=' + hyp_format["IoU_format"] + ',intersection=' + hyp_format["intersection_format"] + ',union=' + hyp_format["union_format"] + ',cb_iou=' + hyp_format["cb_IoU_format"] + '}'
+		hyp_format["parameters"] = '{iou=' + hyp_format["IoU_format"] + ',intersection=' + hyp_format["intersection_format"] + ',union=' + hyp_format["union_format"] + ',cb_intersection=' + hyp_format["cb_intersection_format"] + ',cb_iou=' + hyp_format["cb_IoU_format"] + '}'
 
 		hyp_format.loc[hyp_format["eval"] == "unmapped", "ref"] = "{}"
 		hyp_format.loc[hyp_format["eval"] == "unmapped", "parameters"] = "{}"

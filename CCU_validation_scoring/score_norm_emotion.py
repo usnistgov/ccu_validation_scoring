@@ -61,17 +61,28 @@ def segment_iou(ref_start, ref_end, tgts):
 
     Returns
     -------
-    tIoU : 1d array
-        Temporal intersection over union score of the N's candidate segments.
+    tIoU, intersection, union, collar_based_IoU : 1d array
+        Temporal intersection over union score of the N's candidate segments and sub measurements.
     """
+    #print("------------")
+    #print(ref_start) 
+    #print(ref_end)
+    #print(tgts)
+    ### normal IoU intersection
     tt1 = np.maximum(ref_start, tgts[0])
     tt2 = np.minimum(ref_end, tgts[1])    
-    # Segment intersection including Non-negative overlap score
-    inter = (tt2 - tt1).clip(0)    
+    inter = (tt2 - tt1).clip(0)    # Segment intersection including Non-negative overlap score
+
+    ### Collar based IoU has a different formula for the numerator
+    ## MIN(MAX(re,se),MIN(re,se)+collar)  -   MAX(MIN(rs,s),MAX(rs,ss)-collar))
+    collar = 15
+    cb_tt1 = np.maximum(np.minimum(ref_start,tgts[0]),np.maximum(ref_start,tgts[0])-collar)
+    cb_tt2 = np.minimum(np.maximum(ref_end  ,tgts[1]),np.minimum(ref_end,  tgts[1])+collar)
+    cb_inter = (cb_tt2 - cb_tt1).clip(0)    # Segment intersection including Non-negative overlap score
     # Segment union.
     union = (tgts[1] - tgts[0]) + (ref_end - ref_start) - inter    
     tIoU = inter.astype(float) / union
-    return tIoU, inter, union, inter/union
+    return tIoU, inter, union, cb_inter, cb_inter/union
 
 
 def compute_ious(row, ref, class_type):
@@ -88,7 +99,7 @@ def compute_ious(row, ref, class_type):
             columns=['Class', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU', 'hyp_status'])
     else:        
         ### This computes the IoU regardless of the threshold for scoring.  We are going to 
-        refs['IoU'], refs['intersection'], refs['union'], ref['cb_IoU'] = segment_iou(row.start, row.end, [refs.start, refs.end])
+        refs['IoU'], refs['intersection'], refs['union'], refs['cb_intersection'], refs['cb_IoU'] = segment_iou(row.start, row.end, [refs.start, refs.end])
         if (len(refs.loc[refs.IoU > 0]) > 1) & ("NO_SCORE_REGION" in refs.loc[refs.IoU == refs.IoU.max()].Class.values):
             #If the class of highest iou is no score region, then pick the second highest
             rmax = refs.loc[refs.IoU == refs.loc[refs.Class != "NO_SCORE_REGION"].IoU.max()]
@@ -230,7 +241,7 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=["ioU=0.2"], t
 
         output[iout] = ap_interp(prec, rec), prec, rec
 
-        ihyp_fields = ["Class","type","tp","fp","file_id","start_ref","end_ref","start_hyp","end_hyp","IoU","llr","intersection", "union", "cb_IoU"]
+        ihyp_fields = ["Class","type","tp","fp","file_id","start_ref","end_ref","start_hyp","end_hyp","IoU","llr","intersection", "union", "cb_intersection", "cb_IoU"]
         if (task == "norm"):
             ihyp_fields.append("status")
             ihyp_fields.append("hyp_status")

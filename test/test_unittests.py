@@ -1,8 +1,37 @@
 from CCU_validation_scoring.preprocess_reference import *
+from CCU_validation_scoring.score_norm_emotion import *
 import json
 import ast
 import unittest
 import pandas as pd
+
+
+class IOUTests(unittest.TestCase):
+    #  To test the IoU
+    # 
+
+    def setUp(self):
+        self.cases = [ { 'expected': [ [0.4], [30], [75], [55], [0.73333] ] ,
+                         'inputs': { 'ref': pd.DataFrame(data={'ref_start': [ 10 ], 'ref_end': [ 40 ]}) , 'tgts': [ 0.0, 75 ] } },
+                       { 'expected': [ [0.4], [30], [75], [55], [0.73333] ] ,
+                         'inputs': { 'ref': pd.DataFrame(data={'ref_start': [  0 ], 'ref_end': [ 75 ]}) , 'tgts': [ 10,  40] } },
+                       { 'expected': [ [0.8125], [65], [80], [80], [1.0] ] ,
+                         'inputs': { 'ref': pd.DataFrame(data={'ref_start': [ 10 ], 'ref_end': [ 80 ]}) , 'tgts': [ 0.0, 75 ] } },
+                       { 'expected': [ [0.8125], [65], [80], [80], [1.0] ] ,
+                         'inputs': { 'ref': pd.DataFrame(data={'ref_start': [  0 ], 'ref_end': [ 75 ]}) , 'tgts': [ 10,  80 ] } }, 
+                       { 'expected': [ [0.98], [49], [50], [50], [1.0] ] ,
+                         'inputs': { 'ref': pd.DataFrame(data={'ref_start': [  1 ], 'ref_end': [ 50 ]}) , 'tgts': [ 0,  50 ] } }]
+        
+    def test_iou(self):
+        for case in range(len(self.cases)):
+            ret = segment_iou(self.cases[case]['inputs']['ref']['ref_start'],
+                              self.cases[case]['inputs']['ref']['ref_end'],
+                              self.cases[case]['inputs']['tgts'])
+            [ self.assertAlmostEqual(exp, calc, 3, msg=f"IoU Check Fails: case={case} exp={exp} != calc={calc}")             for exp, calc in zip(self.cases[case]['expected'][0], ret[0]) ]
+            [ self.assertAlmostEqual(exp, calc, 3, msg=f"intersection Check Fails: case={case} exp={exp} != calc={calc}")    for exp, calc in zip(self.cases[case]['expected'][1], ret[1]) ]
+            [ self.assertAlmostEqual(exp, calc, 3, msg=f"union Check Fails: case={case} exp={exp} != calc={calc}")           for exp, calc in zip(self.cases[case]['expected'][2], ret[2]) ]
+            [ self.assertAlmostEqual(exp, calc, 3, msg=f"cb_intersection Check Fails: case={case} exp={exp} != calc={calc}") for exp, calc in zip(self.cases[case]['expected'][3], ret[3]) ]
+            [ self.assertAlmostEqual(exp, calc, 3, msg=f"cb_IoU Check Fails: case={case} exp={exp} != calc={calc}")          for exp, calc in zip(self.cases[case]['expected'][4], ret[4]) ]
 
 class NormDiscoveryTests(unittest.TestCase):
     #  For norm discovery, since there is only one annotation pass,
