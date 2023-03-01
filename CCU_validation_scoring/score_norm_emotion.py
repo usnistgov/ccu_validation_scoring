@@ -279,7 +279,7 @@ def make_pr_curve(apScore, title = "", output_dir = "."):
                    ylim=(0, 1), yticks=np.arange(0, 1, 0.1))
             ax.set_xlabel('Recall')
             ax.set_ylabel('Precision')
-            ax.set_title(f"{title} IoU={iou} Genre={genre}")
+            ax.set_title(f"{title} CC:{iou} Genre={genre}")
             dlist = []
             for index, row in class_data[class_data['type'] == genre].iterrows():
                 ax.plot(row['recall'], row['precision'], linewidth=1.0, label=row['Class'])
@@ -302,7 +302,7 @@ def make_pr_curve(apScore, title = "", output_dir = "."):
                    ylim=(0, 1), yticks=np.arange(0, 1, 0.1))
             ax.set_xlabel('Recall')
             ax.set_ylabel('Precision')
-            ax.set_title(f"{title} IoU={iou} Class={Class}")
+            ax.set_title(f"{title} CC:{iou} Class={Class}")
             dlist = []
             for index, row in class_data[class_data['Class'] == Class].iterrows():
                 ax.plot(row['recall'], row['precision'], linewidth=1.0, label=row['type'])

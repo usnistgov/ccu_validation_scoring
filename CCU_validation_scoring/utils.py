@@ -468,10 +468,13 @@ def generate_alignment_statistics(ali, task, output_dir):
         ax[1].set_title("Histogram (Mean={:.3f})".format(np.mean(data)))
         ax[1].set_xlabel("Collar-Based IoU")
         
-        llrs = sorted(ali[ali['eval'] == 'mapped']['llr'])
-        ax[2].hist(llrs, bins = np.linspace(llrs[0], llrs[-1], num=100, endpoint = True))
+        all_llrs = sorted(ali[ali['sys'] != '{}']['llr'])
+        bins = np.linspace(all_llrs[0], all_llrs[-1], num=100, endpoint = True)
+        ax[2].hist(ali[ (ali['sys'] != '{}') & (ali['eval'] == 'mapped') ]['llr'], bins = bins, histtype=u'step', color="#00FF00", label="Target")
+        ax[2].hist(ali[ (ali['sys'] != '{}') & (ali['eval'] != 'mapped') ]['llr'], bins = bins, histtype=u'step', color="#FF0000", label="NonTarget")
         ax[2].set_title("Histogram")
         ax[2].set_xlabel("LLR")
+        ax[2].legend(loc='upper right')
 
         # Show plot
         fig.savefig(os.path.join(output_dir, "instance_alignment_grqphs.png"))
