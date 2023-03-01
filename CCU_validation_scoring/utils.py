@@ -400,8 +400,10 @@ def generate_alignment_statistics(ali, task):
                         if (hstr not in count_matrix[rstr]):
                                 count_matrix[rstr][hstr] = 0
                         count_matrix[rstr][hstr] += 1
-                mat = pd.DataFrame(count_matrix)
-                print("\nInstance Count Matrix")
+                mat = pd.DataFrame(count_matrix).transpose()
+                mat = mat.sort_index()
+                mat = mat.reindex(sorted(mat.columns), axis=1)
+                print("\nInstance Count Matrix: Rows == Reference")
                 print(mat)
                 # print(mat.columns.tolist())
                 # print(mat.index.tolist())
