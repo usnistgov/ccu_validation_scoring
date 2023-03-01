@@ -399,7 +399,7 @@ def generate_alignment_statistics(ali, task):
                                 count_matrix[rstr] = {}
                         if (hstr not in count_matrix[rstr]):
                                 count_matrix[rstr][hstr] = 0
-                        count_matrix[rstr][hstr] += 1
+                count_matrix[rstr][hstr] += 1
                 mat = pd.DataFrame(count_matrix)
                 print("\nInstance Count Matrix")
                 print(mat)
