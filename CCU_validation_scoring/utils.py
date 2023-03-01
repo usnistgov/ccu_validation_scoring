@@ -5,6 +5,8 @@ import subprocess
 import logging
 import pandas as pd
 import numpy as np
+import re
+from matplotlib import pyplot as plt
 
 silence_string = "noann"
 
@@ -384,7 +386,7 @@ def replace_hyp_norm_mapping(sub_mapping_df, hyp, act):
 
 	return final_sub_hyp
 
-def generate_alignment_statistics(ali, task):
+def generate_alignment_statistics(ali, task, output_dir):
         """
         Generate statistics from the alignment file.
         """
@@ -395,40 +397,85 @@ def generate_alignment_statistics(ali, task):
                 for index, row in ali.iterrows():
                         rstr = row['ref_status']
                         hstr = row['hyp_status']
-                        if (rstr not in count_matrix):
-                                count_matrix[rstr] = {}
-                        if (hstr not in count_matrix[rstr]):
-                                count_matrix[rstr][hstr] = 0
-                        count_matrix[rstr][hstr] += 1
-                mat = pd.DataFrame(count_matrix).transpose()
-                mat = mat.sort_index()
-                mat = mat.reindex(sorted(mat.columns), axis=1)
+                        for Class in ['all', row['class']]:
+                                if (Class not in count_matrix):
+                                        count_matrix[Class] = {}
+                                if (rstr not in count_matrix[Class]):
+                                        count_matrix[Class][rstr] = {}
+                                if (hstr not in count_matrix[Class][rstr]):
+                                        count_matrix[Class][rstr][hstr] = 0
+                                count_matrix[Class][rstr][hstr] += 1
+                        
                 print("\nInstance Count Matrix: Rows == Reference")
-                print(mat)
                 # print(mat.columns.tolist())
                 # print(mat.index.tolist())
                 # print(pd.wide_to_long(pd.DataFrame(count_matrix), '', mat.columns.tolist(), mat.index.tolist()))
+                file1 = open(os.path.join(output_dir, "instance_alignment_status_confusion.csv"), 'w')
+                file1.write("class,ref_status,hyp_status,metric,value\n")
+                for Class in count_matrix.keys():
+                        print(f"Class = {Class}")
+                        mat = pd.DataFrame(count_matrix[Class]).transpose()
+                        mat = mat.sort_index()
+                        mat = mat.reindex(sorted(mat.columns), axis=1)
+                        print(mat)
+                        for rstr in count_matrix[Class].keys():
+                            for hstr in count_matrix[Class][rstr].keys():
+                                file1.write(f"{Class},{rstr},{hstr},number_instance,{count_matrix[Class][rstr][hstr]}\n")
+                file1.close()
 
-        at_MinLLR = {'overall': { 'cd': 0, 'fa': 0, 'md': 0} }
+        at_MinLLR = {'all': { 'cd': 0, 'fa': 0, 'md': 0} }
         for index, row in ali.iterrows():
                 if (row['class'] not in at_MinLLR):
                         at_MinLLR[row['class']] = { 'cd': 0, 'fa': 0, 'md': 0 } 
                 if (row['eval'] == "mapped"):
-                        at_MinLLR['overall']['cd'] += 1
+                        at_MinLLR['all']['cd'] += 1
                         at_MinLLR[row['class']]['cd'] += 1
                 else:
                         if (row['ref'] == '{}'):
-                                at_MinLLR['overall']['fa'] += 1
+                                at_MinLLR['all']['fa'] += 1
                                 at_MinLLR[row['class']]['fa'] += 1
                         else:
-                                at_MinLLR['overall']['md'] += 1
+                                at_MinLLR['all']['md'] += 1
                                 at_MinLLR[row['class']]['md'] += 1
 
         print("\nat MinMLLR")
         print(pd.DataFrame(at_MinLLR))
-        
-        #exit(0)
+        file1 = open(os.path.join(output_dir, "instance_alignment_class_stats.csv"), 'w')
+        file1.write("class,metric,value\n")
+        for Class in at_MinLLR.keys():
+                for met in at_MinLLR[Class].keys():
+                        file1.write(f"{Class},number_{met},{at_MinLLR[Class][met]}\n")
+        file1.close()
 
+        def get_val(str, attrib):
+                match = re.match('.*[{,]('+attrib+')=([^,}]+)', str)
+                if (match is not None):
+                        return(match.group(2))
+
+        get_val("{iou=0.001,intersection=1.000,union=825.000}","iou")
+        get_val("{iou=0.001,intersection=1.000,union=825.000}","intersection")
+        get_val("{iou=0.001,intersection=1.000,union=825.000}","union")
+        print("IoU of mapped submissions")
+
+        fig, ax = plt.subplots(1, 3, figsize = (9, 4))
+        data = sorted([ float(get_val(x,"iou")) for x in ali[ali['eval'] == 'mapped']['parameters'] ])
+        ax[0].hist(data, bins = np.linspace(0, 1, num=100, endpoint = True))
+        ax[0].set_title("Histogram (Mean={:.3f})".format(np.mean(data)))
+        ax[0].set_xlabel("IoU")
+  
+        data = sorted([ float(get_val(x,"cb_iou")) for x in ali[ali['eval'] == 'mapped']['parameters'] ])
+        ax[1].hist(data, bins = np.linspace(0, 1, num=100, endpoint = True))
+        ax[1].set_title("Histogram (Mean={:.3f})".format(np.mean(data)))
+        ax[1].set_xlabel("Collar-Based IoU")
+        
+        llrs = sorted(ali[ali['eval'] == 'mapped']['llr'])
+        ax[2].hist(llrs, bins = np.linspace(llrs[0], llrs[-1], num=100, endpoint = True))
+        ax[2].set_title("Histogram")
+        ax[2].set_xlabel("LLR")
+
+        # Show plot
+        fig.savefig(os.path.join(output_dir, "instance_alignment_grqphs.png"))
+        
 def generate_alignment_file(ref, hyp, task):
 	"""
 	Generate alignment file using ihyp and ref
