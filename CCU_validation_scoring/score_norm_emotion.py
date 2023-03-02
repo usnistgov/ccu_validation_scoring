@@ -1,4 +1,5 @@
 import os
+import pprint
 import logging
 from re import M
 import numpy as np
@@ -75,10 +76,9 @@ def compute_ious(row, ref):
     Compute the ref/hyp matching table
     """
     refs = ref.loc[ ref['file_id'] == row.file_id ].copy()    
-    # If there are no references for this hypothesis it's IoU is 0/FP
     if len(refs) == 0:
-        return pd.DataFrame(data=[[row.Class, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0]],
-            columns=['Class', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU'])
+        return pd.DataFrame(data=[[row.Class, None, None, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0, row.status]],
+            columns=['Class', 'Class_type', 'type', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU', 'hyp_status'])
     else:        
         refs['IoU'] = segment_iou(row.start, row.end, [refs.start, refs.end])
         if (len(refs.loc[refs.IoU > 0]) > 1) & ("NO_SCORE_REGION" in refs.loc[refs.IoU == refs.IoU.max()].Class.values):
@@ -152,7 +152,8 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=[0.2], task=No
     
     # Compute IoU for all hyps incl. NO_SCORE_REGION
     for idx, myhyp in hyp.iterrows():
-        out.append(compute_ious(myhyp, ref))
+        o = compute_ious(myhyp, ref)
+        out.append(o)
     ihyp = pd.concat(out)
     #print("-----------------------")
     #print(ihyp)
