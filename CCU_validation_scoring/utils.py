@@ -410,8 +410,8 @@ def generate_alignment_statistics(ali, task, output_dir):
                 # print(mat.columns.tolist())
                 # print(mat.index.tolist())
                 # print(pd.wide_to_long(pd.DataFrame(count_matrix), '', mat.columns.tolist(), mat.index.tolist()))
-                file1 = open(os.path.join(output_dir, "instance_alignment_status_confusion.csv"), 'w')
-                file1.write("class,ref_status,hyp_status,metric,value\n")
+                file1 = open(os.path.join(output_dir, "instance_alignment_status_confusion.tab"), 'w')
+                file1.write("class	ref_status	hyp_status	metric	value\n")
                 for Class in count_matrix.keys():
                         print(f"Class = {Class}")
                         mat = pd.DataFrame(count_matrix[Class]).transpose()
@@ -420,7 +420,7 @@ def generate_alignment_statistics(ali, task, output_dir):
                         print(mat)
                         for rstr in count_matrix[Class].keys():
                             for hstr in count_matrix[Class][rstr].keys():
-                                file1.write(f"{Class},{rstr},{hstr},number_instance,{count_matrix[Class][rstr][hstr]}\n")
+                                file1.write(f"{Class}	{rstr}	{hstr}	number_instance	{count_matrix[Class][rstr][hstr]}\n")
                 file1.close()
 
         at_MinLLR = {'all': { 'cd': 0, 'fa': 0, 'md': 0} }
@@ -440,11 +440,11 @@ def generate_alignment_statistics(ali, task, output_dir):
 
         print("\nat MinMLLR")
         print(pd.DataFrame(at_MinLLR))
-        file1 = open(os.path.join(output_dir, "instance_alignment_class_stats.csv"), 'w')
-        file1.write("class,metric,value\n")
+        file1 = open(os.path.join(output_dir, "instance_alignment_class_stats.tab"), 'w')
+        file1.write("class	metric	value\n")
         for Class in at_MinLLR.keys():
                 for met in at_MinLLR[Class].keys():
-                        file1.write(f"{Class},number_{met},{at_MinLLR[Class][met]}\n")
+                        file1.write(f"{Class}	number_{met}	{at_MinLLR[Class][met]}\n")
         file1.close()
 
         def get_val(str, attrib):
