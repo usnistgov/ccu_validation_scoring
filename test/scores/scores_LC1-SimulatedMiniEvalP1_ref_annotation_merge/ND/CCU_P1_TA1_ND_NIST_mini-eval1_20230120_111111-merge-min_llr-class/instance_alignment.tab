@@ -1,16 +1,16 @@
 class	file_id	eval	ref	sys	llr	parameters	ref_status	hyp_status
-001	M010005NJ	mapped	{start=0,end=15}	{start=1,end=16}	0.6	{iou=0.875}	adhere,violate	adhere,violate
-001	M010005NJ	mapped	{start=20,end=27}	{start=23,end=31}	0.9	{iou=0.364}	adhere	violate
+001	M010005NJ	mapped	{start=0,end=15}	{start=1,end=16}	0.6	{iou=0.875,intersection=14.000,union=16.000,cb_intersection=16.000,cb_iou=1.000}	adhere,violate	adhere,violate
+001	M010005NJ	mapped	{start=20,end=27}	{start=23,end=31}	0.9	{iou=0.364,intersection=4.000,union=11.000,cb_intersection=11.000,cb_iou=1.000}	adhere	violate
 001	M010005NJ	unmapped	{start=36.8,end=41}	{}		{}	adhere	EMPTY_NA
-001	M010005NJ	mapped	{start=44,end=50}	{start=43,end=50}	0.7	{iou=0.857}	adhere	adhere,violate
-002	M01000G2T	mapped	{start=0,end=20}	{start=1,end=32}	0.4	{iou=0.594}	adhere,violate	adhere,violate
+001	M010005NJ	mapped	{start=44,end=50}	{start=43,end=50}	0.7	{iou=0.857,intersection=6.000,union=7.000,cb_intersection=7.000,cb_iou=1.000}	adhere	adhere,violate
+002	M01000G2T	mapped	{start=0,end=20}	{start=1,end=32}	0.4	{iou=0.594,intersection=19.000,union=32.000,cb_intersection=32.000,cb_iou=1.000}	adhere,violate	adhere,violate
 002	M01000G2T	unmapped	{start=25.5,end=30}	{}		{}	adhere	EMPTY_NA
 002	M01000G2T	unmapped	{start=31,end=35}	{}		{}	violate	EMPTY_NA
-002	M01000G2T	mapped	{start=36,end=40}	{start=36,end=40}	0.6	{iou=1.000}	violate	violate
-002	M01000G2T	mapped	{start=42,end=45}	{start=44,end=47}	0.7	{iou=0.200}	violate	adhere
+002	M01000G2T	mapped	{start=36,end=40}	{start=36,end=40}	0.6	{iou=1.000,intersection=4.000,union=4.000,cb_intersection=4.000,cb_iou=1.000}	violate	violate
+002	M01000G2T	mapped	{start=42,end=45}	{start=44,end=47}	0.7	{iou=0.200,intersection=1.000,union=5.000,cb_intersection=5.000,cb_iou=1.000}	violate	adhere
 002	M01000G2T	unmapped	{start=46,end=49}	{}		{}	violate	EMPTY_NA
-002	M01000H0B	mapped	{start=0,end=70}	{start=0,end=70}	0.8	{iou=1.000}	adhere	adhere
+002	M01000H0B	mapped	{start=0,end=70}	{start=0,end=70}	0.8	{iou=1.000,intersection=70.000,union=70.000,cb_intersection=70.000,cb_iou=1.000}	adhere	adhere
 002	M01000H0B	unmapped	{start=80,end=150}	{}		{}	violate	EMPTY_NA
-002	M01000H0B	mapped	{start=220,end=280}	{start=120,end=320}	0.7	{iou=0.300}	adhere	adhere,violate
+002	M01000H0B	mapped	{start=220,end=280}	{start=120,end=320}	0.7	{iou=0.300,intersection=60.000,union=200.000,cb_intersection=90.000,cb_iou=0.450}	adhere	adhere,violate
 002	M01000H0B	unmapped	{start=290,end=350}	{}		{}	adhere	EMPTY_NA
-002	M01000H0B	mapped	{start=360,end=500}	{start=370,end=490}	0.6	{iou=0.857}	adhere,violate	adhere,violate
+002	M01000H0B	mapped	{start=360,end=500}	{start=370,end=490}	0.6	{iou=0.857,intersection=120.000,union=140.000,cb_intersection=140.000,cb_iou=1.000}	adhere,violate	adhere,violate

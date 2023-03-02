@@ -1,8 +1,8 @@
 class	file_id	eval	ref	sys	llr	parameters	ref_status	hyp_status
-001	M010005QD	mapped	{start=45.2,end=60.2}	{start=45.2,end=60.2}	1.5	{iou=1.000}	adhere	adhere
-001	M010015BY	mapped	{start=1104.567,end=1119.567}	{start=1104.567,end=1119.567}	1.5	{iou=1.000}	adhere	adhere
-001	M010019QD	mapped	{start=45,end=60}	{start=45,end=60}	1.5	{iou=1.000}	adhere	adhere
-001	M010029SP	mapped	{start=200,end=215}	{start=200,end=215}	1.5	{iou=1.000}	adhere	adhere
+001	M010005QD	mapped	{start=45.2,end=60.2}	{start=45.2,end=60.2}	1.5	{iou=1.000,intersection=15.000,union=15.000,cb_intersection=15.000,cb_iou=1.000}	adhere	adhere
+001	M010015BY	mapped	{start=1104.567,end=1119.567}	{start=1104.567,end=1119.567}	1.5	{iou=1.000,intersection=15.000,union=15.000,cb_intersection=15.000,cb_iou=1.000}	adhere	adhere
+001	M010019QD	mapped	{start=45,end=60}	{start=45,end=60}	1.5	{iou=1.000,intersection=15.000,union=15.000,cb_intersection=15.000,cb_iou=1.000}	adhere	adhere
+001	M010029SP	mapped	{start=200,end=215}	{start=200,end=215}	1.5	{iou=1.000,intersection=15.000,union=15.000,cb_intersection=15.000,cb_iou=1.000}	adhere	adhere
 002	M010005QD	unmapped	{start=45.2,end=60.2}	{}		{}	violate	EMPTY_NA
 002	M010015BY	unmapped	{start=1104.567,end=1119.567}	{}		{}	violate	EMPTY_NA
 002	M010019QD	unmapped	{start=45,end=60}	{}		{}	violate	EMPTY_NA

@@ -1,18 +1,18 @@
 class	file_id	eval	ref	sys	llr	parameters	ref_status	hyp_status
 003	M010005NJ	unmapped	{}	{start=1,end=4}	0.6	{}	EMPTY_NA	adhere
-003	M010005NJ	mapped	{start=0,end=15}	{start=6,end=10}	0.8	{iou=0.267}	adhere,violate	violate
+003	M010005NJ	mapped	{start=0,end=15}	{start=6,end=10}	0.8	{iou=0.267,intersection=4.000,union=15.000,cb_intersection=15.000,cb_iou=1.000}	adhere,violate	violate
 003	M010005NJ	unmapped	{}	{start=12,end=16}	0.9	{}	EMPTY_NA	adhere
-003	M010005NJ	mapped	{start=20,end=27}	{start=23,end=31}	0.9	{iou=0.364}	adhere	violate
+003	M010005NJ	mapped	{start=20,end=27}	{start=23,end=31}	0.9	{iou=0.364,intersection=4.000,union=11.000,cb_intersection=11.000,cb_iou=1.000}	adhere	violate
 003	M010005NJ	unmapped	{start=36.8,end=41}	{}		{}	adhere	EMPTY_NA
 003	M010005NJ	unmapped	{}	{start=43,end=47}	0.7	{}	EMPTY_NA	adhere
-003	M010005NJ	mapped	{start=44,end=50}	{start=48,end=50}	0.9	{iou=0.333}	adhere	violate
+003	M010005NJ	mapped	{start=44,end=50}	{start=48,end=50}	0.9	{iou=0.333,intersection=2.000,union=6.000,cb_intersection=6.000,cb_iou=1.000}	adhere	violate
 004	M010005NJ	unmapped	{}	{start=1,end=4}	0.6	{}	EMPTY_NA	adhere
-004	M010005NJ	mapped	{start=0,end=15}	{start=6,end=10}	0.8	{iou=0.267}	adhere,violate	violate
+004	M010005NJ	mapped	{start=0,end=15}	{start=6,end=10}	0.8	{iou=0.267,intersection=4.000,union=15.000,cb_intersection=15.000,cb_iou=1.000}	adhere,violate	violate
 004	M010005NJ	unmapped	{}	{start=12,end=16}	0.9	{}	EMPTY_NA	adhere
-004	M010005NJ	mapped	{start=20,end=27}	{start=23,end=31}	0.9	{iou=0.364}	adhere	violate
+004	M010005NJ	mapped	{start=20,end=27}	{start=23,end=31}	0.9	{iou=0.364,intersection=4.000,union=11.000,cb_intersection=11.000,cb_iou=1.000}	adhere	violate
 004	M010005NJ	unmapped	{start=36.8,end=41}	{}		{}	adhere	EMPTY_NA
 004	M010005NJ	unmapped	{}	{start=43,end=47}	0.7	{}	EMPTY_NA	adhere
-004	M010005NJ	mapped	{start=44,end=50}	{start=48,end=50}	0.9	{iou=0.333}	adhere	violate
+004	M010005NJ	mapped	{start=44,end=50}	{start=48,end=50}	0.9	{iou=0.333,intersection=2.000,union=6.000,cb_intersection=6.000,cb_iou=1.000}	adhere	violate
 005	M010005NJ	unmapped	{start=0,end=15}	{}		{}	adhere,violate	EMPTY_NA
 005	M010005NJ	unmapped	{start=20,end=27}	{}		{}	adhere	EMPTY_NA
 005	M010005NJ	unmapped	{start=36.8,end=41}	{}		{}	adhere	EMPTY_NA
