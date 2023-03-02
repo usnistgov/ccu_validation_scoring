@@ -486,6 +486,7 @@ def generate_alignment_statistics(ali, task, output_dir):
 
         # Show plot
         fig.savefig(os.path.join(output_dir, "instance_alignment_grqphs.png"))
+        plt.close()
         
 def generate_alignment_file(ref, hyp, task):
 	"""
