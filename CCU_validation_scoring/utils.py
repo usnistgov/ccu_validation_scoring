@@ -452,29 +452,37 @@ def generate_alignment_statistics(ali, task, output_dir):
                 if (match is not None):
                         return(match.group(2))
 
-        get_val("{iou=0.001,intersection=1.000,union=825.000}","iou")
-        get_val("{iou=0.001,intersection=1.000,union=825.000}","intersection")
-        get_val("{iou=0.001,intersection=1.000,union=825.000}","union")
-        print("IoU of mapped submissions")
+        #get_val("{iou=0.001,intersection=1.000,union=825.000}","iou")
+        #get_val("{iou=0.001,intersection=1.000,union=825.000}","intersection")
+        #get_val("{iou=0.001,intersection=1.000,union=825.000}","union")
 
+        all_llrs = sorted(ali[ali['sys'] != '{}']['llr'])
         fig, ax = plt.subplots(1, 3, figsize = (9, 4))
         data = sorted([ float(get_val(x,"iou")) for x in ali[ali['eval'] == 'mapped']['parameters'] ])
-        ax[0].hist(data, bins = np.linspace(0, 1, num=100, endpoint = True))
-        ax[0].set_title("Histogram (Mean={:.3f})".format(np.mean(data)))
+        if (len(all_llrs) >= 2):
+                ax[0].hist(data, bins = np.linspace(0, 1, num=100, endpoint = True))
+                ax[0].set_title("Histogram (Mean={:.3f})".format(np.mean(data)))
+        else:
+                ax[0].set_title("NO SYSTEM OUTPUT")               
         ax[0].set_xlabel("IoU")
   
         data = sorted([ float(get_val(x,"cb_iou")) for x in ali[ali['eval'] == 'mapped']['parameters'] ])
-        ax[1].hist(data, bins = np.linspace(0, 1, num=100, endpoint = True))
-        ax[1].set_title("Histogram (Mean={:.3f})".format(np.mean(data)))
+        if (len(all_llrs) >= 2):
+                ax[1].hist(data, bins = np.linspace(0, 1, num=100, endpoint = True))
+                ax[1].set_title("Histogram (Mean={:.3f})".format(np.mean(data)))
+        else:
+                ax[1].set_title("NO SYSTEM OUTPUT")               
         ax[1].set_xlabel("Collar-Based IoU")
         
-        all_llrs = sorted(ali[ali['sys'] != '{}']['llr'])
-        bins = np.linspace(all_llrs[0], all_llrs[-1], num=100, endpoint = True)
-        ax[2].hist(ali[ (ali['sys'] != '{}') & (ali['eval'] == 'mapped') ]['llr'], bins = bins, histtype=u'step', color="#00FF00", label="Target")
-        ax[2].hist(ali[ (ali['sys'] != '{}') & (ali['eval'] != 'mapped') ]['llr'], bins = bins, histtype=u'step', color="#FF0000", label="NonTarget")
-        ax[2].set_title("Histogram")
+        if (len(all_llrs) >= 2):
+                bins = np.linspace(all_llrs[0], all_llrs[-1], num=100, endpoint = True)
+                ax[2].hist(ali[ (ali['sys'] != '{}') & (ali['eval'] == 'mapped') ]['llr'], bins = bins, histtype=u'step', color="#00FF00", label="Target")
+                ax[2].hist(ali[ (ali['sys'] != '{}') & (ali['eval'] != 'mapped') ]['llr'], bins = bins, histtype=u'step', color="#FF0000", label="NonTarget")
+                ax[2].legend(loc='upper right')
+                ax[2].set_title("Histogram")
+        else:
+                ax[2].set_title("NO SYSTEM OUTPUT")
         ax[2].set_xlabel("LLR")
-        ax[2].legend(loc='upper right')
 
         # Show plot
         fig.savefig(os.path.join(output_dir, "instance_alignment_grqphs.png"))
