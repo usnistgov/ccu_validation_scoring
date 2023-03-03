@@ -695,7 +695,7 @@ def make_pr_curve(apScore, title = "", output_dir = "."):
                    ylim=(0, 1), yticks=np.arange(0, 1, 0.1))
             ax.set_xlabel('Recall')
             ax.set_ylabel('Precision')
-            ax.set_title(f"{title} CC:{iou} Genre={genre}")
+            ax.set_title(f"{title}, Correctness:{iou}, Type={genre}")
             dlist = []
             for index, row in class_data[class_data['type'] == genre].iterrows():
                 ax.plot(row['recall'], row['precision'], linewidth=1.0, label=row['Class'])
@@ -718,13 +718,17 @@ def make_pr_curve(apScore, title = "", output_dir = "."):
                    ylim=(0, 1), yticks=np.arange(0, 1, 0.1))
             ax.set_xlabel('Recall')
             ax.set_ylabel('Precision')
-            ax.set_title(f"{title} CC:{iou} Class={Class}")
+            ax.set_title(f"{title} Correctness:{iou} Class={Class}")
             dlist = []
+            has_all = False
             for index, row in class_data[class_data['Class'] == Class].iterrows():
                 ax.plot(row['recall'], row['precision'], linewidth=1.0, label=row['type'])
                 dlist.append(np.array([ row['recall'], row['precision'] ]))
-            agg_recall, agg_precision, agg_stderr = aggregate_xy(dlist)
-            ax.plot(agg_recall, agg_precision, linewidth=1.0, label="Average")
+                if (row['type'] == "all"):
+                        has_all = True
+            if (not has_all):                       
+                    agg_recall, agg_precision, agg_stderr = aggregate_xy(dlist)
+                    ax.plot(agg_recall, agg_precision, linewidth=1.0, label="Average")
             #print("    Saving plot {}".format(out))        
             plt.legend(loc='upper right')
             plt.savefig(out)
