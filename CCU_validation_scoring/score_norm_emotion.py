@@ -90,6 +90,7 @@ def compute_ious(row, ref, class_type):
     """
     Compute the ref/hyp matching table
     """
+    refs = ref.loc[ ref['file_id'] == row.file_id ].copy()
     if len(refs) == 0:
         return pd.DataFrame(data=[[row.Class, None, None, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0, row.status]],
             columns=['Class', 'Class_type', 'type', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU', 'hyp_status'])
