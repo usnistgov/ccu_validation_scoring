@@ -1,5 +1,6 @@
 import os
 import re
+import pprint
 import logging
 import pprint
 from re import M
@@ -89,14 +90,9 @@ def compute_ious(row, ref, class_type):
     """
     Compute the ref/hyp matching table
     """
-    refs = ref.loc[ ref['file_id'] == row.file_id ].copy()
-    #print(f"------Compute iOU class_type={class_type} Hyp={row.to_dict()}")
-    #print(ref)
-    #exit
-    # If there are no references for this hypothesis it's IoU is 0/FP
     if len(refs) == 0:
-        return pd.DataFrame(data=[[row.Class, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0, row.status]],
-            columns=['Class', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU', 'hyp_status'])
+        return pd.DataFrame(data=[[row.Class, None, None, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0, row.status]],
+            columns=['Class', 'Class_type', 'type', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU', 'hyp_status'])
     else:        
         ### This computes the IoU regardless of the threshold for scoring.  We are going to 
         refs['IoU'], refs['intersection'], refs['union'], refs['cb_intersection'], refs['cb_IoU'] = segment_iou(row.start, row.end, [refs.start, refs.end])
