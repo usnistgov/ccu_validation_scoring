@@ -19,11 +19,11 @@ def parse_thresholds(arg):
     dic = {}
     succeed = True
     for item in arg.split(','):
-        match = re.match('^([\d]*\.[\d]+|[\d]+|[\d]+\.)$', item)
+        match = re.match('^([\\d]*\\.[\\d]+|[\\d]+|[\\d]+\\.)$', item)
         if (match is not None):
             dic['iou=' + match.group()] = {'metric': 'IoU', 'thresh': float(match.group())}
         else:
-            match = re.match('^(iou|intersection)=([\d]*\.[\d]+|[\d]+|[\d]+\.)$', item)
+            match = re.match('^(iou|intersection)=([\\d]*\\.[\\d]+|[\\d]+|[\\d]+\\.)$', item)
             if (match is not None):
                 met = match.group(1)
                 if met == "iou":
