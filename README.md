@@ -1,8 +1,8 @@
 # Computational Cultural Understanding (CCU) Evaluation Validation and Scoring Toolkit
 
-**Version:** 1.1.0
+**Version:** 1.1.1
 
-**Date:** November 10th, 2022
+**Date:** March 3, 2023
 
 
 ## Table of Content
@@ -48,7 +48,7 @@ The tools mentioned above are included as a Python package. They can be run unde
 - [Pathlib >= 1.0.1](https://pypi.org/project/pathlib/)
 - [Numpy >= 1.22.3](https://numpy.org/install/)
 - [Pytest >= 7.1.3](https://docs.pytest.org/en/7.1.x/getting-started.html)
-
+- [matplotlib >= 3.5.2](https://matplotlib.org/stable/users/getting_started/index.html#installation-quick-start)
 
 ### <a name="installation">Installation</a>
 
