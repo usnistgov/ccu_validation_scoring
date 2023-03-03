@@ -253,64 +253,6 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=["ioU=0.2"], t
 
     return output,final_alignment_df
 
-
-def make_pr_curve(apScore, title = "", output_dir = "."):
-    """ Plot a Precision Recall Curve for the data.
-    
-    Parameters
-    ----------
-    apScore:
-        - { IoU: [**ap**, **precision** (1darray), **recall** (1darray) , .... }   
-
-    Returns
-    -------
-    """
-    
-    print("Making Precision-Recall Curves by Genre")
-    for iou, class_data in apScore.items():
-        iou_str = iou.replace('=', '_')
-        for genre in set(class_data['type']):
-            out = os.path.join(output_dir, f"pr_{iou_str}_type_{genre}.png")
-            fig, ax = plt.subplots(figsize=(8,6), constrained_layout=True)
-            ax.set(xlim=(0, 1), xticks=np.arange(0, 1, 0.1),
-                   ylim=(0, 1), yticks=np.arange(0, 1, 0.1))
-            ax.set_xlabel('Recall')
-            ax.set_ylabel('Precision')
-            ax.set_title(f"{title} CC:{iou} Genre={genre}")
-            dlist = []
-            for index, row in class_data[class_data['type'] == genre].iterrows():
-                ax.plot(row['recall'], row['precision'], linewidth=1.0, label=row['Class'])
-                dlist.append(np.array([ row['recall'], row['precision'] ]))
-            agg_recall, agg_precision, agg_stderr = aggregate_xy(dlist)
-            ax.plot(agg_recall, agg_precision, linewidth=1.0, label="Average")
-            print("    Saving plot {}".format(out))        
-            plt.legend(loc='upper right')
-            plt.savefig(out)
-            plt.close()
-
-    print("Making Precision-Recall Curves by Class")
-    ### Need to Re-order to be able to iterate over classes
-    for iou, class_data in apScore.items():
-        iou_str = iou.replace('=', '_')
-        for Class in set(class_data['Class']):
-            out = os.path.join(output_dir, f"pr_{iou_str}_class_{Class}.png")
-            fig, ax = plt.subplots(figsize=(8,6), constrained_layout=True)
-            ax.set(xlim=(0, 1), xticks=np.arange(0, 1, 0.1),
-                   ylim=(0, 1), yticks=np.arange(0, 1, 0.1))
-            ax.set_xlabel('Recall')
-            ax.set_ylabel('Precision')
-            ax.set_title(f"{title} CC:{iou} Class={Class}")
-            dlist = []
-            for index, row in class_data[class_data['Class'] == Class].iterrows():
-                ax.plot(row['recall'], row['precision'], linewidth=1.0, label=row['type'])
-                dlist.append(np.array([ row['recall'], row['precision'] ]))
-            agg_recall, agg_precision, agg_stderr = aggregate_xy(dlist)
-            ax.plot(agg_recall, agg_precision, linewidth=1.0, label="Average")
-            print("    Saving plot {}".format(out))        
-            plt.legend(loc='upper right')
-            plt.savefig(out)
-            plt.close()
-
 def compute_multiclass_iou_pr(ref, hyp, iou_thresholds=0.2, mapping_df = None, class_type = None):
     """ Compute average precision score (AP) and precision-recall curves for
     each class at a set of specific temp. intersection-over-union (tIoU)
@@ -503,4 +445,4 @@ def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df):
         
     sumup_tad_system_level_scores(pr_iou_scores, iou_thresholds, class_type, output_dir)
     sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir)
-    make_pr_curve(pr_iou_scores, "title", output_dir)
+    make_pr_curve(pr_iou_scores, class_type, output_dir)

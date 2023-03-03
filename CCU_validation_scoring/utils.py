@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import re
 from matplotlib import pyplot as plt
+from .aggregate import *
 
 silence_string = "noann"
 
@@ -406,18 +407,18 @@ def generate_alignment_statistics(ali, task, output_dir):
                                         count_matrix[Class][rstr][hstr] = 0
                                 count_matrix[Class][rstr][hstr] += 1
                         
-                print("\nInstance Count Matrix: Rows == Reference")
+                # print("\nInstance Count Matrix: Rows == Reference")
                 # print(mat.columns.tolist())
                 # print(mat.index.tolist())
                 # print(pd.wide_to_long(pd.DataFrame(count_matrix), '', mat.columns.tolist(), mat.index.tolist()))
                 file1 = open(os.path.join(output_dir, "instance_alignment_status_confusion.tab"), 'w')
                 file1.write("class	ref_status	hyp_status	metric	value\n")
                 for Class in count_matrix.keys():
-                        print(f"Class = {Class}")
+                        #print(f"Class = {Class}")
                         mat = pd.DataFrame(count_matrix[Class]).transpose()
                         mat = mat.sort_index()
                         mat = mat.reindex(sorted(mat.columns), axis=1)
-                        print(mat)
+                        #print(mat)
                         for rstr in count_matrix[Class].keys():
                             for hstr in count_matrix[Class][rstr].keys():
                                 file1.write(f"{Class}	{rstr}	{hstr}	number_instance	{count_matrix[Class][rstr][hstr]}\n")
@@ -438,8 +439,8 @@ def generate_alignment_statistics(ali, task, output_dir):
                                 at_MinLLR['all']['md'] += 1
                                 at_MinLLR[row['class']]['md'] += 1
 
-        print("\nat MinMLLR")
-        print(pd.DataFrame(at_MinLLR))
+        #print("\nat MinMLLR")
+        #print(pd.DataFrame(at_MinLLR))
         file1 = open(os.path.join(output_dir, "instance_alignment_class_stats.tab"), 'w')
         file1.write("class	metric	value\n")
         for Class in at_MinLLR.keys():
@@ -451,38 +452,41 @@ def generate_alignment_statistics(ali, task, output_dir):
                 match = re.match('.*[{,]('+attrib+')=([^,}]+)', str)
                 if (match is not None):
                         return(match.group(2))
+                return(None)
 
         #get_val("{iou=0.001,intersection=1.000,union=825.000}","iou")
         #get_val("{iou=0.001,intersection=1.000,union=825.000}","intersection")
         #get_val("{iou=0.001,intersection=1.000,union=825.000}","union")
 
         all_llrs = sorted(ali[ali['sys'] != '{}']['llr'])
-        fig, ax = plt.subplots(1, 3, figsize = (9, 4))
-        data = sorted([ float(get_val(x,"iou")) for x in ali[ali['eval'] == 'mapped']['parameters'] ])
-        if (len(all_llrs) >= 2):
-                ax[0].hist(data, bins = np.linspace(0, 1, num=100, endpoint = True))
-                ax[0].set_title("Histogram (Mean={:.3f})".format(np.mean(data)))
-        else:
-                ax[0].set_title("NO SYSTEM OUTPUT")               
-        ax[0].set_xlabel("IoU")
-  
-        data = sorted([ float(get_val(x,"cb_iou")) for x in ali[ali['eval'] == 'mapped']['parameters'] ])
-        if (len(all_llrs) >= 2):
-                ax[1].hist(data, bins = np.linspace(0, 1, num=100, endpoint = True))
-                ax[1].set_title("Histogram (Mean={:.3f})".format(np.mean(data)))
-        else:
-                ax[1].set_title("NO SYSTEM OUTPUT")               
-        ax[1].set_xlabel("Collar-Based IoU")
-        
+        fig, ax = plt.subplots(1, 2 if task in ['cd'] else 3,
+                               figsize = (6 if task in ['cd'] else 9, 4))
+        ax_id = 0;
+        params = []
+        if (task in ['norm', 'emotion']):
+                params = ['iou', 'cb_iou']
+        if (task in ['cd']):
+                params = ['delta_cp']
+        for param in params:
+                data = [ x for x in [ get_val(x,param) for x in ali[ali['eval'] == 'mapped']['parameters'] ] if x is not None ]
+                if (len(data) >= 2):
+                        data = sorted([float(x) for x in data])  ## sort and float
+                        ax[ax_id].hist(data, bins = np.linspace(0, 1, num=100, endpoint = True))
+                        ax[ax_id].set_title("Histogram (Mean={:.3f})".format(np.mean(data)))
+                else:
+                        ax[ax_id].set_title("NO SYSTEM OUTPUT")               
+                ax[ax_id].set_xlabel(param)
+                ax_id += 1
+                
         if (len(all_llrs) >= 2):
                 bins = np.linspace(all_llrs[0], all_llrs[-1], num=100, endpoint = True)
-                ax[2].hist(ali[ (ali['sys'] != '{}') & (ali['eval'] == 'mapped') ]['llr'], bins = bins, histtype=u'step', color="#00FF00", label="Target")
-                ax[2].hist(ali[ (ali['sys'] != '{}') & (ali['eval'] != 'mapped') ]['llr'], bins = bins, histtype=u'step', color="#FF0000", label="NonTarget")
-                ax[2].legend(loc='upper right')
-                ax[2].set_title("Histogram")
+                ax[ax_id].hist(ali[ (ali['sys'] != '{}') & (ali['eval'] == 'mapped') ]['llr'], bins = bins, histtype=u'step', color="#00FF00", label="Target")
+                ax[ax_id].hist(ali[ (ali['sys'] != '{}') & (ali['eval'] != 'mapped') ]['llr'], bins = bins, histtype=u'step', color="#FF0000", label="NonTarget")
+                ax[ax_id].legend(loc='upper right')
+                ax[ax_id].set_title("Histogram")
         else:
-                ax[2].set_title("NO SYSTEM OUTPUT")
-        ax[2].set_xlabel("LLR")
+                ax[ax_id].set_title("NO SYSTEM OUTPUT")
+        ax[ax_id].set_xlabel("LLR")
 
         # Show plot
         fig.savefig(os.path.join(output_dir, "instance_alignment_grqphs.png"))
@@ -669,4 +673,61 @@ def generate_scoring_parameter_file(args):
 	sp_df.to_csv(os.path.join(args.output_dir, "scoring_parameters.tab"), sep = "\t", index = None)
 
 	
+
+def make_pr_curve(apScore, title = "", output_dir = "."):
+    """ Plot a Precision Recall Curve for the data.
+    
+    Parameters
+    ----------
+    apScore:
+        - { IoU: [**ap**, **precision** (1darray), **recall** (1darray) , .... }   
+
+    Returns
+    -------
+    """
+    #print("Making Precision-Recall Curves by Genre")
+    for iou, class_data in apScore.items():
+        iou_str = str(iou).replace('=', '_')
+        for genre in set(class_data['type']):
+            out = os.path.join(output_dir, f"pr_{iou_str}_type_{genre}.png")
+            fig, ax = plt.subplots(figsize=(8,6), constrained_layout=True)
+            ax.set(xlim=(0, 1), xticks=np.arange(0, 1, 0.1),
+                   ylim=(0, 1), yticks=np.arange(0, 1, 0.1))
+            ax.set_xlabel('Recall')
+            ax.set_ylabel('Precision')
+            ax.set_title(f"{title} CC:{iou} Genre={genre}")
+            dlist = []
+            for index, row in class_data[class_data['type'] == genre].iterrows():
+                ax.plot(row['recall'], row['precision'], linewidth=1.0, label=row['Class'])
+                dlist.append(np.array([ row['recall'], row['precision'] ]))
+            agg_recall, agg_precision, agg_stderr = aggregate_xy(dlist)
+            ax.plot(agg_recall, agg_precision, linewidth=1.0, label="Average")
+            #print("    Saving plot {}".format(out))        
+            plt.legend(loc='upper right')
+            plt.savefig(out)
+            plt.close()
+
+    print("Making Precision-Recall Curves by Class")
+    ### Need to Re-order to be able to iterate over classes
+    for iou, class_data in apScore.items():
+        iou_str = str(iou).replace('=', '_')
+        for Class in set(class_data['Class']):
+            out = os.path.join(output_dir, f"pr_{iou_str}_class_{Class}.png")
+            fig, ax = plt.subplots(figsize=(8,6), constrained_layout=True)
+            ax.set(xlim=(0, 1), xticks=np.arange(0, 1, 0.1),
+                   ylim=(0, 1), yticks=np.arange(0, 1, 0.1))
+            ax.set_xlabel('Recall')
+            ax.set_ylabel('Precision')
+            ax.set_title(f"{title} CC:{iou} Class={Class}")
+            dlist = []
+            for index, row in class_data[class_data['Class'] == Class].iterrows():
+                ax.plot(row['recall'], row['precision'], linewidth=1.0, label=row['type'])
+                dlist.append(np.array([ row['recall'], row['precision'] ]))
+            agg_recall, agg_precision, agg_stderr = aggregate_xy(dlist)
+            ax.plot(agg_recall, agg_precision, linewidth=1.0, label="Average")
+            #print("    Saving plot {}".format(out))        
+            plt.legend(loc='upper right')
+            plt.savefig(out)
+            plt.close()
+
 

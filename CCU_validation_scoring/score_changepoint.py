@@ -316,7 +316,15 @@ def score_cp(ref, hyp, delta_cp_text_thresholds, delta_cp_time_thresholds, outpu
         pr_iou_scores = generate_zero_scores_changepoint(ref, delta_cp_text_thresholds, delta_cp_time_thresholds)
         final_alignment_df = pd.DataFrame([["cp","NA","NA","NA","NA","NA","NA"]], columns=["class", "file_id", "eval", "ref", "sys", "llr", "parameters"])
 
+    ### Hack the pr_iou_scores structure.  For ED and ND, genre is in the type column so replicate the genre column here
+        
     ensure_output_dir(output_dir)
     final_alignment_df_sorted = final_alignment_df.sort_values(by=['class', 'file_id', 'sys', 'ref'])
     final_alignment_df_sorted.to_csv(os.path.join(output_dir, "instance_alignment.tab"), index = False, quoting=3, sep="\t", escapechar="\t")
     write_type_level_scores(output_dir, pr_iou_scores, delta_cp_text_thresholds, delta_cp_time_thresholds)
+    for iou, class_data in pr_iou_scores.items():
+        pr_iou_scores[iou]['type'] = pr_iou_scores[iou]['genre']
+        pr_iou_scores[iou]['Class'] = pr_iou_scores[iou]['class']
+    make_pr_curve(pr_iou_scores, "cd", output_dir)
+    generate_alignment_statistics(final_alignment_df_sorted, "cd", output_dir)
+    
