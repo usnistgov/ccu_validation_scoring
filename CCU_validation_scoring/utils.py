@@ -387,7 +387,7 @@ def replace_hyp_norm_mapping(sub_mapping_df, hyp, act):
 
 	return final_sub_hyp
 
-def generate_alignment_statistics(ali, task, output_dir):
+def generate_alignment_statistics(ali, task, output_dir, info_dict = None):
         """
         Generate statistics from the alignment file.
         """
@@ -489,7 +489,10 @@ def generate_alignment_statistics(ali, task, output_dir):
         ax[ax_id].set_xlabel("LLR")
 
         # Show plot
-        fig.savefig(os.path.join(output_dir, "instance_alignment_grqphs.png"))
+        out = os.path.join(output_dir, "instance_alignment_grqphs.png")
+        fig.savefig(out)
+        if (info_dict is not None):
+                info_dict.append({ 'task': task, 'graph_type': 'instance_alignment', 'graph_factor': 'overall', 'graph_factor_value': 'all', 'correctness_constraint': "n/a", 'filename': out})
         plt.close()
         
 def generate_alignment_file(ref, hyp, task):
@@ -674,17 +677,20 @@ def generate_scoring_parameter_file(args):
 
 	
 
-def make_pr_curve(apScore, title = "", output_dir = "."):
+def make_pr_curve(apScore, task, title = "", output_dir = ".", info_dict = None):
     """ Plot a Precision Recall Curve for the data.
     
     Parameters
     ----------
     apScore:
-        - { IoU: [**ap**, **precision** (1darray), **recall** (1darray) , .... }   
+        - { IoU: [**ap**, **precision** (1darray), **recall** (1darray) , .... }
+    info_dict:
+        - an array of dictionaries describing the graphs
 
     Returns
     -------
     """
+    
     #print("Making Precision-Recall Curves by Genre")
     for iou, class_data in apScore.items():
         iou_str = str(iou).replace('=', '_')
@@ -702,11 +708,13 @@ def make_pr_curve(apScore, title = "", output_dir = "."):
                 dlist.append(np.array([ row['recall'], row['precision'] ]))
             agg_recall, agg_precision, agg_stderr = aggregate_xy(dlist)
             ax.plot(agg_recall, agg_precision, linewidth=1.0, label="Average")
-            #print("    Saving plot {}".format(out))        
+            #print("    Saving plot {}".format(out))
+            if (info_dict is not None):
+                    info_dict.append({ 'task': task, 'graph_type': 'pr_curve', 'graph_factor': 'genre', 'graph_factor_value': genre, 'correctness_constraint': iou, 'filename': out})
             plt.legend(loc='upper right')
             plt.savefig(out)
             plt.close()
-
+    
     print("Making Precision-Recall Curves by Class")
     ### Need to Re-order to be able to iterate over classes
     for iou, class_data in apScore.items():
@@ -729,9 +737,12 @@ def make_pr_curve(apScore, title = "", output_dir = "."):
             if (not has_all):                       
                     agg_recall, agg_precision, agg_stderr = aggregate_xy(dlist)
                     ax.plot(agg_recall, agg_precision, linewidth=1.0, label="Average")
-            #print("    Saving plot {}".format(out))        
+            #print("    Saving plot {}".format(out))
+            if (info_dict is not None):
+                    info_dict.append({ 'task': task, 'graph_type': 'pr_curve', 'graph_factor': 'class', 'graph_factor_value': Class, 'correctness_constraint': iou, 'filename': out})           
             plt.legend(loc='upper right')
             plt.savefig(out)
             plt.close()
 
 
+    return(info_dict)

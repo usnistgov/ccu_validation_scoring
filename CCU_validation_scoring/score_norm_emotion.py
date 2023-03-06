@@ -1,4 +1,4 @@
-import os
+CCU_validation_scoring/score_changepoint.pyimport os
 import re
 import pprint
 import logging
@@ -441,8 +441,12 @@ def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df):
     final_alignment_df_sorted = final_alignment_df.sort_values(by=['class', 'file_id', 'sort'])
     final_alignment_df_sorted.to_csv(os.path.join(output_dir, "instance_alignment.tab"), index = False, quoting=3, sep="\t", escapechar="\t",
                                      columns = ["class","file_id","eval","ref","sys","llr","parameters"] + (["ref_status","hyp_status"] if (class_type == "norm") else []))
-    generate_alignment_statistics(final_alignment_df, class_type, output_dir)
+    graph_info_dict = []
+    generate_alignment_statistics(final_alignment_df, class_type, output_dir, info_dict = graph_info_dict)
         
     sumup_tad_system_level_scores(pr_iou_scores, iou_thresholds, class_type, output_dir)
     sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir)
-    make_pr_curve(pr_iou_scores, class_type, output_dir)
+    make_pr_curve(pr_iou_scores, class_type, class_type, output_dir = output_dir, info_dict = graph_info_dict)
+    graph_info_df = pd.DataFrame(graph_info_dict)
+    graph_info_df.to_csv(os.path.join(output_dir, "graph_info.tab"), index = False, quoting=3, sep="\t", escapechar="\t")
+    
