@@ -1,4 +1,4 @@
-CCU_validation_scoring/score_changepoint.pyimport os
+import os
 import re
 import pprint
 import logging
