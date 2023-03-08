@@ -690,7 +690,7 @@ def make_pr_curve(apScore, task, title = "", output_dir = ".", info_dict = None)
     Returns
     -------
     """
-    
+
     #print("Making Precision-Recall Curves by Genre")
     for iou, class_data in apScore.items():
         iou_str = str(iou).replace('=', '_')

@@ -10,6 +10,7 @@ from .utils import *
 from .aggregate import *
 import pdb
 import matplotlib.pyplot as plt
+import json
 
 logger = logging.getLogger('SCORING')
 
@@ -35,14 +36,14 @@ def generate_zero_scores_norm_emotion(ref):
 
         if len(final_combo_pruned)>0:
             for i in range(len(final_combo_pruned)):
-                y.append( [final_combo_pruned.loc[i, "Class"], final_combo_pruned.loc[i, "type"], 0.0, [0.0, 0.0], [0.0, 1.0] ])
+                y.append( [final_combo_pruned.loc[i, "Class"], final_combo_pruned.loc[i, "type"], 0.0, [0.0], [0.0], [0.0] ])
         else:
             logger.error("No matching Classes and types found in system output.")
-            y.append( [ 'no_macthing_class', 'no_macthing_type', 0.0, [0.0, 0.0], [0.0, 1.0] ]) 
+            y.append( [ 'no_macthing_class', 'no_macthing_type', 0.0, [0.0, 0.0], [0.0, 1.0], [0.0, 0,0] ]) 
     else:
         logger.error("No reference to score")
-        y.append( ["NA", "NA", "NA", "NA", "NA"])
-    return pd.DataFrame(y, columns=['Class', 'type', 'ap', 'precision', 'recall'])
+        y.append( ["NA", "NA", "NA", "NA", "NA", "NA"])
+    return pd.DataFrame(y, columns=['Class', 'type', 'ap', 'precision', 'recall', 'llr'])
 
 
 def segment_iou(ref_start, ref_end, tgts):
@@ -160,7 +161,7 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=["ioU=0.2"], t
     # No Class found.
     if hyp.empty:
         for iout in iou_thresholds:
-            output[iout] = 0.0, [0.0, 0.0], [0.0, 1.0]
+            output[iout] = 0.0, [0.0], [0.0], [0.0]
         alignment_df = generate_all_fn_alignment_file(ref, task)
         return output,alignment_df
 
@@ -198,7 +199,7 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=["ioU=0.2"], t
     
     if ihyp.empty:
         for iout in iou_thresholds:
-            output[iout] = 0.0, [0.0, 0.0], [0.0, 1.0]
+            output[iout] = 0.0, [0.0], [0.0], [0.0]
         alignment_df = generate_all_fn_alignment_file(ref, task)
         return output,alignment_df
 
@@ -232,12 +233,12 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=["ioU=0.2"], t
         fhyp = ihyp
         thyp = fhyp.duplicated(subset = ['llr'], keep='last')
         fhyp = fhyp.loc[thyp == False]
-                     
+        llr = np.array(fhyp["llr"])
         rec = (np.array(fhyp["cum_tp"]) / npos)
         prec = (np.array(fhyp["cum_tp"]) / (np.array(fhyp["cum_tp"]) + np.array(fhyp["cum_fp"])))
 
-        output[iout] = ap_interp(prec, rec), prec, rec
-
+        output[iout] = ap_interp(prec, rec), prec, rec, llr
+ 
         ihyp_fields = ["Class","type","tp","fp","file_id","start_ref","end_ref","start_hyp","end_hyp","IoU","llr","intersection", "union", "cb_intersection", "cb_IoU"]
         if (task == "norm"):
             ihyp_fields.append("status")
@@ -335,7 +336,7 @@ def compute_multiclass_iou_pr(ref, hyp, iou_thresholds=0.2, mapping_df = None, c
                 Class=final_combo_pruned.loc[i, "Class"],
                 iou_thresholds=iou_thresholds,
                 task=class_type)
-
+        print(apScore)
         apScores.append(apScore)
         if final_combo_pruned.loc[i, "type"] == "all":
             alignment_df = pd.concat([alignment_df, alignment])
@@ -343,14 +344,15 @@ def compute_multiclass_iou_pr(ref, hyp, iou_thresholds=0.2, mapping_df = None, c
     final_alignment_df = alignment_df.drop_duplicates()
 
     for i in range(len(final_combo_pruned)):
-        for iout in iou_thresholds:            
-            scores[iout].append([final_combo_pruned.loc[i, "Class"], final_combo_pruned.loc[i, "type"], apScores[i][iout][0], apScores[i][iout][1], apScores[i][iout][2]])
+        for iout in iou_thresholds:
+            print(f"i{i} iout{iout}")
+            print(apScores[i][iout])
+            scores[iout].append([final_combo_pruned.loc[i, "Class"], final_combo_pruned.loc[i, "type"], apScores[i][iout][0], apScores[i][iout][1], apScores[i][iout][2], apScores[i][iout][3]])
 
     # Build results for all            
     pr_scores = {}
     for iout in iou_thresholds: 
-        pr_scores[iout] = pd.DataFrame(scores[iout], columns = ['Class', 'type', 'ap', 'precision', 'recall'])
-
+        pr_scores[iout] = pd.DataFrame(scores[iout], columns = ['Class', 'type', 'ap', 'precision', 'recall', 'llr'])
     return pr_scores, final_alignment_df
 
 def sumup_tad_system_level_scores(pr_iou_scores, iou_thresholds, class_type, output_dir):
@@ -381,7 +383,7 @@ def sumup_tad_system_level_scores(pr_iou_scores, iou_thresholds, class_type, out
     
     map_scores_threshold.to_csv(os.path.join(output_dir, "scores_aggregated.tab"), sep = "\t", index = None)
         
-def sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir):
+def sumup_tad_class_level_scores_orig(pr_iou_scores, iou_thresholds, output_dir):
     """
     Write class level result into a file
     """
@@ -397,7 +399,82 @@ def sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir):
         prs_threshold = pd.concat([prs, prs_threshold])
     
     prs_threshold.to_csv(os.path.join(output_dir, "scores_by_class.tab"), sep = "\t", index = None)
-   
+
+
+        
+def sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir):
+    """
+    Write class level result into a file
+    """
+    prs_threshold = pd.DataFrame()   
+    for iout in sorted(iou_thresholds):
+        print(iout)        
+        prs = pr_iou_scores[iout]
+        print(prs)
+        if prs["ap"].values[0] != "NA":
+            prs.ap = prs.ap.round(3)
+        prs["metric"] = "AP"        
+        prs["correctness_criteria"] = "{%s}" % iout
+        prs = prs.rename(columns={'Class': 'class', 'type': 'genre', 'ap': 'value'})
+
+        ### Make the long form by row!!!
+        for index, row in prs.iterrows():
+            ### AP
+            temp = prs[prs.index == index].copy(deep=True)
+            temp['metric'] = "AP"
+            temp = temp[["class","genre","metric","value","correctness_criteria"]]
+            prs_threshold = pd.concat([prs_threshold, temp]);
+            ### PRCurve
+            temp = prs[prs.index == index].copy(deep=True)
+            temp['metric'] = "PRCurve_json"
+            print(temp)
+            #d = {"precision": temp['precision'].tolist()[0], 'recall': temp['recall'].tolist()[0], 'llr': temp['llr'].tolist()[0]}
+            d ={ "precision": [ x for x in temp['precision'].tolist()[0] ],
+                 "recall": [ x for x in temp['recall'].tolist()[0] ],  
+                 "llr": [ x for x in temp['llr'].tolist()[0] ],  }
+            print(d)
+            temp['value'] = json.dumps(d)
+            
+            temp = temp[["class","genre","metric","value","correctness_criteria"]]
+
+            prs_threshold = pd.concat([temp, prs_threshold])
+    
+        prs = prs[["class","genre","metric","value","correctness_criteria"]]
+
+    prs_threshold.to_csv(os.path.join(output_dir, "scores_by_class.tab"), sep = "\t", index = None)
+
+
+
+def write_type_level_scores(output_dir, results, delta_cp_text_thresholds, delta_cp_time_thresholds):
+    """
+    Write class level result into a file.  THIS UPDATES THE SOURCE DATA FRAME
+    """
+    results_long = pd.DataFrame()
+    type_level_scores = pd.DataFrame()
+    for cp in delta_cp_text_thresholds + delta_cp_time_thresholds:
+        result_cp = results[cp]
+        result_cp["correctness_criteria"] = "{delta_cp=" + str(cp) + "}"
+        result_cp.rename(columns={'ap': 'value', 'type': 'genre'}, inplace = True)
+        result_cp['metric'] = 'AP'
+        result_cp["class"] = 'cp'
+
+        ### Make the long form!!!
+        ### AP
+        temp = results[cp].copy(deep=True)
+        temp['metric'] = "AP"
+        temp = temp[["class","genre","metric","value","correctness_criteria"]]
+        results_long = pd.concat([results_long, temp]);
+        ### PRCurve
+        temp = results[cp].copy(deep=True)
+        temp['metric'] = "PRCurve_json"
+        d = {"precision": temp['precision'].tolist()[0], 'recall': temp['recall'].tolist()[0], 'llr': temp['llr'].tolist()[0]}
+        temp['value'] = json.dumps(d)
+        
+        temp = temp[["class","genre","metric","value","correctness_criteria"]]
+        results_long = pd.concat([results_long, temp]);
+
+    results_long.to_csv(os.path.join(output_dir, "scores_by_class.tab"), sep = "\t", index = None, quoting=None)   
+
 def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df):
     """ Score System output of Norm/Emotion Detection Task
  
