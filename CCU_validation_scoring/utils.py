@@ -459,19 +459,21 @@ def generate_alignment_statistics(ali, task, output_dir, info_dict = None):
         #get_val("{iou=0.001,intersection=1.000,union=825.000}","union")
 
         all_llrs = sorted(ali[ali['sys'] != '{}']['llr'])
-        fig, ax = plt.subplots(1, 2 if task in ['cd'] else 3,
-                               figsize = (6 if task in ['cd'] else 9, 4))
+        fig, ax = plt.subplots(1,
+                               2 if task in ['cd'] else 4,
+                               figsize = (6 if task in ['cd'] else 12, 4))
         ax_id = 0;
         params = []
         if (task in ['norm', 'emotion']):
-                params = ['iou', 'cb_iou']
+                params = ['iou', 'cb_iou', 'intersection']
         if (task in ['cd']):
                 params = ['delta_cp']
         for param in params:
                 data = [ x for x in [ get_val(x,param) for x in ali[ali['eval'] == 'mapped']['parameters'] ] if x is not None ]
                 if (len(data) >= 2):
                         data = sorted([float(x) for x in data])  ## sort and float
-                        ax[ax_id].hist(data, bins = np.linspace(0, 1, num=100, endpoint = True))
+                        maxx = np.maximum(1, data[-1])
+                        ax[ax_id].hist(data, bins = np.linspace(0, maxx, num=100, endpoint = True))
                         ax[ax_id].set_title("Histogram (Mean={:.3f})".format(np.mean(data)))
                 else:
                         ax[ax_id].set_title("NO SYSTEM OUTPUT")               
