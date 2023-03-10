@@ -150,6 +150,8 @@ def score_ed_submission_dir_cli(args):
 	if args.emotion_list_file:
 		ref = process_subset_norm_emotion(args.emotion_list_file, ref)
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "emotions")
+	if (args.dump_inputs):
+                hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.read.tab"), sep = "\t", index = None)
 
 	if args.merge_sys_text_gap:
 		merge_sys_text_gap = int(args.merge_sys_text_gap)
@@ -168,6 +170,9 @@ def score_ed_submission_dir_cli(args):
 	thresholds = parse_thresholds(args.iou_thresholds)
 
 	statistic(args.reference_dir, ref, args.submission_dir, merged_hyp, args.output_dir, "emotions")
+	if (args.dump_inputs):
+                ref.to_csv(os.path.join(args.output_dir, "inputs.ref.scored.tab"), sep = "\t", index = None)
+                merged_hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.scored.tab"), sep = "\t", index = None)
 
 	score_tad(ref, merged_hyp, "emotion", iou_thresholds=thresholds, output_dir=args.output_dir, mapping_df = None)
 	generate_scoring_parameter_file(args)
@@ -196,7 +201,6 @@ def score_vd_submission_dir_cli(args):
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "valence_continuous")
 
 	statistic(args.reference_dir, ref, args.submission_dir, hyp, args.output_dir, "valence_continuous")
-
 	score_valence_arousal(ref, hyp, output_dir = args.output_dir, task = "valence_continuous")
 	generate_scoring_parameter_file(args)	
 
