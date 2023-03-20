@@ -57,7 +57,7 @@ Install the Python package using the following commands:
 ```bash
 git clone https://github.com/usnistgov/ccu_validation_scoring
 
-cd /path/to/CCU_validation_scoring
+cd ./CCU_validation_scoring
 
 python3 -m pip install -e ./
 ```
