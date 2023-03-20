@@ -38,8 +38,7 @@ setup(name=PACKAGE_NAME,
         'pathlib',
         'numpy',
         'pytest',
-        'subprocess',
-        'fnmatch'
+        'matplotlib'
     ],
       version=CCU_validation_scoring.__version__,
       entry_points='''
