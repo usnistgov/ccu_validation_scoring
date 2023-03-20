@@ -55,9 +55,9 @@ The tools mentioned above are included as a Python package. They can be run unde
 Install the Python package using the following commands:
 
 ```bash
-tar -xvzf /path/to/CCU_validation_scoring-x.x.x.tgz
+git clone https://github.com/usnistgov/ccu_validation_scoring
 
-cd /path/to/CCU_validation_scoring-x.x.x
+cd /path/to/CCU_validation_scoring
 
 python3 -m pip install -e ./
 ```
