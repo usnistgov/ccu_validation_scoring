@@ -131,7 +131,7 @@ user_id	file_id	segment_id	norm	status
 1012	F5	F5_0010	101	adhere
 1012	F5	F5_0011	101	adhere
 1012	F5	F5_0012	101	adhere
-1012	F5	F5_0013	101	adhere
+1012	F5	F5_0013	none	EMPTY_NA
 1012	F5	F5_0014	none	EMPTY_NA
 1012	F5	F5_0015	none	EMPTY_NA
 1012	F5	F5_0016	none	EMPTY_NA

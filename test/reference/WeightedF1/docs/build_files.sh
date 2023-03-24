@@ -1,45 +1,8 @@
 #!/bin/sh
 
-dir=../../../pass_submissions/pass_submissions_WeightedF1/ND/system1
-si=system_output.index.tab
-echo "file_id\tis_processed\tmessage\tfile_path" > $dir/$si
-for file in F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 ; do
-    echo "$file\tTrue\t\t$file.tab" >> $dir/$si
-    echo "file_id\tnorm\tstart\tend\tstatus\tllr" > $dir/$file.tab
-done
-for x in F3:20.0:100.0 F4:20.0:60.0 F5:25.0:55.0 F6:5.0:75.0 F7:25.0:55.0 F8:25.0:75.0 F9:25.0:65.0 F10:20.0:55.0 F11:5.0:35.0  ; do
-    file=`echo $x|awk -F: '{print $1}'`
-    on=`echo $x|awk -F: '{print $2}'`
-    off=`echo $x|awk -F: '{print $3}'`
-    echo "$file\t101\t$on\t$off\tadhere\t0.0" >> $dir/$file.tab
-done
-
-
-exit
-
-
-==> ../../../pass_submissions/pass_submissions_WeightedF1/ND/system1/AlignFile.tab <==
-file_id	norm	start	end	status	llr
-AlignFile	105	0.0	13.5	adhere	-0.6363001360328636
-AlignFile	201	0.0	13.5	adhere	-0.6363001360328636
-AlignFile	103	0.0	13.5	adhere	-1.6434771432141604
-AlignFile	102	0.0	13.5	adhere	0.1460988898283735
-AlignFile	104	0.0	13.5	adhere	-0.1776367424272662
-AlignFile	102	15.24	29.33	adhere	-0.4125128165452992
-AlignFile	201	15.24	29.33	adhere	-0.4125128165452992
-AlignFile	104	15.24	29.33	adhere	-0.7144186912767696
-AlignFile	103	15.24	29.33	adhere	-1.4408151678301728
-
-==> ../../../pass_submissions/pass_submissions_WeightedF1/ND/system1/system_output.index.tab <==
-file_id	is_processed	message	file_path
-AlignFile	True		AlignFile.tab
-
-
-exit
-
 
 echo 'user_id	file_id	segment_id	norm	status' > ../data/norms.tab
-for x in F1:7:20 F2:15:24 F4:6:11 F5:5:13 F6:6:11 F7:2:15 F8:5:11 F9:2:11 F10:6:15 F11:6:13  ; do
+for x in F1:7:20 F2:15:24 F4:6:11 F5:5:12 F6:6:11 F7:2:15 F8:5:11 F9:2:11 F10:6:15 F11:6:13  ; do
     file=`echo $x|awk -F: '{print $1}'`
     on=`echo $x|awk -F: '{print $2}'`
     off=`echo $x|awk -F: '{print $3}'`
@@ -55,6 +18,21 @@ for x in F1:7:20 F2:15:24 F4:6:11 F5:5:13 F6:6:11 F7:2:15 F8:5:11 F9:2:11 F10:6:
 done
 
 exit
+
+dir=../../../pass_submissions/pass_submissions_WeightedF1/ND/system1
+si=system_output.index.tab
+echo "file_id\tis_processed\tmessage\tfile_path" > $dir/$si
+for file in F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 ; do
+    echo "$file\tTrue\t\t$file.tab" >> $dir/$si
+    echo "file_id\tnorm\tstart\tend\tstatus\tllr" > $dir/$file.tab
+done
+for x in F3:20.0:100.0 F4:20.0:60.0 F5:25.0:55.0 F6:5.0:75.0 F7:25.0:55.0 F8:25.0:75.0 F9:25.0:65.0 F10:20.0:55.0 F11:5.0:35.0  ; do
+    file=`echo $x|awk -F: '{print $1}'`
+    on=`echo $x|awk -F: '{print $2}'`
+    off=`echo $x|awk -F: '{print $3}'`
+    echo "$file\t101\t$on\t$off\tadhere\t0.0" >> $dir/$file.tab
+done
+
 
 echo 'file_id	segment_id	start	end' > segments.tab
 for x in F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 ; do

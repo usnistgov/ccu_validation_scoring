@@ -6,6 +6,7 @@ import logging
 import pandas as pd
 import numpy as np
 import re
+import json
 from matplotlib import pyplot as plt
 from .aggregate import *
 
@@ -529,13 +530,17 @@ def generate_alignment_file(ref, hyp, task):
 
 		hyp_format["ref"] = "{start=" + hyp_format["start_ref"].astype(str) + ",end=" + hyp_format["end_ref"].astype(str) + "}"
 		hyp_format["sys"] = "{start=" + hyp_format["start_hyp"].astype(str) + ",end=" + hyp_format["end_hyp"].astype(str) + "}"
-		hyp_format["IoU_format"] = hyp_format["IoU"].apply(lambda x: "{:,.3f}".format(x))
-		hyp_format["intersection_format"] = hyp_format["intersection"].apply(lambda x: "{:,.3f}".format(x))
-		hyp_format["union_format"] = hyp_format["union"].apply(lambda x: "{:,.3f}".format(x))
-		hyp_format["cb_intersection_format"] = hyp_format["cb_intersection"].apply(lambda x: "{:,.3f}".format(x))
-		hyp_format["cb_IoU_format"] = hyp_format["cb_IoU"].apply(lambda x: "{:,.3f}".format(x))
-		hyp_format["parameters"] = '{iou=' + hyp_format["IoU_format"] + ',intersection=' + hyp_format["intersection_format"] + ',union=' + hyp_format["union_format"] + ',cb_intersection=' + hyp_format["cb_intersection_format"] + ',cb_iou=' + hyp_format["cb_IoU_format"] + '}'
 
+		hyp_format['IoU_f'] =               hyp_format['IoU'].apply(              lambda x: 'iou={:,.3f}'.format(x))
+		hyp_format['intersection_f'] =      hyp_format['intersection'].apply(     lambda x: 'intersection={:,.3f}'.format(x))
+		hyp_format['union_f'] =             hyp_format['union'].apply(            lambda x: 'union={:,.3f}'.format(x))
+		hyp_format['shifted_sys_start_f'] = hyp_format['shifted_sys_start'].apply(lambda x: 'shifted_start_hyp={:,.3f}'.format(x))
+		hyp_format['shifted_sys_end_f'] =   hyp_format['shifted_sys_end'].apply(  lambda x: 'shifted_end_hyp={:,.3f}'.format(x))
+		hyp_format['pct_tp_f'] =            hyp_format['pct_tp'].apply(           lambda x: 'pct_temp_tp={:,.3f}'.format(x))
+		hyp_format['pct_fp_f'] =            hyp_format['pct_fp'].apply(           lambda x: 'pct_temp_fp={:,.3f}'.format(x))
+
+		hyp_format['parameters'] = '{' + hyp_format['IoU_f'] + ',' + hyp_format['intersection_f'] + ',' + hyp_format['union_f'] + ',' + hyp_format['shifted_sys_start_f'] + ',' + hyp_format['shifted_sys_end_f'] + ',' + hyp_format['pct_tp_f'] + ',' + hyp_format['pct_fp_f'] + '}'
+                
 		hyp_format.loc[hyp_format["eval"] == "unmapped", "ref"] = "{}"
 		hyp_format.loc[hyp_format["eval"] == "unmapped", "parameters"] = "{}"
 		if (task == "norm"):
@@ -544,7 +549,8 @@ def generate_alignment_file(ref, hyp, task):
 		        hyp_format = hyp_format.rename(columns={"status": "ref_status"})
 		else:
 		        hyp_format = hyp_format[["Class","file_id","eval","ref","sys","llr","parameters","sort"]]                        
-                
+
+                #### These are the unmapped refs
 		ref_new = ref_format.copy()
 		ref_new["ref"] = "{start=" + ref_format["start"].astype(str) + ",end=" + ref_format["end"].astype(str) + "}"
 		if (task == "norm"):
@@ -558,13 +564,14 @@ def generate_alignment_file(ref, hyp, task):
 		ref_new["sys"] = "{}"
 		ref_new["parameters"] = "{}"
 		ref_new["llr"] = np.nan
+		print(ref_new)
 
 		alignment = pd.concat([hyp_format, ref_new])
 		alignment = alignment.rename(columns={'Class':'class'})
 
-		#print("final alignment")
-		#print(alignment)
-		#exit(1)
+		print("final alignment")
+		print(alignment)
+		exit(1)
 	if task == "changepoint":
 
 		ref_format = ref.copy()
