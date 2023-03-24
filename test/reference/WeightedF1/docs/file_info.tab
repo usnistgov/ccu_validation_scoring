@@ -1,0 +1,12 @@
+catalog_id	version	file_uid	data_type	url	lang_id_manual	wrapped_md5	unwrapped_md5	download_date	content_date	status_in_corpus	legacy_catalog_id	original_file_id	type	file_path	length
+LDC2022E22	V1.0	F1	.flac.ldcc	na	cmn	f167c35c42f0717bdea6eddaf4f60b14f9	f107f42ed12b7f501f15ae20c174cd9a39	na	na	present	na	na	audio	data/audio/f1.flac.ldcc	200
+LDC2022E22	V1.0	F2	.flac.ldcc	na	cmn	f267c35c42f0717bdea6eddaf4f60b14f9	f207f42ed12b7f501f15ae20c174cd9a39	na	na	present	na	na	audio	data/audio/f2.flac.ldcc	200
+LDC2022E22	V1.0	F3	.flac.ldcc	na	cmn	f367c35c42f0717bdea6eddaf4f60b14f9	f307f42ed12b7f501f15ae20c174cd9a39	na	na	present	na	na	audio	data/audio/f3.flac.ldcc	200
+LDC2022E22	V1.0	F4	.flac.ldcc	na	cmn	f467c35c42f0717bdea6eddaf4f60b14f9	f407f42ed12b7f501f15ae20c174cd9a39	na	na	present	na	na	audio	data/audio/f4.flac.ldcc	200
+LDC2022E22	V1.0	F5	.flac.ldcc	na	cmn	f567c35c42f0717bdea6eddaf4f60b14f9	f507f42ed12b7f501f15ae20c174cd9a39	na	na	present	na	na	audio	data/audio/f5.flac.ldcc	200
+LDC2022E22	V1.0	F6	.flac.ldcc	na	cmn	f667c35c42f0717bdea6eddaf4f60b14f9	f607f42ed12b7f501f15ae20c174cd9a39	na	na	present	na	na	audio	data/audio/f6.flac.ldcc	200
+LDC2022E22	V1.0	F7	.flac.ldcc	na	cmn	f767c35c42f0717bdea6eddaf4f60b14f9	f707f42ed12b7f501f15ae20c174cd9a39	na	na	present	na	na	audio	data/audio/f7.flac.ldcc	200
+LDC2022E22	V1.0	F8	.flac.ldcc	na	cmn	f867c35c42f0717bdea6eddaf4f60b14f9	f807f42ed12b7f501f15ae20c174cd9a39	na	na	present	na	na	audio	data/audio/f8.flac.ldcc	200
+LDC2022E22	V1.0	F9	.flac.ldcc	na	cmn	f967c35c42f0717bdea6eddaf4f60b14f9	f907f42ed12b7f501f15ae20c174cd9a39	na	na	present	na	na	audio	data/audio/f9.flac.ldcc	200
+LDC2022E22	V1.0	F10	.flac.ldcc	na	cmn	f1067c35c42f0717bdea6eddaf4f60b14f9	f2007f42ed12b7f501f15ae20c174cd9a39	na	na	present	na	na	audio	data/audio/f10.flac.ldcc	200
+LDC2022E22	V1.0	F11	.flac.ldcc	na	cmn	f1167c35c42f0717bdea6eddaf4f60b14f9	f1107f42ed12b7f501f15ae20c174cd9a39	na	na	present	na	na	audio	data/audio/f11.flac.ldcc	200
