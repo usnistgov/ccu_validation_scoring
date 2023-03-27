@@ -1,4 +1,4 @@
-import os
+CCU_validation_scoring/score_norm_emotion.pyimport os
 import re
 import pprint
 import logging
@@ -167,7 +167,7 @@ def compute_ious(row, ref, class_type, collar=15):
     #print(f"ROW - - - The HYP: file={row.file_id} start={row.start} end={row.end}")
 
     if len(refs) == 0:
-        return pd.DataFrame(data=[[row.Class, None, row.type, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0, row.status, None, 0.0, 0.0, row.start, row.end, 0.0, 1.0]],
+        return pd.DataFrame(data=[[row.Class, None, row.type, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0, row.status, None, None, None, row.start, row.end, 0.0, 1.0]],
             columns=['Class', 'Class_type', 'type', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU', 'hyp_status', 'length', 'intersection', 'union', 'shifted_sys_start', 'shifted_sys_end', 'pct_tp', 'pct_fp'])    
     
     else:        
@@ -258,14 +258,18 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=["ioU=0.2"], t
         out.append(compute_ious(myhyp, ref, task))
     ihyp = pd.concat(out)
     print("-----------------from compute_ious------")
-    print(out)
+    print(ihyp)
     #exit(1)
     
     # Capture naked false alarms that have no overlap with anything regardless of if it is a NO_SCORE_REGION
     #ihyp_naked_fa = ihyp.loc[ihyp.IoU == 0.0]
     #print("---- Naked FAs -----")
     #print(ihyp_naked_fa)
-    
+
+    print(ihyp.loc[(ihyp.Class.str.contains('NO_SCORE_REGION') == False)]) # | ((ihyp.Class.str.contains('NO_SCORE_REGION') == True) & (ihyp['IoU'] == 0.0)) | ihyp.start_ref.isna()])
+    print(ihyp.loc[ ((ihyp.Class.str.contains('NO_SCORE_REGION') == True) & (ihyp['IoU'] == 0.0))]) # | ihyp.start_ref.isna()])
+    print(ihyp.loc[ ihyp.start_ref.isna()])
+
     # Exclude NO_SCORE_REGIONs but keep FP NA's
     #ihyp = ihyp.loc[(ihyp.Class.str.contains('NO_SCORE_REGION') == False) | ihyp.start_ref.isna()]
     ihyp = ihyp.loc[(ihyp.Class.str.contains('NO_SCORE_REGION') == False) | ((ihyp.Class.str.contains('NO_SCORE_REGION') == True) & (ihyp['IoU'] == 0.0)) | ihyp.start_ref.isna()]
@@ -279,32 +283,56 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=["ioU=0.2"], t
         alignment_df = generate_all_fn_alignment_file(ref, task)
         return output,alignment_df
 
+    #print("------------Adding FNs]--------------");
+    ref_fn = ref.loc[~(ref["ref_uid"].isin(ihyp["ref_uid"])) & (ref.Class.str.contains('NO_SCORE_REGION') == False)]
+    ref_fn = ref_fn.rename(columns={'start': 'start_ref', 'end': 'end_ref'})
+    if (task == "norm"):
+        ref_fn['hyp_status'] = "EMPTY_NA"
+    ref_fn['pct_tp'] = 0.0
+    ref_fn['pct_fp'] = 0.0
+    ihyp = pd.concat([ihyp, ref_fn])
+    #print(ihyp)
+    #exit(0)
+    
     # Sort by confidence score
     ihyp.sort_values(["llr"], ascending=False, inplace=True)        
     ihyp.reset_index(inplace=True, drop=True)
 
+    print("------------Pre AP Calc Alignment--------------");
+    print(ihyp)
+    #exit(0)
+
     # Determine TP/FP @ IoU-Threshold
     for iout, params in iou_thresholds.items():
-        ihyp[['tp', 'fp']] = [ 0, 1 ]
-        ihyp.loc[~ihyp['start_ref'].isna() & (ihyp[params['metric']] >= params['thresh']), ['tp', 'fp']] = [ 1, 0 ]
+        ### This resets the tp and fp for each correctness threshold 
+        ihyp[['tp', 'fp', 'md']] = [ 0, 1, 0 ] 
+        ### Ref exists, above threshold (implying a TP)
+        ihyp.loc[~ihyp['start_ref'].isna() & (ihyp[params['metric']] >= params['thresh']), ['tp', 'fp', 'md']] = [ 1, 0, 0 ]
         
         # Mark TP as FP for duplicate ref matches at lower CS
         nhyp = ihyp.duplicated(subset = ['file_id', 'start_ref', 'end_ref', 'tp'], keep='first')
-        ihyp.loc[ihyp.loc[nhyp == True].index, ['tp', 'fp']] = [ 0, 1 ]
+        ihyp.loc[ihyp.loc[nhyp == True].index, ['tp', 'fp', 'md']] = [ 0, 1, 0 ]
         ihyp.sort_values(["llr", "file_id"], ascending=[False, True], inplace=True)
-        print("------------PRe Alignment--------------");
-        print(ihyp)
- 
-        tp = np.cumsum(ihyp.tp).astype(float)
-        fp = np.cumsum(ihyp.fp).astype(float)
+        
+        # Set MDs - This is because MD refs are added
+        ihyp.loc [~ihyp['start_ref'].isna() & ihyp['start_hyp'].isna(), ['tp', 'fp', 'md']] = [ 0, 0, 1 ]
 
-        # after filtering 
-        ihyp["cum_tp"] = tp
-        ihyp["cum_fp"] = fp
+        ### Update the data for Class when IoU == 0.  This sets the class for No_score_regions        
+        ihyp.loc[ihyp.loc[ihyp['Class'] == 'NO_SCORE_REGION'].index, ['start_ref', 'end_ref']] = [ float("nan"), float("nan") ]
+        ihyp.loc[ihyp.loc[ihyp['IoU'] == 0.0].index, ['Class']] = [ Class ]
+        
+        # MDs are still in the alignment struct so the need to be removed for AP calc
+        print(f"--------Alignment for this threshold {params['metric']} >= {params['thresh']} --------------");
+        print(ihyp)
+        #exit(0)
+    
+        ihyp["cum_tp"] = np.cumsum(ihyp.tp).astype(float)
+        ihyp["cum_fp"] = np.cumsum(ihyp.fp).astype(float)
 
         fhyp = ihyp
         thyp = fhyp.duplicated(subset = ['llr'], keep='last')
         fhyp = fhyp.loc[thyp == False]
+        fhyp = fhyp.loc[fhyp.md == 0]   ### Remove the MDs before AP calc
         llr = np.array(fhyp["llr"])
         rec = (np.array(fhyp["cum_tp"]) / npos)
         prec = (np.array(fhyp["cum_tp"]) / (np.array(fhyp["cum_tp"]) + np.array(fhyp["cum_fp"])))
@@ -318,15 +346,18 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds=["ioU=0.2"], t
         ihyp = ihyp[ihyp_fields]
         
         alignment_df = pd.concat([alignment_df, ihyp])
-        #print(f"-------------------------Alignment_df for {iout}--------------");
-        #print(ihyp)
+        print(f"-------------------------Alignment_df for {iout}--------------");
+        print(ihyp)
+        print(output[iout])
         #exit(0)
         
     final_alignment_df = generate_alignment_file(ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False], alignment_df, task)
     print("late2")
+    print("Alignment")
     print(alignment_df)
+    print("Alignment Output")
     print(final_alignment_df)
-    exit(0)
+    #exit(0)
 
     return output,final_alignment_df
 
@@ -336,7 +367,7 @@ def compute_multiclass_iou_pr(ref, hyp, iou_thresholds=0.2, mapping_df = None, c
     thresholds. If references have empty class they will be marked as
     'NO_SCORE_REGION' and are excluded from scoring. 
     
-    Parameters
+Parameters
     ----------
     ref: df
         Data frame containing the ground truth instances. Required fields:
@@ -574,7 +605,10 @@ def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df):
     """    
     # FIXME: Use a No score-region parameter
     tad_add_noscore_region(ref,hyp)
+    print(">> Enter score_tad()")
+    print("REF - With Noscore Regions")
     print(ref)
+    print("HYP")
     print(hyp)
     if len(ref) > 0:
         if len(hyp) > 0:
@@ -590,16 +624,14 @@ def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df):
             pr_iou_scores[iout] = generate_zero_scores_norm_emotion(ref)
         final_alignment_df = pd.DataFrame([["NA","NA","NA","NA","NA","NA","NA","NA", (["",""] if (class_type == "norm") else [])]],
                                           columns=["class", "file_id", "eval", "ref", "sys", "llr", "parameters","sort",(["ref_status","hyp_status"] if (class_type == "norm") else [])])
-
-    print(final_alignment_df)
-    exit(1)
+        
 
     ensure_output_dir(output_dir)
     final_alignment_df_sorted = final_alignment_df.sort_values(by=['class', 'file_id', 'sort'])
     final_alignment_df_sorted.to_csv(os.path.join(output_dir, "instance_alignment.tab"), index = False, quoting=3, sep="\t", escapechar="\t",
                                      columns = ["class","file_id","eval","ref","sys","llr","parameters"] + (["ref_status","hyp_status"] if (class_type == "norm") else []))
     graph_info_dict = []
-    generate_alignment_statistics(final_alignment_df, class_type, output_dir, info_dict = graph_info_dict)
+#    generate_alignment_statistics(final_alignment_df, class_type, output_dir, info_dict = graph_info_dict)
 
     sumup_tad_system_level_scores(pr_iou_scores, iou_thresholds, class_type, output_dir)
     sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir)

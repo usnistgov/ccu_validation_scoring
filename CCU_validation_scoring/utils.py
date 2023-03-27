@@ -1,4 +1,4 @@
-import os
+CCU_validation_scoring/utils.pyimport os
 import fnmatch
 import pprint
 import subprocess
@@ -506,27 +506,38 @@ def generate_alignment_file(ref, hyp, task):
 		if row['tp'] == 1 and row['fp'] == 0:
 			return 'mapped'
 		return 'unmapped'
+	def categorise_score(row):
+		if row['tp'] == 1 and row['fp'] == 0:
+			return 'CD'
+		if row['tp'] == 0 and row['fp'] == 1:
+			return 'FA'
+		return 'MD'
 
 	hyp["eval"] = hyp.apply(lambda row: categorise(row), axis=1)
+	hyp["eval_score"] = hyp.apply(lambda row: categorise_score(row), axis=1)
 
+	print(f">> Generate alignment file for task {task}")
+	print("REF")
+	print(ref)
+	print("HYP")
+	print(hyp)
+	#exit(0)
 	if task in ["norm","emotion"]:
-
-		ref_format = ref.copy()
-		ref_format['start'] = [formatNumber(x) for x in ref['start']]
-		ref_format['end'] = [formatNumber(x) for x in ref['end']]
-		ref_format['sort'] = [x for x in ref['start']]
+                ### Refs are in the hyp df
+		# ref_format = ref.copy()
+		# ref_format['start'] = [formatNumber(x) for x in ref['start']]
+		# ref_format['end'] = [formatNumber(x) for x in ref['end']]
+		# ref_format['sort'] = [x for x in ref['start']]
 		#print("ref_format")
 		#print(ref_format)
 		
 		hyp_format = hyp.copy()
-		#print("hyp_format")
-		#print(hyp_format)
 
 		hyp_format['start_ref'] = [formatNumber(x) for x in hyp['start_ref']]
 		hyp_format['end_ref'] = [formatNumber(x) for x in hyp['end_ref']]
 		hyp_format['start_hyp'] = [formatNumber(x) for x in hyp['start_hyp']]
 		hyp_format['end_hyp'] = [formatNumber(x) for x in hyp['end_hyp']]
-		hyp_format['sort'] = [x for x in hyp['start_hyp']]
+		hyp_format['sort'] = [r if (math.isnan(h) ) else h for h, r in zip(hyp['start_hyp'], hyp['start_ref']) ]
 
 		hyp_format["ref"] = "{start=" + hyp_format["start_ref"].astype(str) + ",end=" + hyp_format["end_ref"].astype(str) + "}"
 		hyp_format["sys"] = "{start=" + hyp_format["start_hyp"].astype(str) + ",end=" + hyp_format["end_hyp"].astype(str) + "}"
@@ -540,38 +551,47 @@ def generate_alignment_file(ref, hyp, task):
 		hyp_format['pct_fp_f'] =            hyp_format['pct_fp'].apply(           lambda x: 'pct_temp_fp={:,.3f}'.format(x))
 
 		hyp_format['parameters'] = '{' + hyp_format['IoU_f'] + ',' + hyp_format['intersection_f'] + ',' + hyp_format['union_f'] + ',' + hyp_format['shifted_sys_start_f'] + ',' + hyp_format['shifted_sys_end_f'] + ',' + hyp_format['pct_tp_f'] + ',' + hyp_format['pct_fp_f'] + '}'
-                
-		hyp_format.loc[hyp_format["eval"] == "unmapped", "ref"] = "{}"
+
+		hyp_format.loc[hyp_format.eval_score == 'FA', "ref"] = "{}"  ### start_ref is now a string!!!
+		hyp_format.loc[hyp_format.eval_score == 'MD', "sys"] = "{}"  ### start_ref is now a string!!!
+		#hyp_format.loc[hyp_format["eval"] == "unmapped", "ref"] = "{}"
 		hyp_format.loc[hyp_format["eval"] == "unmapped", "parameters"] = "{}"
+
+		print("hyp_format befor filtering columns")
+		print(hyp_format)
+                
+                ### Filter columns
 		if (task == "norm"):
-		        hyp_format.loc[hyp_format["eval"] == "unmapped", "status"] = "EMPTY_NA"
+		        hyp_format.loc[hyp_format["eval_score"] == "FA", "status"] = "EMPTY_NA"  ### This is the REF - to be renamed below
 		        hyp_format = hyp_format[["Class","file_id","eval","ref","sys","llr","parameters","sort","status", "hyp_status"]]
 		        hyp_format = hyp_format.rename(columns={"status": "ref_status"})
 		else:
 		        hyp_format = hyp_format[["Class","file_id","eval","ref","sys","llr","parameters","sort"]]                        
 
-                #### These are the unmapped refs
-		ref_new = ref_format.copy()
-		ref_new["ref"] = "{start=" + ref_format["start"].astype(str) + ",end=" + ref_format["end"].astype(str) + "}"
-		if (task == "norm"):
-		        ref_new = ref_new[["file_id","Class","ref","sort","status"]]
-		        ref_new = ref_new.rename(columns={"status": "ref_status"})
-		        ref_new['hyp_status'] = "EMPTY_NA"
-		else:
-		        ref_new = ref_new[["file_id","Class","ref","sort"]]
-		ref_new = ref_new.loc[~(ref_new["ref"].isin(hyp_format["ref"]))]
-		ref_new["eval"] = "unmapped"
-		ref_new["sys"] = "{}"
-		ref_new["parameters"] = "{}"
-		ref_new["llr"] = np.nan
-		print(ref_new)
 
-		alignment = pd.concat([hyp_format, ref_new])
-		alignment = alignment.rename(columns={'Class':'class'})
+                ### REF as all in the hyp structure
+                # #### These are the unmapped refs
+		# ref_new = ref_format.copy()
+		# ref_new["ref"] = "{start=" + ref_format["start"].astype(str) + ",end=" + ref_format["end"].astype(str) + "}"
+		# if (task == "norm"):
+		#         ref_new = ref_new[["file_id","Class","ref","sort","status"]]
+		#         ref_new = ref_new.rename(columns={"status": "ref_status"})
+		#         ref_new['hyp_status'] = "EMPTY_NA"
+		# else:
+		#         ref_new = ref_new[["file_id","Class","ref","sort"]]
+		# ref_new = ref_new.loc[~(ref_new["ref"].isin(hyp_format["ref"]))]
+		# ref_new["eval"] = "unmapped"
+		# ref_new["sys"] = "{}"
+		# ref_new["parameters"] = "{}"
+		# ref_new["llr"] = np.nan
+		# print(ref_new)
 
+		# alignment = pd.concat([hyp_format, ref_new])
+
+		alignment = hyp_format.rename(columns={'Class':'class'})
 		print("final alignment")
-		print(alignment)
-		exit(1)
+		print(hyp_format)
+		#exit(0)
 	if task == "changepoint":
 
 		ref_format = ref.copy()
