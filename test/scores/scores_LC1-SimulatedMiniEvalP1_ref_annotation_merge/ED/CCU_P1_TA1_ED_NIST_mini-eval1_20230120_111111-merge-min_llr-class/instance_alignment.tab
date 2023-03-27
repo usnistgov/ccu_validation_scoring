@@ -1,12 +1,12 @@
 class	file_id	eval	ref	sys	llr	parameters
-joy	M010005NJ	mapped	{start=0,end=15}	{start=1,end=16}	0.6	{iou=0.875,intersection=14.000,union=16.000,cb_intersection=16.000,cb_iou=1.000}
-joy	M010005NJ	mapped	{start=44,end=50}	{start=43,end=50}	0.7	{iou=0.857,intersection=6.000,union=7.000,cb_intersection=7.000,cb_iou=1.000}
-joy	M01000H0B	mapped	{start=0,end=70}	{start=0,end=70}	0.8	{iou=1.000,intersection=70.000,union=70.000,cb_intersection=70.000,cb_iou=1.000}
+joy	M010005NJ	mapped	{start=0,end=15}	{start=1,end=16}	0.6	{iou=0.875,intersection=14.000,union=16.000,shifted_start_hyp=0.000,shifted_end_hyp=16.000,pct_temp_tp=1.000,pct_temp_fp=0.067}
+joy	M010005NJ	mapped	{start=44,end=50}	{start=43,end=50}	0.7	{iou=0.857,intersection=6.000,union=7.000,shifted_start_hyp=43.000,shifted_end_hyp=50.000,pct_temp_tp=1.000,pct_temp_fp=0.167}
+joy	M01000H0B	mapped	{start=0,end=70}	{start=0,end=70}	0.8	{iou=1.000,intersection=70.000,union=70.000,shifted_start_hyp=0.000,shifted_end_hyp=70.000,pct_temp_tp=1.000,pct_temp_fp=0.000}
 joy	M01000H0B	unmapped	{start=80,end=150}	{}		{}
-joy	M01000H0B	mapped	{start=220,end=280}	{start=120,end=320}	0.7	{iou=0.300,intersection=60.000,union=200.000,cb_intersection=90.000,cb_iou=0.450}
-joy	M01000H0B	mapped	{start=360,end=400}	{start=370,end=490}	0.6	{iou=0.231,intersection=30.000,union=130.000,cb_intersection=55.000,cb_iou=0.423}
-surprise	M010005NJ	mapped	{start=0,end=5}	{start=1,end=16}	0.6	{iou=0.250,intersection=4.000,union=16.000,cb_intersection=16.000,cb_iou=1.000}
+joy	M01000H0B	mapped	{start=220,end=280}	{start=120,end=320}	0.7	{iou=0.300,intersection=60.000,union=200.000,shifted_start_hyp=120.000,shifted_end_hyp=320.000,pct_temp_tp=1.000,pct_temp_fp=2.333}
+joy	M01000H0B	mapped	{start=360,end=400}	{start=370,end=490}	0.6	{iou=0.231,intersection=30.000,union=130.000,shifted_start_hyp=360.000,shifted_end_hyp=490.000,pct_temp_tp=1.000,pct_temp_fp=2.250}
+surprise	M010005NJ	mapped	{start=0,end=5}	{start=1,end=16}	0.6	{iou=0.250,intersection=4.000,union=16.000,shifted_start_hyp=0.000,shifted_end_hyp=16.000,pct_temp_tp=1.000,pct_temp_fp=2.200}
 surprise	M010005NJ	unmapped	{start=36.8,end=41}	{}		{}
 surprise	M010005NJ	unmapped	{}	{start=43,end=50}	0.7	{}
-surprise	M01000H0B	mapped	{start=0,end=70}	{start=0,end=70}	0.8	{iou=1.000,intersection=70.000,union=70.000,cb_intersection=70.000,cb_iou=1.000}
-surprise	M01000H0B	mapped	{start=220,end=280}	{start=140,end=320}	0.7	{iou=0.333,intersection=60.000,union=180.000,cb_intersection=90.000,cb_iou=0.500}
+surprise	M01000H0B	mapped	{start=0,end=70}	{start=0,end=70}	0.8	{iou=1.000,intersection=70.000,union=70.000,shifted_start_hyp=0.000,shifted_end_hyp=70.000,pct_temp_tp=1.000,pct_temp_fp=0.000}
+surprise	M01000H0B	mapped	{start=220,end=280}	{start=140,end=320}	0.7	{iou=0.333,intersection=60.000,union=180.000,shifted_start_hyp=140.000,shifted_end_hyp=320.000,pct_temp_tp=1.000,pct_temp_fp=2.000}
