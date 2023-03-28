@@ -1,4 +1,4 @@
-CCU_validation_scoring/score_submission.pyCCU_validation_scoring/score_submission.pyimport os
+CCU_validation_scoring/score_submission.pyimport os
 import pandas as pd
 import logging
 import re

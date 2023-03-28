@@ -516,11 +516,11 @@ def generate_alignment_file(ref, hyp, task):
 	hyp["eval"] = hyp.apply(lambda row: categorise(row), axis=1)
 	hyp["eval_score"] = hyp.apply(lambda row: categorise_score(row), axis=1)
 
-	print(f">> Generate alignment file for task {task}")
-	print("REF")
-	print(ref)
-	print("HYP")
-	print(hyp)
+	# print(f">> Generate alignment file for task {task}")
+	# print("REF")
+	# print(ref)
+	# print("HYP")
+	# print(hyp)
 	#exit(0)
 	if task in ["norm","emotion"]:
                 ### Refs are in the hyp df
@@ -558,8 +558,8 @@ def generate_alignment_file(ref, hyp, task):
 		#hyp_format.loc[hyp_format["eval"] == "unmapped", "ref"] = "{}"
 		hyp_format.loc[hyp_format["eval"] == "unmapped", "parameters"] = "{}"
 
-		print("hyp_format befor filtering columns")
-		print(hyp_format)
+		#print("hyp_format befor filtering columns")
+		#print(hyp_format)
                 
                 ### Filter columns
 		if (task == "norm"):
@@ -590,8 +590,8 @@ def generate_alignment_file(ref, hyp, task):
 		# alignment = pd.concat([hyp_format, ref_new])
 
 		alignment = hyp_format.rename(columns={'Class':'class'})
-		print("final alignment")
-		print(hyp_format)
+		#print("final alignment")
+		#print(hyp_format)
 		#exit(0)
 	if task == "changepoint":
 

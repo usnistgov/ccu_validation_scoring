@@ -324,18 +324,14 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
     for idx, myhyp in hyp.iterrows():
         out.append(compute_ious(myhyp, ref, task, time_span_scale_collar, text_span_scale_collar))
     ihyp = pd.concat(out)
-    print("-----------------from compute_ious------")
-    print(ihyp)
+    #print("-----------------from compute_ious------")
+    #print(ihyp)
     #exit(1)
     
     # Capture naked false alarms that have no overlap with anything regardless of if it is a NO_SCORE_REGION
     #ihyp_naked_fa = ihyp.loc[ihyp.IoU == 0.0]
     #print("---- Naked FAs -----")
     #print(ihyp_naked_fa)
-
-    print(ihyp.loc[(ihyp.Class.str.contains('NO_SCORE_REGION') == False)]) # | ((ihyp.Class.str.contains('NO_SCORE_REGION') == True) & (ihyp['IoU'] == 0.0)) | ihyp.start_ref.isna()])
-    print(ihyp.loc[ ((ihyp.Class.str.contains('NO_SCORE_REGION') == True) & (ihyp['IoU'] == 0.0))]) # | ihyp.start_ref.isna()])
-    print(ihyp.loc[ ihyp.start_ref.isna()])
 
     # Exclude NO_SCORE_REGIONs but keep FP NA's
     #ihyp = ihyp.loc[(ihyp.Class.str.contains('NO_SCORE_REGION') == False) | ihyp.start_ref.isna()]
@@ -365,8 +361,8 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
     ihyp.sort_values(["llr"], ascending=False, inplace=True)        
     ihyp.reset_index(inplace=True, drop=True)
 
-    print("------------Pre AP Calc Alignment--------------");
-    print(ihyp)
+    #print("------------Pre AP Calc Alignment--------------");
+    #print(ihyp)
     #exit(0)
 
     # Determine TP/FP @ IoU-Threshold
@@ -392,8 +388,8 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
         ihyp.loc[ihyp.loc[ihyp['IoU'] == 0.0].index, ['Class']] = [ Class ]
         
         # MDs are still in the alignment struct so the need to be removed for AP calc
-        print(f"--------Alignment for this threshold {params['metric']} >= {params['thresh']} --------------");
-        print(ihyp)
+        #print(f"--------Alignment for this threshold {params['metric']} >= {params['thresh']} --------------");
+        #print(ihyp)
         #exit(0)
     
         ihyp["cum_tp"] = np.cumsum(ihyp.tp).astype(float)
@@ -438,18 +434,18 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
         ihyp = ihyp[ihyp_fields]
         
         alignment_df = pd.concat([alignment_df, ihyp])
-        print(f"-------------------------Alignment_df for {iout}--------------");
-        print(ihyp)
-        for key, value in output[iout].items():
-            print(f"   {key} -> {value}")
+        #print(f"-------------------------Alignment_df for {iout}--------------");
+        #print(ihyp)
+        #for key, value in output[iout].items():
+        #    print(f"   {key} -> {value}")
         #exit(0)
         
     final_alignment_df = generate_alignment_file(ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False], alignment_df, task)
-    print("late2")
-    print("Alignment")
-    print(alignment_df)
-    print("Alignment Output")
-    print(final_alignment_df)
+    #print("late2")
+    #print("Alignment")
+    #print(alignment_df)
+    #print("Alignment Output")
+    #print(final_alignment_df)
     #exit(0)
 
     return output,final_alignment_df
@@ -552,27 +548,27 @@ Parameters
         if final_combo_pruned.loc[i, "type"] == "all":
             alignment_df = pd.concat([alignment_df, alignment])
 
-        print("-----------------------")
-        print(apScore)
+        #print("-----------------------")
+        #print(apScore)
         ### Load the results into the IoU-specific data frame.  The first time the IoU is found, the DF is began
         for iout in iou_thresholds:
             ### Add Values then append
-            print(f"iout {iout}")
-            print(apScore[iout])
-            print(final_combo_pruned.loc[i])
+            #print(f"iout {iout}")
+            #print(apScore[iout])
+            #print(final_combo_pruned.loc[i])
             apScore[iout]['Class'] = final_combo_pruned.loc[i, "Class"]
             apScore[iout]['type'] = final_combo_pruned.loc[i, "type"]
             pr_scores[iout].append(apScore[iout])
 
     final_alignment_df = alignment_df.drop_duplicates() ### Good heavens, this must take a TON of time. IT's needed if multiple IoU thresholds are used
 
-    print("SCORING COMPLETE")
-    for iout, val in pr_scores.items():
-        print(iout)
-        for sc in range(len(pr_scores[iout])):
-            for met, met_val in pr_scores[iout][sc].items():
-                print(f"   {sc} {met} -> {met_val}")
-    print(final_alignment_df)
+    # print("SCORING COMPLETE")
+    # for iout, val in pr_scores.items():
+    #     print(iout)
+    #     for sc in range(len(pr_scores[iout])):
+    #         for met, met_val in pr_scores[iout][sc].items():
+    #             print(f"   {sc} {met} -> {met_val}")
+    # print(final_alignment_df)
         
     # exit(0)
     # exit(0)
@@ -640,14 +636,12 @@ def sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir, clas
     """
     Write class level result into a file
     """
-    print(">>sumup_tad_class_level_scores")
+    #print(">>sumup_tad_class_level_scores")
 
     ### Build the class table
     table = []   #class   genre   metric  value   correctness_criteria
     for iout in sorted(iou_thresholds):
-        print(iout)        
         prs = pr_iou_scores[iout]  ### This is an array of class, type, * scores
-        print(prs)
         for row in range(len(prs)):
             Class = prs[row]['Class']
             Type = prs[row]['type']
@@ -655,9 +649,7 @@ def sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir, clas
             metrics = list(prs[row].keys())
             metrics.sort()
             for metric in metrics:
-                print(f"{metric} {prs[row][metric]}")
                 if (metric not in ['prcurve:precision', 'prcurve:recall', 'prcurve:llr', 'Class', 'type' ]):
-                    print(prs[row][metric])
                     table.append([ Class, Type, metric, np.round(prs[row][metric], 3) if (prs[row][metric] is not None) else prs[row][metric], "{%s}" % iout] )
                     if (metric == 'AP'):  ### Add twice as a standard name
                         table.append([ Class, Type, 'average_precision', np.round(prs[row][metric], 3) if (prs[row][metric] is not None) else prs[row][metric], "{%s}" % iout] )
@@ -673,7 +665,7 @@ def sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir, clas
 
     table_df = pd.DataFrame(table, columns=["class", "genre", "metric", "value", "correctness_criteria"])
     table_df.to_csv(os.path.join(output_dir, "scores_by_class.tab"), sep = "\t", index = None)
-    print(table_df)
+    #print(table_df)
 
     ### Build the aggregated table from table_df
     agg_table = table_df[table_df.metric != 'PRCurve_json'].groupby(['genre', "metric", "correctness_criteria"])['value'].mean().reset_index()
@@ -738,11 +730,11 @@ def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df, time
     """    
     # FIXME: Use a No score-region parameter
     tad_add_noscore_region(ref,hyp)
-    print(">> Enter score_tad()")
-    print("REF - With Noscore Regions")
-    print(ref)
-    print("HYP")
-    print(hyp)
+    #print(">> Enter score_tad()")
+    #print("REF - With Noscore Regions")
+    #print(ref)
+    #print("HYP")
+    #print(hyp)
     if len(ref) > 0:
         if len(hyp) > 0:
             pr_iou_scores, final_alignment_df = compute_multiclass_iou_pr(ref, hyp, iou_thresholds, mapping_df, class_type, time_span_scale_collar, text_span_scale_collar)
