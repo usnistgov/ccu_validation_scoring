@@ -659,11 +659,12 @@ def sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir, clas
                     #table.append([ Class, Type, metric, prs[row][metric], "{%s}" % iout] )
 
             ### Add the PR curve
-            #d = { "precision": [ x for x in prs[row]['prcurve:precision'] ],
-            #      "recall": [ x for x in prs[row]['prcurve:recall'] ],
-            #      "llr": [ x for x in prs[row]['prcurve:llr'] ]
-            #     }
-            #table.append([ Class, Type, "PRCurve_json", json.dumps(d), "{%s}" % iout] )
+            if (prs[row]['prcurve:precision'] is not None):
+                d = { "precision": [ x for x in prs[row]['prcurve:precision'] ],
+                      "recall": [ x for x in prs[row]['prcurve:recall'] ],
+                      "llr": [ x for x in prs[row]['prcurve:llr'] ]
+                     }
+                table.append([ Class, Type, "PRCurve_json", json.dumps(d), "{%s}" % iout] )
 
     table_df = pd.DataFrame(table, columns=["class", "genre", "metric", "value", "correctness_criteria"])
     table_df.to_csv(os.path.join(output_dir, "scores_by_class.tab"), sep = "\t", index = None)
