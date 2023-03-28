@@ -653,10 +653,12 @@ def sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir, clas
             metrics.sort()
             for metric in metrics:
                 print(f"{metric} {prs[row][metric]}")
-                if (metric in ['AP']):
+                if (metric not in ['prcurve:precision', 'prcurve:recall', 'prcurve:llr', 'Class', 'type' ]):
                     print(prs[row][metric])
                     table.append([ Class, Type, metric, np.round(prs[row][metric], 3) if (prs[row][metric] is not None) else prs[row][metric], "{%s}" % iout] )
-                    #table.append([ Class, Type, metric, prs[row][metric], "{%s}" % iout] )
+                    if (metric == 'AP'):  ### Add twice as a standard name
+                        table.append([ Class, Type, 'average_precision', np.round(prs[row][metric], 3) if (prs[row][metric] is not None) else prs[row][metric], "{%s}" % iout] )
+
 
             ### Add the PR curve
             if (prs[row]['prcurve:precision'] is not None):
@@ -671,8 +673,9 @@ def sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir, clas
     print(table_df)
 
     ### Build the aggregated table from table_df
-    agg_table = table_df[table_df.metric == 'AP'].groupby(['genre', "metric", "correctness_criteria"])['value'].mean().reset_index()
-    agg_table.loc[agg_table.metric == 'AP', ['metric']] = [ 'mAP' ]      ## Rename AP to mAP
+    agg_table = table_df[table_df.metric != 'PRCurve_json'].groupby(['genre', "metric", "correctness_criteria"])['value'].mean().reset_index()
+    agg_table['metric'] = 'mean_' + agg_table['metric']
+    agg_table.loc[agg_table.metric == 'mean_AP', ['metric']] = [ 'mAP' ]      ## Rename AP to mAP
     agg_table['task'] = 'nd' if (class_type == 'norm') else 'ed'
     agg_table[["task", "genre", "metric", "value", "correctness_criteria"]].to_csv(os.path.join(output_dir, "scores_aggregated.tab"), sep = "\t", index = None)
 
