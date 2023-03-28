@@ -1,4 +1,4 @@
-import os
+CCU_validation_scoring/score_submission.pyCCU_validation_scoring/score_submission.pyimport os
 import pandas as pd
 import logging
 import re
@@ -21,17 +21,17 @@ def parse_thresholds(arg):
     for item in arg.split(','):
         match = re.match('^([\\d]*\\.[\\d]+|[\\d]+|[\\d]+\\.)$', item)
         if (match is not None):
-            dic['iou=' + match.group()] = {'metric': 'IoU', 'thresh': float(match.group())}
+            dic['iou=' + match.group()] = {'metric': 'IoU', 'op': 'gte', 'thresh': float(match.group())}
         else:
-            match = re.match('^(iou|intersection)=([\\d]*\\.[\\d]+|[\\d]+|[\\d]+\\.)$', item)
+            match = re.match('^(iou|intersection):(gt|gte):([\\d]*\\.[\\d]+|[\\d]+|[\\d]+\\.)$', item)
             if (match is not None):
                 met = match.group(1)
                 if met == "iou":
                         met = "IoU"
-                dic[item] = { 'metric':met, 'thresh': float(match.group(2)) }
+                dic[item] = { 'metric':met, 'op': match.group(2), 'thresh': float(match.group(3)) }
             else:
                 succeed = False
-                print(f"Error: Could not parse the threshold {item}")
+                print(f"Error: Could not parse the threshold {item}.  Options are comma-separated variants of:\n    #\n    (iou|intersection):(gt|gte):#\n")
                 
     assert succeed, "Parse thresholds failed"
     return(dic)

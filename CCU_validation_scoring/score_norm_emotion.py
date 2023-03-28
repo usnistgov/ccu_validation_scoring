@@ -374,8 +374,11 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
         ### This resets the tp and fp for each correctness threshold 
         ihyp[['tp', 'fp', 'md']] = [ 0, 1, 0 ] 
         ### Ref exists, above threshold (implying a TP)
-        ihyp.loc[~ihyp['start_ref'].isna() & (ihyp[params['metric']] >= params['thresh']), ['tp', 'fp', 'md']] = [ 1, 0, 0 ]
-        
+        if (params['op'] == 'gte'):
+            ihyp.loc[~ihyp['start_ref'].isna() & (ihyp[params['metric']] >= params['thresh']), ['tp', 'fp', 'md']] = [ 1, 0, 0 ] 
+        if (params['op'] == 'gt'):
+            ihyp.loc[~ihyp['start_ref'].isna() & (ihyp[params['metric']] > params['thresh']), ['tp', 'fp', 'md']] = [ 1, 0, 0 ] 
+       
         # Mark TP as FP for duplicate ref matches at lower CS
         nhyp = ihyp.duplicated(subset = ['file_id', 'start_ref', 'end_ref', 'tp'], keep='first')
         ihyp.loc[ihyp.loc[nhyp == True].index, ['tp', 'fp', 'md']] = [ 0, 1, 0 ]
@@ -465,7 +468,7 @@ Parameters
     hyp: df
         Data frame containing the prediction instances. Required fields:
         ['file_id', 'Class', 'start', 'end', 'llr']
-    iou_thresholds: 1darray
+    iou_thresholds: a dictionary of thresholds.  defines the metric, operation, and value
         List of IoU levels to score at.
     mapping_df:
         norm mapping dataframe
@@ -722,7 +725,7 @@ def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df, time
         ['file_id', 'Class', 'start', 'end', 'llr']
     class_type:
         string that indicates task name. e.g. norm/emotion
-    iou_thresholds: 1darray [int]
+    iou_thresholds: a dictionary of thresholds.  defines the metric, operation, and value
         List of IoU levels to score at.
     output_dir: str
         Path to a directory (created on demand) for output files   

@@ -85,6 +85,7 @@ def run_scorer():
                           ('AlignFile_tests', 'AlignFile_tests.scoring_input.index.tab', 'pass_submissions_AlignFile_tests', 'CD', '', 'known_norms_AlignFile_tests.txt', '', ''),
 
                           ('WeightedF1', 'WeightedF1.scoring_input.index.tab', 'pass_submissions_WeightedF1', 'ND', '', 'known_norms_WeightedF1.txt', '', ''),
+                          ('WeightedF1', 'WeightedF1.scoring_input.index.tab', 'pass_submissions_WeightedF1', 'ND', '', 'known_norms_WeightedF1.txt', '-t intersection:gt:0', 'any_overlap'),
                           ])
 
 def test_run_score_submissions(dataset, system_input_index, system_dir, task, opt1, opt2, opt3, score_tag):
