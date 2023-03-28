@@ -1,21 +1,4 @@
 class	genre	metric	value	correctness_criteria
-surprise	text	PRCurve_json	"{""precision"": [0.0], ""recall"": [0.0], ""llr"": [0.0]}"	{iou=0.2}
-surprise	audio	PRCurve_json	"{""precision"": [0.0], ""recall"": [0.0], ""llr"": [0.0]}"	{iou=0.2}
-surprise	all	PRCurve_json	"{""precision"": [0.0], ""recall"": [0.0], ""llr"": [0.0]}"	{iou=0.2}
-sadness	video	PRCurve_json	"{""precision"": [0.0], ""recall"": [0.0], ""llr"": [0.0]}"	{iou=0.2}
-sadness	text	PRCurve_json	"{""precision"": [0.0], ""recall"": [0.0], ""llr"": [0.0]}"	{iou=0.2}
-sadness	all	PRCurve_json	"{""precision"": [0.0], ""recall"": [0.0], ""llr"": [0.0]}"	{iou=0.2}
-joy	text	PRCurve_json	"{""precision"": [0.0], ""recall"": [0.0], ""llr"": [0.0]}"	{iou=0.2}
-joy	audio	PRCurve_json	"{""precision"": [0.0], ""recall"": [0.0], ""llr"": [0.0]}"	{iou=0.2}
-joy	all	PRCurve_json	"{""precision"": [0.0], ""recall"": [0.0], ""llr"": [0.0]}"	{iou=0.2}
-fear	video	PRCurve_json	"{""precision"": [0.0], ""recall"": [0.0], ""llr"": [0.0]}"	{iou=0.2}
-fear	audio	PRCurve_json	"{""precision"": [0.0], ""recall"": [0.0], ""llr"": [0.0]}"	{iou=0.2}
-fear	all	PRCurve_json	"{""precision"": [0.0], ""recall"": [0.0], ""llr"": [0.0]}"	{iou=0.2}
-disgust	audio	PRCurve_json	"{""precision"": [0.0], ""recall"": [0.0], ""llr"": [0.0]}"	{iou=0.2}
-disgust	all	PRCurve_json	"{""precision"": [0.0], ""recall"": [0.0], ""llr"": [0.0]}"	{iou=0.2}
-anger	text	PRCurve_json	"{""precision"": [0.0], ""recall"": [0.0], ""llr"": [0.0]}"	{iou=0.2}
-anger	audio	PRCurve_json	"{""precision"": [0.0], ""recall"": [0.0], ""llr"": [0.0]}"	{iou=0.2}
-anger	all	PRCurve_json	"{""precision"": [0.0], ""recall"": [0.0], ""llr"": [0.0]}"	{iou=0.2}
 anger	all	AP	0.0	{iou=0.2}
 anger	audio	AP	0.0	{iou=0.2}
 anger	text	AP	0.0	{iou=0.2}

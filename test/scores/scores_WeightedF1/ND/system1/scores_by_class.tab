@@ -1,5 +1,3 @@
 class	genre	metric	value	correctness_criteria
-101	audio	PRCurve_json	"{""precision"": [0.7777777777777778], ""recall"": [0.7], ""llr"": [0.0]}"	{iou=0.2}
-101	all	PRCurve_json	"{""precision"": [0.7777777777777778], ""recall"": [0.7], ""llr"": [0.0]}"	{iou=0.2}
 101	all	AP	0.544	{iou=0.2}
 101	audio	AP	0.544	{iou=0.2}

@@ -1,16 +1,4 @@
 class	genre	metric	value	correctness_criteria
-007	video	PRCurve_json	"{""precision"": [0.5], ""recall"": [1.0], ""llr"": [1.5]}"	{iou=0.2}
-007	text	PRCurve_json	"{""precision"": [0.5], ""recall"": [1.0], ""llr"": [1.5]}"	{iou=0.2}
-007	audio	PRCurve_json	"{""precision"": [0.3333333333333333], ""recall"": [1.0], ""llr"": [1.5]}"	{iou=0.2}
-007	all	PRCurve_json	"{""precision"": [0.4444444444444444], ""recall"": [1.0], ""llr"": [1.5]}"	{iou=0.2}
-002	video	PRCurve_json	"{""precision"": [0.5], ""recall"": [1.0], ""llr"": [1.5]}"	{iou=0.2}
-002	text	PRCurve_json	"{""precision"": [0.5], ""recall"": [1.0], ""llr"": [1.5]}"	{iou=0.2}
-002	audio	PRCurve_json	"{""precision"": [0.5], ""recall"": [1.0], ""llr"": [1.5]}"	{iou=0.2}
-002	all	PRCurve_json	"{""precision"": [0.5], ""recall"": [1.0], ""llr"": [1.5]}"	{iou=0.2}
-001	video	PRCurve_json	"{""precision"": [1.0], ""recall"": [1.0], ""llr"": [1.5]}"	{iou=0.2}
-001	text	PRCurve_json	"{""precision"": [1.0], ""recall"": [1.0], ""llr"": [1.5]}"	{iou=0.2}
-001	audio	PRCurve_json	"{""precision"": [1.0], ""recall"": [1.0], ""llr"": [1.5]}"	{iou=0.2}
-001	all	PRCurve_json	"{""precision"": [1.0], ""recall"": [1.0], ""llr"": [1.5]}"	{iou=0.2}
 001	all	AP	1.0	{iou=0.2}
 001	audio	AP	1.0	{iou=0.2}
 001	text	AP	1.0	{iou=0.2}
