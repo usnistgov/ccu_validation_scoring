@@ -414,7 +414,7 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
                      'prcurve:llr': llr,
                      'precision_at_MinLLR': prec[-1],
                      'recall_at_MinLLR': rec[-1],
-                     'f1_at_MinLLR': f1(prec[-1], llr[-1]),
+                     'f1_at_MinLLR': f1(prec[-1], rec[-1]),
                      'llr_at_MinLLR': llr[-1],
                      'sum_tp_at_MinLLR': ihyp.tp.sum(),
                      'sum_fp_at_MinLLR': ihyp.fp.sum(),
@@ -755,7 +755,7 @@ def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df, time
     final_alignment_df_sorted.to_csv(os.path.join(output_dir, "instance_alignment.tab"), index = False, quoting=3, sep="\t", escapechar="\t",
                                      columns = ["class","file_id","eval","ref","sys","llr","parameters"] + (["ref_status","hyp_status"] if (class_type == "norm") else []))
     graph_info_dict = []
-#    generate_alignment_statistics(final_alignment_df, class_type, output_dir, info_dict = graph_info_dict)
+    generate_alignment_statistics(final_alignment_df, class_type, output_dir, info_dict = graph_info_dict)
 
     sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir, class_type)
     grqph_info_dict = make_pr_curve(pr_iou_scores, class_type, class_type, output_dir = output_dir, info_dict = graph_info_dict)

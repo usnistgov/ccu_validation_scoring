@@ -466,7 +466,7 @@ def generate_alignment_statistics(ali, task, output_dir, info_dict = None):
         ax_id = 0;
         params = []
         if (task in ['norm', 'emotion']):
-                params = ['iou', 'cb_iou', 'intersection']
+                params = ['iou', 'intersection']
         if (task in ['cd']):
                 params = ['delta_cp']
         for param in params:
@@ -743,7 +743,7 @@ def make_pr_curve_for_cd(apScore, task, title = "", output_dir = ".", info_dict 
             plt.savefig(out)
             plt.close()
     
-    print("Making Precision-Recall Curves by Class")
+    #print("Making Precision-Recall Curves by Class")
     ### Need to Re-order to be able to iterate over classes
     for iou, class_data in apScore.items():
         iou_str = str(iou).replace('=', '_')
@@ -790,15 +790,10 @@ def make_pr_curve(apScore, task, title = "", output_dir = ".", info_dict = None)
     Returns
     -------
     """
-    print("APAS")
-    print(apScore)
-
-    print("Making Precision-Recall Curves by Genre")
+    #print("Making Precision-Recall Curves by Genre")
     for iou, class_data in apScore.items():
         iou_str = str(iou).replace(':', '_')        
-        print(class_data)
         genres = list(set( [ x['type'] for x in class_data ] ) )
-        print(f"Genres {genres}")
         for genre in genres:
             out = os.path.join(output_dir, f"pr_{iou_str}_type_{genre}.png")
             fig, ax = plt.subplots(figsize=(8,6), constrained_layout=True)
@@ -809,8 +804,6 @@ def make_pr_curve(apScore, task, title = "", output_dir = ".", info_dict = None)
             ax.set_title(f"{title}, Correctness:{iou}, Type={genre}")
             dlist = []
             for row in class_data:
-                print("ROW")
-                print(row)
                 if (row['type'] == genre):
                     if (row['prcurve:recall'] is not None):
                             ax.plot(row['prcurve:recall'], row['prcurve:precision'], linewidth=1.0, label=row['Class'])
@@ -830,12 +823,10 @@ def make_pr_curve(apScore, task, title = "", output_dir = ".", info_dict = None)
             plt.savefig(out)
             plt.close()
     
-    print("Making Precision-Recall Curves by Class")
+    #print("Making Precision-Recall Curves by Class")
     for iou, class_data in apScore.items():
         iou_str = str(iou).replace(':', '_')        
-        print(class_data)
         classes = list(set( [ x['Class'] for x in class_data ] ) )
-        print(f"Classes {classes}")
         for Class in classes:
             out = os.path.join(output_dir, f"pr_{iou_str}_class_{Class}.png")
             fig, ax = plt.subplots(figsize=(8,6), constrained_layout=True)
