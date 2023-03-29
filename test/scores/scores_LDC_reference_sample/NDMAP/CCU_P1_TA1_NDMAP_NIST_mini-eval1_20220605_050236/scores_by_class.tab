@@ -1,7 +1,7 @@
 class	genre	metric	value	correctness_criteria
 001	all	AP	1.0	{iou=0.2}
 001	all	average_precision	1.0	{iou=0.2}
-001	all	f1_at_MinLLR	1.2	{iou=0.2}
+001	all	f1_at_MinLLR	1.0	{iou=0.2}
 001	all	llr_at_MinLLR	1.5	{iou=0.2}
 001	all	precision_at_MinLLR	1.0	{iou=0.2}
 001	all	recall_at_MinLLR	1.0	{iou=0.2}
@@ -15,7 +15,7 @@ class	genre	metric	value	correctness_criteria
 001	all	PRCurve_json	"{""precision"": [1.0], ""recall"": [1.0], ""llr"": [1.5]}"	{iou=0.2}
 001	audio	AP	1.0	{iou=0.2}
 001	audio	average_precision	1.0	{iou=0.2}
-001	audio	f1_at_MinLLR	1.2	{iou=0.2}
+001	audio	f1_at_MinLLR	1.0	{iou=0.2}
 001	audio	llr_at_MinLLR	1.5	{iou=0.2}
 001	audio	precision_at_MinLLR	1.0	{iou=0.2}
 001	audio	recall_at_MinLLR	1.0	{iou=0.2}
@@ -29,7 +29,7 @@ class	genre	metric	value	correctness_criteria
 001	audio	PRCurve_json	"{""precision"": [1.0], ""recall"": [1.0], ""llr"": [1.5]}"	{iou=0.2}
 001	text	AP	1.0	{iou=0.2}
 001	text	average_precision	1.0	{iou=0.2}
-001	text	f1_at_MinLLR	1.2	{iou=0.2}
+001	text	f1_at_MinLLR	1.0	{iou=0.2}
 001	text	llr_at_MinLLR	1.5	{iou=0.2}
 001	text	precision_at_MinLLR	1.0	{iou=0.2}
 001	text	recall_at_MinLLR	1.0	{iou=0.2}
@@ -43,7 +43,7 @@ class	genre	metric	value	correctness_criteria
 001	text	PRCurve_json	"{""precision"": [1.0], ""recall"": [1.0], ""llr"": [1.5]}"	{iou=0.2}
 001	video	AP	1.0	{iou=0.2}
 001	video	average_precision	1.0	{iou=0.2}
-001	video	f1_at_MinLLR	1.2	{iou=0.2}
+001	video	f1_at_MinLLR	1.0	{iou=0.2}
 001	video	llr_at_MinLLR	1.5	{iou=0.2}
 001	video	precision_at_MinLLR	1.0	{iou=0.2}
 001	video	recall_at_MinLLR	1.0	{iou=0.2}
@@ -57,7 +57,7 @@ class	genre	metric	value	correctness_criteria
 001	video	PRCurve_json	"{""precision"": [1.0], ""recall"": [1.0], ""llr"": [1.5]}"	{iou=0.2}
 002	all	AP	0.5	{iou=0.2}
 002	all	average_precision	0.5	{iou=0.2}
-002	all	f1_at_MinLLR	0.75	{iou=0.2}
+002	all	f1_at_MinLLR	0.667	{iou=0.2}
 002	all	llr_at_MinLLR	1.5	{iou=0.2}
 002	all	precision_at_MinLLR	0.5	{iou=0.2}
 002	all	recall_at_MinLLR	1.0	{iou=0.2}
@@ -71,7 +71,7 @@ class	genre	metric	value	correctness_criteria
 002	all	PRCurve_json	"{""precision"": [0.5], ""recall"": [1.0], ""llr"": [1.5]}"	{iou=0.2}
 002	audio	AP	0.5	{iou=0.2}
 002	audio	average_precision	0.5	{iou=0.2}
-002	audio	f1_at_MinLLR	0.75	{iou=0.2}
+002	audio	f1_at_MinLLR	0.667	{iou=0.2}
 002	audio	llr_at_MinLLR	1.5	{iou=0.2}
 002	audio	precision_at_MinLLR	0.5	{iou=0.2}
 002	audio	recall_at_MinLLR	1.0	{iou=0.2}
@@ -85,7 +85,7 @@ class	genre	metric	value	correctness_criteria
 002	audio	PRCurve_json	"{""precision"": [0.5], ""recall"": [1.0], ""llr"": [1.5]}"	{iou=0.2}
 002	text	AP	0.5	{iou=0.2}
 002	text	average_precision	0.5	{iou=0.2}
-002	text	f1_at_MinLLR	0.75	{iou=0.2}
+002	text	f1_at_MinLLR	0.667	{iou=0.2}
 002	text	llr_at_MinLLR	1.5	{iou=0.2}
 002	text	precision_at_MinLLR	0.5	{iou=0.2}
 002	text	recall_at_MinLLR	1.0	{iou=0.2}
@@ -99,7 +99,7 @@ class	genre	metric	value	correctness_criteria
 002	text	PRCurve_json	"{""precision"": [0.5], ""recall"": [1.0], ""llr"": [1.5]}"	{iou=0.2}
 002	video	AP	0.5	{iou=0.2}
 002	video	average_precision	0.5	{iou=0.2}
-002	video	f1_at_MinLLR	0.75	{iou=0.2}
+002	video	f1_at_MinLLR	0.667	{iou=0.2}
 002	video	llr_at_MinLLR	1.5	{iou=0.2}
 002	video	precision_at_MinLLR	0.5	{iou=0.2}
 002	video	recall_at_MinLLR	1.0	{iou=0.2}
@@ -113,7 +113,7 @@ class	genre	metric	value	correctness_criteria
 002	video	PRCurve_json	"{""precision"": [0.5], ""recall"": [1.0], ""llr"": [1.5]}"	{iou=0.2}
 007	all	AP	0.444	{iou=0.2}
 007	all	average_precision	0.444	{iou=0.2}
-007	all	f1_at_MinLLR	0.686	{iou=0.2}
+007	all	f1_at_MinLLR	0.615	{iou=0.2}
 007	all	llr_at_MinLLR	1.5	{iou=0.2}
 007	all	precision_at_MinLLR	0.444	{iou=0.2}
 007	all	recall_at_MinLLR	1.0	{iou=0.2}
@@ -127,7 +127,7 @@ class	genre	metric	value	correctness_criteria
 007	all	PRCurve_json	"{""precision"": [0.4444444444444444], ""recall"": [1.0], ""llr"": [1.5]}"	{iou=0.2}
 007	audio	AP	0.333	{iou=0.2}
 007	audio	average_precision	0.333	{iou=0.2}
-007	audio	f1_at_MinLLR	0.545	{iou=0.2}
+007	audio	f1_at_MinLLR	0.5	{iou=0.2}
 007	audio	llr_at_MinLLR	1.5	{iou=0.2}
 007	audio	precision_at_MinLLR	0.333	{iou=0.2}
 007	audio	recall_at_MinLLR	1.0	{iou=0.2}
@@ -141,7 +141,7 @@ class	genre	metric	value	correctness_criteria
 007	audio	PRCurve_json	"{""precision"": [0.3333333333333333], ""recall"": [1.0], ""llr"": [1.5]}"	{iou=0.2}
 007	text	AP	0.5	{iou=0.2}
 007	text	average_precision	0.5	{iou=0.2}
-007	text	f1_at_MinLLR	0.75	{iou=0.2}
+007	text	f1_at_MinLLR	0.667	{iou=0.2}
 007	text	llr_at_MinLLR	1.5	{iou=0.2}
 007	text	precision_at_MinLLR	0.5	{iou=0.2}
 007	text	recall_at_MinLLR	1.0	{iou=0.2}
@@ -155,7 +155,7 @@ class	genre	metric	value	correctness_criteria
 007	text	PRCurve_json	"{""precision"": [0.5], ""recall"": [1.0], ""llr"": [1.5]}"	{iou=0.2}
 007	video	AP	0.5	{iou=0.2}
 007	video	average_precision	0.5	{iou=0.2}
-007	video	f1_at_MinLLR	0.75	{iou=0.2}
+007	video	f1_at_MinLLR	0.667	{iou=0.2}
 007	video	llr_at_MinLLR	1.5	{iou=0.2}
 007	video	precision_at_MinLLR	0.5	{iou=0.2}
 007	video	recall_at_MinLLR	1.0	{iou=0.2}

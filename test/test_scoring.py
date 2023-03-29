@@ -39,10 +39,11 @@ def byte_compare_file(generated, expected):
         #    os.remove(generated)
             
 
-def run_scorer():
+def run_scorer(tmp_dir):
     print("Scoring Command: python -m CCU_validation_scoring.cli " + " ".join(sys.argv[1:]))
     try:
         rtn = cli.main()
+        print(f"Scorer-produced files in {tmp_dir}\n   {os.listdir(tmp_dir)}")
 
     except Exception:
         print("Scorer execution threw and exception")
@@ -90,6 +91,16 @@ def run_scorer():
                           ])
 
 def test_run_score_submissions(dataset, system_input_index, system_dir, task, opt1, opt2, opt3, score_tag):
+    def clean_tmp_dir(tmp_dir):
+        for myfile in os.listdir(tmp_dir):
+            if (myfile not in ['.gitignore']):
+                try:
+                    os.remove(os.path.join(tmp_dir, myfile))
+                except OSError as e:
+                    # If it fails, inform the user.
+                    print(f"Error: Could not remove {tmp_dir}/{myfile}")
+                    exit(1)
+
     current_path = os.path.abspath(__file__)
     test_dir_path = os.path.dirname(current_path)
     
@@ -111,7 +122,8 @@ def test_run_score_submissions(dataset, system_input_index, system_dir, task, op
         for subdir in subdirs:                        
             sys.argv[1:] = ["score-{}".format(task.lower()), "-ref", refdir,
                             "-s", subdir, "-i", scoring_index_path, "-o", tmp_dir]
-            run_scorer()
+            clean_tmp_dir(tmp_dir)
+            run_scorer(tmp_dir)
 
 #            for filename in ["scores_aggregated.tab", "segment_diarization.tab"]:
             for filename in ["segment_diarization.tab"]:                
@@ -119,7 +131,7 @@ def test_run_score_submissions(dataset, system_input_index, system_dir, task, op
                 tmp_out_dir_name = os.path.basename(subdir) + ('' if (score_tag == '') else '-' + score_tag)
                 byte_compare_file(tmp_file,
                                   os.path.join(score_path, "scores_" + dataset, task, tmp_out_dir_name, filename))
-                os.remove(tmp_file)
+            clean_tmp_dir(tmp_dir)
 
 
     if (task in ["ND", "ED"]):
@@ -128,6 +140,7 @@ def test_run_score_submissions(dataset, system_input_index, system_dir, task, op
         for subdir in subdirs:            
             sys.argv[1:] = ["score-{}".format(task.lower()), "-ref", refdir,
                             "-s", subdir, "-i", scoring_index_path, "-o", tmp_dir, "-aR", "1.0", "-xR", "10"]
+            clean_tmp_dir(tmp_dir)
             ### Add opt2 if there
             if (opt2 != ''):
                 sys.argv.append("-n")
@@ -135,14 +148,14 @@ def test_run_score_submissions(dataset, system_input_index, system_dir, task, op
 
             if (opt3 != ''):
                 sys.argv.extend(opt3.split())
-            run_scorer()
+            run_scorer(tmp_dir)
                 
             for filename in ["scores_by_class.tab", "scores_aggregated.tab", "instance_alignment.tab"]:
                 tmp_file = os.path.join(tmp_dir, filename)
                 tmp_out_dir_name = os.path.basename(subdir) + ('' if (score_tag == '') else '-' + score_tag)
                 byte_compare_file(tmp_file,
                                   os.path.join(score_path, "scores_" + dataset, task, tmp_out_dir_name, filename))
-                os.remove(tmp_file)
+            clean_tmp_dir(tmp_dir)
 
     if (task in ["NDMAP"]):
         assert len(subdirs) > 0
@@ -158,14 +171,15 @@ def test_run_score_submissions(dataset, system_input_index, system_dir, task, op
             if (opt2 != ''):
                 sys.argv.append("-n")
                 sys.argv.append(os.path.join(test_dir_path, opt2))
-            run_scorer()
+            clean_tmp_dir(tmp_dir)
+            run_scorer(tmp_dir)
             
             for filename in ["scores_by_class.tab", "scores_aggregated.tab", "instance_alignment.tab"]:
                 tmp_file = os.path.join(tmp_dir, filename)
                 tmp_out_dir_name = os.path.basename(subdir) + ('' if (score_tag == '') else '-' + score_tag)
                 byte_compare_file(tmp_file,
                                   os.path.join(score_path, "scores_" + dataset, task, tmp_out_dir_name, filename))
-                #os.remove(tmp_file)
+            clean_tmp_dir(tmp_dir)
                 
     if (task in ["CD"]):
         assert len(subdirs) > 0
@@ -173,14 +187,15 @@ def test_run_score_submissions(dataset, system_input_index, system_dir, task, op
             sys.argv[1:] = ["score-{}".format(task.lower()), "-ref", refdir,
                             "-s", subdir, "-i", scoring_index_path, "-o", tmp_dir]
 
-            run_scorer()
+            clean_tmp_dir(tmp_dir)
+            run_scorer(tmp_dir)
                 
             for filename in ["scores_by_class.tab", "instance_alignment.tab"]:
                 tmp_file = os.path.join(tmp_dir, filename)
                 tmp_out_dir_name = os.path.basename(subdir) + ('' if (score_tag == '') else '-' + score_tag)
                 byte_compare_file(tmp_file,
                                   os.path.join(score_path, "scores_" + dataset, task, tmp_out_dir_name, filename))
-                os.remove(tmp_file)
+            clean_tmp_dir(tmp_dir)
 
 
 if __name__ == '__main__':
