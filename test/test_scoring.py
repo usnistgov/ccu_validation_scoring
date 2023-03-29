@@ -43,7 +43,7 @@ def run_scorer():
     print("Scoring Command: python -m CCU_validation_scoring.cli " + " ".join(sys.argv[1:]))
     try:
         rtn = cli.main()
-        
+
     except Exception:
         print("Scorer execution threw and exception")
         exit(1)
@@ -86,6 +86,7 @@ def run_scorer():
 
                           ('WeightedF1', 'WeightedF1.scoring_input.index.tab', 'pass_submissions_WeightedF1', 'ND', '', 'known_norms_WeightedF1.txt', '', ''),
                           ('WeightedF1', 'WeightedF1.scoring_input.index.tab', 'pass_submissions_WeightedF1', 'ND', '', 'known_norms_WeightedF1.txt', '-t intersection:gt:0', 'any_overlap'),
+                          ('WeightedF1', 'WeightedF1.scoring_input.index.tab', 'pass_submissions_WeightedF1', 'ND', '', 'known_norms_WeightedF1.txt', '-aR 30 -xR 300 -vR class -aC 15 -xC 150 -t intersection:gt:0', 'LC1_Eval_V1_RefMerge_NoSysMerge'),
                           ])
 
 def test_run_score_submissions(dataset, system_input_index, system_dir, task, opt1, opt2, opt3, score_tag):
@@ -95,7 +96,7 @@ def test_run_score_submissions(dataset, system_input_index, system_dir, task, op
     submissions_path = os.path.join(test_dir_path, 'pass_submissions')
     reference_path = os.path.join(test_dir_path, 'reference')
     score_path = os.path.join(test_dir_path, 'scores')
-    tmp_dir = test_dir_path
+    tmp_dir = os.path.join(test_dir_path, 'test_output')
 
     refdir = os.path.join(reference_path, dataset)
     scoring_index_path = os.path.join(refdir, 'index_files', system_input_index)

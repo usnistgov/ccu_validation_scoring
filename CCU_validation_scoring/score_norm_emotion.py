@@ -758,7 +758,7 @@ def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df, time
 #    generate_alignment_statistics(final_alignment_df, class_type, output_dir, info_dict = graph_info_dict)
 
     sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir, class_type)
-    #make_pr_curve(pr_iou_scores, class_type, class_type, output_dir = output_dir, info_dict = graph_info_dict)
+    grqph_info_dict = make_pr_curve(pr_iou_scores, class_type, class_type, output_dir = output_dir, info_dict = graph_info_dict)
     graph_info_df = pd.DataFrame(graph_info_dict)
     graph_info_df.to_csv(os.path.join(output_dir, "graph_info.tab"), index = False, quoting=3, sep="\t", escapechar="\t")
     

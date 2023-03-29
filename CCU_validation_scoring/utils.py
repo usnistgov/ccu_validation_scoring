@@ -705,9 +705,7 @@ def generate_scoring_parameter_file(args):
 
 	sp_df.to_csv(os.path.join(args.output_dir, "scoring_parameters.tab"), sep = "\t", index = None)
 
-	
-
-def make_pr_curve(apScore, task, title = "", output_dir = ".", info_dict = None):
+def make_pr_curve_for_cd(apScore, task, title = "", output_dir = ".", info_dict = None):
     """ Plot a Precision Recall Curve for the data.
     
     Parameters
@@ -774,5 +772,96 @@ def make_pr_curve(apScore, task, title = "", output_dir = ".", info_dict = None)
             plt.savefig(out)
             plt.close()
 
+
+    return(info_dict)
+	
+
+
+def make_pr_curve(apScore, task, title = "", output_dir = ".", info_dict = None):
+    """ Plot a Precision Recall Curve for the data.
+    
+    Parameters
+    ----------
+    apScore:
+        - { IoU: [**ap**, **precision** (1darray), **recall** (1darray) , .... }
+    info_dict:
+        - an array of dictionaries describing the graphs
+
+    Returns
+    -------
+    """
+    print("APAS")
+    print(apScore)
+
+    print("Making Precision-Recall Curves by Genre")
+    for iou, class_data in apScore.items():
+        iou_str = str(iou).replace(':', '_')        
+        print(class_data)
+        genres = list(set( [ x['type'] for x in class_data ] ) )
+        print(f"Genres {genres}")
+        for genre in genres:
+            out = os.path.join(output_dir, f"pr_{iou_str}_type_{genre}.png")
+            fig, ax = plt.subplots(figsize=(8,6), constrained_layout=True)
+            ax.set(xlim=(0, 1), xticks=np.arange(0, 1, 0.1),
+                   ylim=(0, 1), yticks=np.arange(0, 1, 0.1))
+            ax.set_xlabel('Recall')
+            ax.set_ylabel('Precision')
+            ax.set_title(f"{title}, Correctness:{iou}, Type={genre}")
+            dlist = []
+            for row in class_data:
+                print("ROW")
+                print(row)
+                if (row['type'] == genre):
+                    if (row['prcurve:recall'] is not None):
+                            ax.plot(row['prcurve:recall'], row['prcurve:precision'], linewidth=1.0, label=row['Class'])
+                            dlist.append(np.array([ row['prcurve:recall'], row['prcurve:precision'] ]))
+                    else:
+                            ax.plot([-1], [-1], linewidth=1.0, label=row['Class'] + "-No Sys Output")
+
+            if (len(dlist) > 0):
+                    agg_recall, agg_precision, agg_stderr = aggregate_xy(dlist)
+                    ax.plot(agg_recall, agg_precision, linewidth=1.0, label="Average")
+            else:
+                    ax.plot([-1], [-1], linewidth=1.0, label="No Average")
+            #print("    Saving plot {}".format(out))
+            if (info_dict is not None):
+                    info_dict.append({ 'task': task, 'graph_type': 'pr_curve', 'graph_factor': 'genre', 'graph_factor_value': genre, 'correctness_constraint': iou, 'filename': out})
+            plt.legend(loc='upper right')
+            plt.savefig(out)
+            plt.close()
+    
+    print("Making Precision-Recall Curves by Class")
+    for iou, class_data in apScore.items():
+        iou_str = str(iou).replace(':', '_')        
+        print(class_data)
+        classes = list(set( [ x['Class'] for x in class_data ] ) )
+        print(f"Classes {classes}")
+        for Class in classes:
+            out = os.path.join(output_dir, f"pr_{iou_str}_class_{Class}.png")
+            fig, ax = plt.subplots(figsize=(8,6), constrained_layout=True)
+            ax.set(xlim=(0, 1), xticks=np.arange(0, 1, 0.1),
+                   ylim=(0, 1), yticks=np.arange(0, 1, 0.1))
+            ax.set_xlabel('Recall')
+            ax.set_ylabel('Precision')
+            ax.set_title(f"{title}, Correctness:{iou}, Class={Class}")
+            dlist = []
+            for row in class_data:
+                if (row['Class'] == Class):
+                    if (row['prcurve:recall'] is not None):
+                            ax.plot(row['prcurve:recall'], row['prcurve:precision'], linewidth=1.0, label=row['type'])
+                            dlist.append(np.array([ row['prcurve:recall'], row['prcurve:precision'] ]))
+                    else:
+                            ax.plot([-1], [-1], linewidth=1.0, label=row['type'] + "-No Sys Output")
+            if (len(dlist) > 0):
+                    agg_recall, agg_precision, agg_stderr = aggregate_xy(dlist)
+                    ax.plot(agg_recall, agg_precision, linewidth=1.0, label="Average")
+            else:
+                    ax.plot([-1], [-1], linewidth=1.0, label="No Average")
+            #print("    Saving plot {}".format(out))
+            if (info_dict is not None):
+                    info_dict.append({ 'task': task, 'graph_type': 'pr_curve', 'graph_factor': 'class', 'graph_factor_value': Class, 'correctness_constraint': iou, 'filename': out})
+            plt.legend(loc='upper right')
+            plt.savefig(out)
+            plt.close()
 
     return(info_dict)

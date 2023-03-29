@@ -346,7 +346,7 @@ def score_cp(ref, hyp, delta_cp_text_thresholds, delta_cp_time_thresholds, outpu
 
     graph_info_dict = []
     generate_alignment_statistics(final_alignment_df_sorted, "cd", output_dir = output_dir, info_dict = graph_info_dict)
-    make_pr_curve(pr_iou_scores, "cd", "cd", output_dir, info_dict = graph_info_dict)
+    make_pr_curve_for_cd(pr_iou_scores, "cd", "cd", output_dir, info_dict = graph_info_dict)
     graph_info_df = pd.DataFrame(graph_info_dict)
     graph_info_df.to_csv(os.path.join(output_dir, "graph_info.tab"), index = False, quoting=3, sep="\t", escapechar="\t")
     
