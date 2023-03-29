@@ -654,9 +654,10 @@ def preprocess_norm_emotion_reference_df(reference_df, class_type, text_gap, tim
 	#print(pprint.pprint(result, width=200))
 	# Convert the result dictionary into dataframe
 	result_df = convert_norm_emotion_dict_df(result, class_type)
-	#print("end preprocess")
+
+	## Dropping rows with zero duration
+	result_df = result_df.drop(result_df[result_df.start == result_df.end].index, axis=0)
 	#print(result_df)
-	#exit(0)
 
 	return result_df
 
@@ -766,8 +767,8 @@ def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time
                                         ref_final.loc[len(ref_final)] = [0, file_id, 0,   'NO_SCORE_REGION', "StartNoScore", type_col, length, 0, start]
                                 if (end < length):
                                         ref_final.loc[len(ref_final)] = [0, file_id, end, 'NO_SCORE_REGION', "EndNoScore", type_col, length, end, length]
-                
 
+	ref_final['ref_uid'] = [ "R"+str(s) for s in range(len(ref_final['file_id'])) ] ### This is a unique REF ID to help find FN 
 	#print("DONE - ref_final")
 	#print(ref_final)
 	#exit(0)

@@ -6,7 +6,7 @@ import unittest
 import pandas as pd
 
 
-class IOUTests(unittest.TestCase):
+class IOUTests_v1(unittest.TestCase):
     #  To test the IoU
     # 
 
@@ -24,15 +24,161 @@ class IOUTests(unittest.TestCase):
         
     def test_iou(self):
         for case in range(len(self.cases)):
-            ret = segment_iou(self.cases[case]['inputs']['ref']['ref_start'],
-                              self.cases[case]['inputs']['ref']['ref_end'],
-                              self.cases[case]['inputs']['tgts'])
+            ret = segment_iou_v1(self.cases[case]['inputs']['ref']['ref_start'],
+                                 self.cases[case]['inputs']['ref']['ref_end'],
+                                 self.cases[case]['inputs']['tgts'])
             [ self.assertAlmostEqual(exp, calc, 3, msg=f"IoU Check Fails: case={case} exp={exp} != calc={calc}")             for exp, calc in zip(self.cases[case]['expected'][0], ret[0]) ]
             [ self.assertAlmostEqual(exp, calc, 3, msg=f"intersection Check Fails: case={case} exp={exp} != calc={calc}")    for exp, calc in zip(self.cases[case]['expected'][1], ret[1]) ]
             [ self.assertAlmostEqual(exp, calc, 3, msg=f"union Check Fails: case={case} exp={exp} != calc={calc}")           for exp, calc in zip(self.cases[case]['expected'][2], ret[2]) ]
             [ self.assertAlmostEqual(exp, calc, 3, msg=f"cb_intersection Check Fails: case={case} exp={exp} != calc={calc}") for exp, calc in zip(self.cases[case]['expected'][3], ret[3]) ]
             [ self.assertAlmostEqual(exp, calc, 3, msg=f"cb_IoU Check Fails: case={case} exp={exp} != calc={calc}")          for exp, calc in zip(self.cases[case]['expected'][4], ret[4]) ]
 
+
+# class IOUTests_v2_save(unittest.TestCase):
+#     #  To test the IoU
+#     # 
+
+#     def setUp(self):
+#         ##############################  IoU     Inter Union   csb   cse   ScTP      ScFP
+#         #self.cases = [ { 'expected': [ [0.75, 0.75],   [30, 30], [40, 40], [20, 20], [60, 60],  [1.0, 1.0],    [0.333, 0.333] ] ,  'inputs': { 'ref': pd.DataFrame(data={'ref_start': [ 25 ], 'ref_end': [ 55 ]}) , 'tgts': [ [ 20, 60 ], [ 20, 60] ] } }, 
+#         self.cases = [ { 'expected': [ [0.75],   [30], [40], [20], [60],  [1.0],    [0.333] ] ,  'inputs': { 'file': 'F4', 'ref': pd.DataFrame(data={'ref_start': [ 25 ], 'ref_end': [ 55 ]}) , 'tgts': [ [20, 60] ] } }, 
+#                        { 'expected': [ [0.75],   [30], [40], [20], [60],  [1.0],    [0.0] ] ,    'inputs': { 'file': 'F5', 'ref': pd.DataFrame(data={'ref_start': [ 20 ], 'ref_end': [ 60 ]}) , 'tgts': [ [25, 55] ] } },
+#                        { 'expected': [ [0.4286], [30], [70],  [5], [75],  [1.0],    [1.333] ] ,  'inputs': { 'file': 'F6', 'ref': pd.DataFrame(data={'ref_start': [ 25 ], 'ref_end': [ 55 ]}) , 'tgts': [ [ 5, 75] ] } },
+#                        { 'expected': [ [0.4286], [30], [70], [10], [70],  [0.8571], [0.0] ] ,    'inputs': { 'file': 'F7', 'ref': pd.DataFrame(data={'ref_start': [  5 ], 'ref_end': [ 75 ]}) , 'tgts': [ [25, 55] ] } },
+#                        { 'expected': [ [0.5454], [30], [55], [20], [75],  [1.0],    [0.5714] ] , 'inputs': { 'file': 'F8', 'ref': pd.DataFrame(data={'ref_start': [ 20 ], 'ref_end': [ 55 ]}) , 'tgts': [ [25, 75] ] } },
+#                        { 'expected': [ [0.50],   [30], [60], [10], [65],  [0.9],    [0.2] ] ,    'inputs': { 'file': 'F9', 'ref': pd.DataFrame(data={'ref_start': [  5 ], 'ref_end': [ 55 ]}) , 'tgts': [ [25, 65] ] } },
+#                        { 'expected': [ [0.5454], [30], [55], [20], [70],  [0.9],    [0.1] ] ,    'inputs': { 'file': 'F10', 'ref': pd.DataFrame(data={'ref_start': [ 25 ], 'ref_end': [ 75 ]}) , 'tgts': [ [20, 55] ] } },
+#                        { 'expected': [ [0.1667], [10], [60],  [5], [50],  [0.625],  [0.5] ] ,    'inputs': { 'file': 'F11', 'ref': pd.DataFrame(data={'ref_start': [ 25 ], 'ref_end': [ 65 ]}) , 'tgts': [ [ 5, 35] ] } }
+#                       ]
+                                                
+#     def test_iou(self):
+#         fig, ax = plt.subplots(len(self.cases), 1, figsize=(8,1.5 * len(self.cases)), constrained_layout=True)
+
+#         for case in range(len(self.cases)):
+#             #print(self.cases[case])
+#             #print(self.cases[case]['inputs']['tgts'])
+                      
+#             #d = pd.DataFrame([[self.cases[case]['inputs']['tgts'][0], self.cases[case]['inputs']['tgts'][1] ]], columns = ['start', 'end'])
+#             d = pd.DataFrame(self.cases[case]['inputs']['tgts'], columns = ['start', 'end'])
+#             #print("")
+#             #print(f"df wtf type {type(d)}")
+#             #print(d)
+#             ret = segment_iou_v2(self.cases[case]['inputs']['ref']['ref_start'][0],
+#                                  self.cases[case]['inputs']['ref']['ref_end'][0],
+#                                  [ d.start, d.end],
+#                                  15)
+            
+#             print(f"ref_start {self.cases[case]['inputs']['ref']['ref_start'][0]} ref_end {self.cases[case]['inputs']['ref']['ref_end'][0]} -> tgts {self.cases[case]['inputs']['tgts']}")
+#             print("IoU  [0]: " + str(ret[0].to_list()))
+#             print("Int  [1]: " + str(ret[1].to_list()))
+#             print("Uni  [2]: " + str(ret[2].to_list()))
+#             print("csb  [3]: " + str(ret[3].to_list()))
+#             print("cse  [4]: " + str(ret[4].to_list()))
+#             print("ScTP [5]: " + str(ret[5].to_list()))
+#             print("ScFP [6]: " + str(ret[6].to_list()))
+#             exit(0)
+            
+#             [ self.assertAlmostEqual(exp, calc, 3, msg=f"IoU Check Fails: case={case} exp={exp} != calc={calc}")             for exp, calc in zip(self.cases[case]['expected'][0], ret[0]) ]
+#             [ self.assertAlmostEqual(exp, calc, 3, msg=f"intersection Check Fails: case={case} exp={exp} != calc={calc}")    for exp, calc in zip(self.cases[case]['expected'][1], ret[1]) ]
+#             [ self.assertAlmostEqual(exp, calc, 3, msg=f"union Check Fails: case={case} exp={exp} != calc={calc}")           for exp, calc in zip(self.cases[case]['expected'][2], ret[2]) ]
+#             [ self.assertAlmostEqual(exp, calc, 3, msg=f"csb Check Fails: case={case} exp={exp} != calc={calc}")             for exp, calc in zip(self.cases[case]['expected'][3], ret[3]) ]
+#             [ self.assertAlmostEqual(exp, calc, 3, msg=f"cse Check Fails: case={case} exp={exp} != calc={calc}")             for exp, calc in zip(self.cases[case]['expected'][4], ret[4]) ]
+#             [ self.assertAlmostEqual(exp, calc, 3, msg=f"ScTP Check Fails: case={case} exp={exp} != calc={calc}")            for exp, calc in zip(self.cases[case]['expected'][5], ret[5]) ]
+#             [ self.assertAlmostEqual(exp, calc, 3, msg=f"ScFP Check Fails: case={case} exp={exp} != calc={calc}")            for exp, calc in zip(self.cases[case]['expected'][6], ret[6]) ]
+
+#             ax[case].set(xlim=(0, 100), xticks=np.arange(0, 100, 5),
+#                          ylim=(0, 3), yticks=np.arange(0, 3, 1))
+#             ax[case].set_xlabel('Time')
+#             ax[case].plot([self.cases[case]['inputs']['ref']['ref_start'][0], self.cases[case]['inputs']['ref']['ref_end'][0]], [2,2], color='red',  marker=".", linestyle='solid', linewidth=1.0, label='Ref')
+#             for h in range(len(self.cases[case]['inputs']['tgts'])):
+#                 p = 1 - (h*.40)
+#                 ax[case].plot([self.cases[case]['inputs']['tgts'][h][0],          self.cases[case]['inputs']['tgts'][h][1] ],       [p,p], color='blue', marker=".", linestyle='solid', linewidth=1.0, label='Sys')
+#                 ax[case].plot([ ret[3][0], self.cases[case]['inputs']['tgts'][h][0] ],                                              [p-0.25, p-0.255], color='blue', marker='^', linestyle='dashed', linewidth=1.0, label='Shifted Sys')
+#                 ax[case].plot([ self.cases[case]['inputs']['tgts'][h][1], ret[4][0] ],                                              [p-0.25, p-0.25], color='blue', marker='v', linestyle='dashed', linewidth=1.0)
+#             ax[case].text(20, 0.3, "%TP={:.3f}, %FP={:.3f}".format(ret[5][0], ret[6][0]))
+#             ax[case].text(5, 2.5, "File: {}".format(self.cases[case]['inputs']['file']))
+#             ax[case].legend(loc='upper right')
+            
+#         fig.savefig(os.path.join("/tmp", "IOUTests_v2.png"))
+#         plt.close()
+            
+class IOUTests_v2(unittest.TestCase):
+    #  To test the IoU
+    # 
+
+    def setUp(self):
+        ##############################  IoU     Inter Union   csb   cse   ScTP      ScFP
+        self.cases = [ { 'expected': [ [0.75, 0.75],   [30, 30], [40, 40], [20, 20], [60, 60],  [1.0, 1.0],    [0.333, 0.333] ] ,  'inputs': { 'file': 'F4', 'ref':  [ [ 25, 55 ], [ 25, 55 ] ], 'hyp': [20, 60] } }, 
+                       { 'expected': [ [0.75],   [30], [40], [20], [60],  [1.0],    [0.333] ] ,  'inputs': { 'file': 'F4', 'ref':  [ [ 25, 55 ] ], 'hyp': [20, 60] } }, 
+                       { 'expected': [ [0.75],   [30], [40], [20], [60],  [1.0],    [0.0] ] ,    'inputs': { 'file': 'F5', 'ref':  [ [ 20, 60 ] ], 'hyp': [25, 55] } }, 
+                       { 'expected': [ [0.4286], [30], [70],  [5], [75],  [1.0],    [1.333] ] ,  'inputs': { 'file': 'F6', 'ref':  [ [ 25, 55 ] ], 'hyp': [ 5, 75] } },
+                       { 'expected': [ [0.4286], [30], [70], [10], [70],  [0.8571], [0.0] ] ,    'inputs': { 'file': 'F7', 'ref':  [ [  5, 75 ] ], 'hyp': [25, 55] } },
+                       { 'expected': [ [0.5454], [30], [55], [20], [75],  [1.0],    [0.5714] ] , 'inputs': { 'file': 'F8', 'ref':  [ [ 20, 55 ] ], 'hyp': [25, 75] } },
+                       { 'expected': [ [0.50],   [30], [60], [10], [65],  [0.9],    [0.2] ] ,    'inputs': { 'file': 'F9', 'ref':  [ [  5, 55 ] ], 'hyp': [25, 65] } },
+                       { 'expected': [ [0.5454], [30], [55], [20], [70],  [0.9],    [0.1] ] ,    'inputs': { 'file': 'F10', 'ref': [ [ 25, 75 ] ], 'hyp': [20, 55] } },
+                       { 'expected': [ [0.1667], [10], [60],  [5], [50],  [0.625],  [0.5] ] ,    'inputs': { 'file': 'F11', 'ref': [ [ 25, 65 ] ], 'hyp': [ 5, 35] } }
+                     ]
+        self.cases = [ { 'expected': [ [0.75],   [30], [40], [20], [60],  [1.0],    [0.333] ] ,  'inputs': { 'file': 'F4', 'ref':  [ [ 25, 55 ] ], 'hyp': [20, 60] } }, 
+                       { 'expected': [ [0.75],   [30], [40], [20], [60],  [1.0],    [0.0] ] ,    'inputs': { 'file': 'F5', 'ref':  [ [ 20, 60 ] ], 'hyp': [25, 55] } },
+                       { 'expected': [ [0.4286], [30], [70],  [5], [75],  [1.0],    [1.333] ] ,  'inputs': { 'file': 'F6', 'ref':  [ [ 25, 55 ] ], 'hyp': [ 5, 75] } },
+                       { 'expected': [ [0.4286], [30], [70], [10], [70],  [0.8571], [0.0] ] ,    'inputs': { 'file': 'F7', 'ref':  [ [  5, 75 ] ], 'hyp': [25, 55] } },
+                       { 'expected': [ [0.5454], [30], [55], [20], [75],  [1.0],    [0.5714] ] , 'inputs': { 'file': 'F8', 'ref':  [ [ 20, 55 ] ], 'hyp': [25, 75] } },
+                       { 'expected': [ [0.50],   [30], [60], [10], [65],  [0.9],    [0.2] ] ,    'inputs': { 'file': 'F9', 'ref':  [ [  5, 55 ] ], 'hyp': [25, 65] } },
+                       { 'expected': [ [0.5454], [30], [55], [20], [70],  [0.9],    [0.1] ] ,    'inputs': { 'file': 'F10', 'ref': [ [ 25, 75 ] ], 'hyp': [20, 55] } },
+                       { 'expected': [ [0.1667], [10], [60],  [5], [50],  [0.625],  [0.5] ] ,    'inputs': { 'file': 'F11', 'ref': [ [ 25, 65 ] ], 'hyp': [ 5, 35] } },
+                       { 'expected': [ [0.75, 0.4],   [30, 20], [40, 50], [20, 20], [60, 70],  [1.0, 1.0],    [0.333, 0.6667] ] ,  'inputs': { 'file': 'Multi', 'ref':  [ [ 25, 55 ], [ 40, 70 ] ], 'hyp': [20, 60] } },
+                       ]
+                                                
+    def test_iou(self):
+        fig, ax = plt.subplots(len(self.cases), 1, figsize=(8,1.5 * len(self.cases)), constrained_layout=True)
+        if (len(self.cases) == 1):
+            ax = [ax]
+        for case in range(len(self.cases)):
+            #print(f"==== Begin Case {case} file {self.cases[case]['inputs']['file']}")
+
+            d = pd.DataFrame(self.cases[case]['inputs']['ref'], columns = ['start', 'end'])
+
+            ret = segment_iou_v2(self.cases[case]['inputs']['hyp'][0],
+                                 self.cases[case]['inputs']['hyp'][1],
+                                 [ d.start, d.end],
+                                 15)
+            #print("IoU  [0]: " + str(ret[0].to_list()))
+            #print("Int  [1]: " + str(ret[1].to_list()))
+            #print("Uni  [2]: " + str(ret[2].to_list()) + " type " + str(type(ret[2])) )
+            #print("csb  [3]: " + str(ret[3]))
+            #print("cse  [4]: " + str(ret[4]))
+            #print("ScTP [5]: " + str(ret[5]))
+            #print("ScFP [6]: " + str(ret[6]))
+             
+            [ self.assertAlmostEqual(exp, calc, 3, msg=f"IoU Check Fails: case={case} exp={exp} != calc={calc}")             for exp, calc in zip(self.cases[case]['expected'][0], ret[0]) ]
+            [ self.assertAlmostEqual(exp, calc, 3, msg=f"intersection Check Fails: case={case} exp={exp} != calc={calc}")    for exp, calc in zip(self.cases[case]['expected'][1], ret[1]) ]
+            [ self.assertAlmostEqual(exp, calc, 3, msg=f"union Check Fails: case={case} exp={exp} != calc={calc}")           for exp, calc in zip(self.cases[case]['expected'][2], ret[2]) ]
+            [ self.assertAlmostEqual(exp, calc, 3, msg=f"csb Check Fails: case={case} exp={exp} != calc={calc}")             for exp, calc in zip(self.cases[case]['expected'][3], ret[3]) ]
+            [ self.assertAlmostEqual(exp, calc, 3, msg=f"cse Check Fails: case={case} exp={exp} != calc={calc}")             for exp, calc in zip(self.cases[case]['expected'][4], ret[4]) ]
+            [ self.assertAlmostEqual(exp, calc, 3, msg=f"ScTP Check Fails: case={case} exp={exp} != calc={calc}")            for exp, calc in zip(self.cases[case]['expected'][5], ret[5]) ]
+            [ self.assertAlmostEqual(exp, calc, 3, msg=f"ScFP Check Fails: case={case} exp={exp} != calc={calc}")            for exp, calc in zip(self.cases[case]['expected'][6], ret[6]) ]
+
+            ax[case].set(xlim=(0, 150), xticks=np.arange(0, 100, 5),
+                         ylim=(0, 3), yticks=np.arange(0, 3, 1))
+            ax[case].set_xlabel('Time')
+            is_multi = (len(self.cases[case]['inputs']['ref']) > 1)
+            for r in range(len(self.cases[case]['inputs']['ref'])):
+                p = 2 + (r*.40)
+                ax[case].plot([self.cases[case]['inputs']['ref'][r][0], self.cases[case]['inputs']['ref'][r][1]], [p,p], color='red',  marker=".", linestyle='solid', linewidth=1.0, label=f'Ref {r}' if (is_multi) else 'Ref')
+            ax[case].plot([self.cases[case]['inputs']['hyp'][0],        self.cases[case]['inputs']['hyp'][1] ],   [1.5,1.5], color='blue', marker=".", linestyle='solid', linewidth=1.0, label='Sys') 
+            for h in range(len(self.cases[case]['expected'][0])):
+                p = 1 - (h*.40)
+                ax[case].plot([ ret[3][h], self.cases[case]['inputs']['hyp'][0] ],                                 [p-0.0, p-0.0], color='blue', marker='^', linestyle='dashed', linewidth=1.0, label=f'Shifted Sys(Ref#{h})' if (is_multi) else 'Shifted Sys')
+                ax[case].plot([ self.cases[case]['inputs']['hyp'][1], ret[4][h] ],                                 [p-0.0, p-0.0], color='blue', marker='^', linestyle='dashed', linewidth=1.0)
+
+                ax[case].text(ret[4][h]+5, p-0.255, "%TP={:.3f}, %FP={:.3f}".format(ret[5][0], ret[6][0]))
+            ax[case].text(5, 2.5, "File: {}".format(self.cases[case]['inputs']['file']))
+            ax[case].legend(loc='upper right')
+            
+        fig.savefig(os.path.join("/tmp", "IOUTests_v2.png"))
+        plt.close()
+            
+            
 class NormDiscoveryTests(unittest.TestCase):
     #  For norm discovery, since there is only one annotation pass,
     # only "Instance Merging" is performed

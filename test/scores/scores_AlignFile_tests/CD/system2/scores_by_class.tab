@@ -1,2 +1,1 @@
-class	genre	metric	value	correctness_criteria
-cp	audio	AP	0.3333333333333333	{delta_cp=10.0}
+

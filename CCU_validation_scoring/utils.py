@@ -6,6 +6,7 @@ import logging
 import pandas as pd
 import numpy as np
 import re
+import json
 from matplotlib import pyplot as plt
 from .aggregate import *
 
@@ -387,7 +388,7 @@ def replace_hyp_norm_mapping(sub_mapping_df, hyp, act):
 
 	return final_sub_hyp
 
-def generate_alignment_statistics(ali, task, output_dir):
+def generate_alignment_statistics(ali, task, output_dir, info_dict = None):
         """
         Generate statistics from the alignment file.
         """
@@ -459,19 +460,21 @@ def generate_alignment_statistics(ali, task, output_dir):
         #get_val("{iou=0.001,intersection=1.000,union=825.000}","union")
 
         all_llrs = sorted(ali[ali['sys'] != '{}']['llr'])
-        fig, ax = plt.subplots(1, 2 if task in ['cd'] else 3,
-                               figsize = (6 if task in ['cd'] else 9, 4))
+        fig, ax = plt.subplots(1,
+                               2 if task in ['cd'] else 4,
+                               figsize = (6 if task in ['cd'] else 12, 4))
         ax_id = 0;
         params = []
         if (task in ['norm', 'emotion']):
-                params = ['iou', 'cb_iou']
+                params = ['iou', 'intersection']
         if (task in ['cd']):
                 params = ['delta_cp']
         for param in params:
                 data = [ x for x in [ get_val(x,param) for x in ali[ali['eval'] == 'mapped']['parameters'] ] if x is not None ]
                 if (len(data) >= 2):
                         data = sorted([float(x) for x in data])  ## sort and float
-                        ax[ax_id].hist(data, bins = np.linspace(0, 1, num=100, endpoint = True))
+                        maxx = np.maximum(1, data[-1])
+                        ax[ax_id].hist(data, bins = np.linspace(0, maxx, num=100, endpoint = True))
                         ax[ax_id].set_title("Histogram (Mean={:.3f})".format(np.mean(data)))
                 else:
                         ax[ax_id].set_title("NO SYSTEM OUTPUT")               
@@ -489,7 +492,10 @@ def generate_alignment_statistics(ali, task, output_dir):
         ax[ax_id].set_xlabel("LLR")
 
         # Show plot
-        fig.savefig(os.path.join(output_dir, "instance_alignment_grqphs.png"))
+        out = os.path.join(output_dir, "instance_alignment_grqphs.png")
+        fig.savefig(out)
+        if (info_dict is not None):
+                info_dict.append({ 'task': task, 'graph_type': 'instance_alignment', 'graph_factor': 'overall', 'graph_factor_value': 'all', 'correctness_constraint': "n/a", 'filename': out})
         plt.close()
         
 def generate_alignment_file(ref, hyp, task):
@@ -500,66 +506,93 @@ def generate_alignment_file(ref, hyp, task):
 		if row['tp'] == 1 and row['fp'] == 0:
 			return 'mapped'
 		return 'unmapped'
+	def categorise_score(row):
+		if row['tp'] == 1 and row['fp'] == 0:
+			return 'CD'
+		if row['tp'] == 0 and row['fp'] == 1:
+			return 'FA'
+		return 'MD'
 
 	hyp["eval"] = hyp.apply(lambda row: categorise(row), axis=1)
+	hyp["eval_score"] = hyp.apply(lambda row: categorise_score(row), axis=1)
 
+	# print(f">> Generate alignment file for task {task}")
+	# print("REF")
+	# print(ref)
+	# print("HYP")
+	# print(hyp)
+	#exit(0)
 	if task in ["norm","emotion"]:
-
-		ref_format = ref.copy()
-		ref_format['start'] = [formatNumber(x) for x in ref['start']]
-		ref_format['end'] = [formatNumber(x) for x in ref['end']]
-		ref_format['sort'] = [x for x in ref['start']]
+                ### Refs are in the hyp df
+		# ref_format = ref.copy()
+		# ref_format['start'] = [formatNumber(x) for x in ref['start']]
+		# ref_format['end'] = [formatNumber(x) for x in ref['end']]
+		# ref_format['sort'] = [x for x in ref['start']]
 		#print("ref_format")
 		#print(ref_format)
 		
 		hyp_format = hyp.copy()
-		#print("hyp_format")
-		#print(hyp_format)
 
 		hyp_format['start_ref'] = [formatNumber(x) for x in hyp['start_ref']]
 		hyp_format['end_ref'] = [formatNumber(x) for x in hyp['end_ref']]
 		hyp_format['start_hyp'] = [formatNumber(x) for x in hyp['start_hyp']]
 		hyp_format['end_hyp'] = [formatNumber(x) for x in hyp['end_hyp']]
-		hyp_format['sort'] = [x for x in hyp['start_hyp']]
+		hyp_format['sort'] = [r if (math.isnan(h) ) else h for h, r in zip(hyp['start_hyp'], hyp['start_ref']) ]
 
 		hyp_format["ref"] = "{start=" + hyp_format["start_ref"].astype(str) + ",end=" + hyp_format["end_ref"].astype(str) + "}"
 		hyp_format["sys"] = "{start=" + hyp_format["start_hyp"].astype(str) + ",end=" + hyp_format["end_hyp"].astype(str) + "}"
-		hyp_format["IoU_format"] = hyp_format["IoU"].apply(lambda x: "{:,.3f}".format(x))
-		hyp_format["intersection_format"] = hyp_format["intersection"].apply(lambda x: "{:,.3f}".format(x))
-		hyp_format["union_format"] = hyp_format["union"].apply(lambda x: "{:,.3f}".format(x))
-		hyp_format["cb_intersection_format"] = hyp_format["cb_intersection"].apply(lambda x: "{:,.3f}".format(x))
-		hyp_format["cb_IoU_format"] = hyp_format["cb_IoU"].apply(lambda x: "{:,.3f}".format(x))
-		hyp_format["parameters"] = '{iou=' + hyp_format["IoU_format"] + ',intersection=' + hyp_format["intersection_format"] + ',union=' + hyp_format["union_format"] + ',cb_intersection=' + hyp_format["cb_intersection_format"] + ',cb_iou=' + hyp_format["cb_IoU_format"] + '}'
 
-		hyp_format.loc[hyp_format["eval"] == "unmapped", "ref"] = "{}"
+		hyp_format['IoU_f'] =               hyp_format['IoU'].apply(              lambda x: 'iou={:,.3f}'.format(x))
+		hyp_format['intersection_f'] =      hyp_format['intersection'].apply(     lambda x: 'intersection={:,.3f}'.format(x))
+		hyp_format['union_f'] =             hyp_format['union'].apply(            lambda x: 'union={:,.3f}'.format(x))
+		hyp_format['shifted_sys_start_f'] = hyp_format['shifted_sys_start'].apply(lambda x: 'shifted_start_hyp={:,.3f}'.format(x))
+		hyp_format['shifted_sys_end_f'] =   hyp_format['shifted_sys_end'].apply(  lambda x: 'shifted_end_hyp={:,.3f}'.format(x))
+		hyp_format['pct_tp_f'] =            hyp_format['pct_tp'].apply(           lambda x: 'pct_temp_tp={:,.3f}'.format(x))
+		hyp_format['pct_fp_f'] =            hyp_format['pct_fp'].apply(           lambda x: 'pct_temp_fp={:,.3f}'.format(x))
+		hyp_format['collar'] =              hyp_format['scale_collar'].apply(     lambda x: 'collar={:,.3f}'.format(x))
+
+		hyp_format['parameters'] = '{' + hyp_format['IoU_f'] + ',' + hyp_format['intersection_f'] + ',' + hyp_format['union_f'] + ',' + hyp_format['shifted_sys_start_f'] + ',' + hyp_format['shifted_sys_end_f'] + ',' + hyp_format['pct_tp_f'] + ',' + hyp_format['pct_fp_f'] + ',' + hyp_format['collar'] + '}'
+
+		hyp_format.loc[hyp_format.eval_score == 'FA', "ref"] = "{}"  ### start_ref is now a string!!!
+		hyp_format.loc[hyp_format.eval_score == 'MD', "sys"] = "{}"  ### start_ref is now a string!!!
+		#hyp_format.loc[hyp_format["eval"] == "unmapped", "ref"] = "{}"
 		hyp_format.loc[hyp_format["eval"] == "unmapped", "parameters"] = "{}"
+
+		#print("hyp_format befor filtering columns")
+		#print(hyp_format)
+                
+                ### Filter columns
 		if (task == "norm"):
-		        hyp_format.loc[hyp_format["eval"] == "unmapped", "status"] = "EMPTY_NA"
+		        hyp_format.loc[hyp_format["eval_score"] == "FA", "status"] = "EMPTY_NA"  ### This is the REF - to be renamed below
 		        hyp_format = hyp_format[["Class","file_id","eval","ref","sys","llr","parameters","sort","status", "hyp_status"]]
 		        hyp_format = hyp_format.rename(columns={"status": "ref_status"})
 		else:
 		        hyp_format = hyp_format[["Class","file_id","eval","ref","sys","llr","parameters","sort"]]                        
-                
-		ref_new = ref_format.copy()
-		ref_new["ref"] = "{start=" + ref_format["start"].astype(str) + ",end=" + ref_format["end"].astype(str) + "}"
-		if (task == "norm"):
-		        ref_new = ref_new[["file_id","Class","ref","sort","status"]]
-		        ref_new = ref_new.rename(columns={"status": "ref_status"})
-		        ref_new['hyp_status'] = "EMPTY_NA"
-		else:
-		        ref_new = ref_new[["file_id","Class","ref","sort"]]
-		ref_new = ref_new.loc[~(ref_new["ref"].isin(hyp_format["ref"]))]
-		ref_new["eval"] = "unmapped"
-		ref_new["sys"] = "{}"
-		ref_new["parameters"] = "{}"
-		ref_new["llr"] = np.nan
 
-		alignment = pd.concat([hyp_format, ref_new])
-		alignment = alignment.rename(columns={'Class':'class'})
 
+                ### REF as all in the hyp structure
+                # #### These are the unmapped refs
+		# ref_new = ref_format.copy()
+		# ref_new["ref"] = "{start=" + ref_format["start"].astype(str) + ",end=" + ref_format["end"].astype(str) + "}"
+		# if (task == "norm"):
+		#         ref_new = ref_new[["file_id","Class","ref","sort","status"]]
+		#         ref_new = ref_new.rename(columns={"status": "ref_status"})
+		#         ref_new['hyp_status'] = "EMPTY_NA"
+		# else:
+		#         ref_new = ref_new[["file_id","Class","ref","sort"]]
+		# ref_new = ref_new.loc[~(ref_new["ref"].isin(hyp_format["ref"]))]
+		# ref_new["eval"] = "unmapped"
+		# ref_new["sys"] = "{}"
+		# ref_new["parameters"] = "{}"
+		# ref_new["llr"] = np.nan
+		# print(ref_new)
+
+		# alignment = pd.concat([hyp_format, ref_new])
+
+		alignment = hyp_format.rename(columns={'Class':'class'})
 		#print("final alignment")
-		#print(alignment)
-		#exit(1)
+		#print(hyp_format)
+		#exit(0)
 	if task == "changepoint":
 
 		ref_format = ref.copy()
@@ -672,19 +705,20 @@ def generate_scoring_parameter_file(args):
 
 	sp_df.to_csv(os.path.join(args.output_dir, "scoring_parameters.tab"), sep = "\t", index = None)
 
-	
-
-def make_pr_curve(apScore, title = "", output_dir = "."):
+def make_pr_curve_for_cd(apScore, task, title = "", output_dir = ".", info_dict = None):
     """ Plot a Precision Recall Curve for the data.
     
     Parameters
     ----------
     apScore:
-        - { IoU: [**ap**, **precision** (1darray), **recall** (1darray) , .... }   
+        - { IoU: [**ap**, **precision** (1darray), **recall** (1darray) , .... }
+    info_dict:
+        - an array of dictionaries describing the graphs
 
     Returns
     -------
     """
+
     #print("Making Precision-Recall Curves by Genre")
     for iou, class_data in apScore.items():
         iou_str = str(iou).replace('=', '_')
@@ -702,12 +736,14 @@ def make_pr_curve(apScore, title = "", output_dir = "."):
                 dlist.append(np.array([ row['recall'], row['precision'] ]))
             agg_recall, agg_precision, agg_stderr = aggregate_xy(dlist)
             ax.plot(agg_recall, agg_precision, linewidth=1.0, label="Average")
-            #print("    Saving plot {}".format(out))        
+            #print("    Saving plot {}".format(out))
+            if (info_dict is not None):
+                    info_dict.append({ 'task': task, 'graph_type': 'pr_curve', 'graph_factor': 'genre', 'graph_factor_value': genre, 'correctness_constraint': iou, 'filename': out})
             plt.legend(loc='upper right')
             plt.savefig(out)
             plt.close()
-
-    print("Making Precision-Recall Curves by Class")
+    
+    #print("Making Precision-Recall Curves by Class")
     ### Need to Re-order to be able to iterate over classes
     for iou, class_data in apScore.items():
         iou_str = str(iou).replace('=', '_')
@@ -729,9 +765,94 @@ def make_pr_curve(apScore, title = "", output_dir = "."):
             if (not has_all):                       
                     agg_recall, agg_precision, agg_stderr = aggregate_xy(dlist)
                     ax.plot(agg_recall, agg_precision, linewidth=1.0, label="Average")
-            #print("    Saving plot {}".format(out))        
+            #print("    Saving plot {}".format(out))
+            if (info_dict is not None):
+                    info_dict.append({ 'task': task, 'graph_type': 'pr_curve', 'graph_factor': 'class', 'graph_factor_value': Class, 'correctness_constraint': iou, 'filename': out})           
             plt.legend(loc='upper right')
             plt.savefig(out)
             plt.close()
 
 
+    return(info_dict)
+	
+
+
+def make_pr_curve(apScore, task, title = "", output_dir = ".", info_dict = None):
+    """ Plot a Precision Recall Curve for the data.
+    
+    Parameters
+    ----------
+    apScore:
+        - { IoU: [**ap**, **precision** (1darray), **recall** (1darray) , .... }
+    info_dict:
+        - an array of dictionaries describing the graphs
+
+    Returns
+    -------
+    """
+    #print("Making Precision-Recall Curves by Genre")
+    for iou, class_data in apScore.items():
+        iou_str = str(iou).replace(':', '_')        
+        genres = list(set( [ x['type'] for x in class_data ] ) )
+        for genre in genres:
+            out = os.path.join(output_dir, f"pr_{iou_str}_type_{genre}.png")
+            fig, ax = plt.subplots(figsize=(8,6), constrained_layout=True)
+            ax.set(xlim=(0, 1), xticks=np.arange(0, 1, 0.1),
+                   ylim=(0, 1), yticks=np.arange(0, 1, 0.1))
+            ax.set_xlabel('Recall')
+            ax.set_ylabel('Precision')
+            ax.set_title(f"{title}, Correctness:{iou}, Type={genre}")
+            dlist = []
+            for row in class_data:
+                if (row['type'] == genre):
+                    if (row['prcurve:recall'] is not None):
+                            ax.plot(row['prcurve:recall'], row['prcurve:precision'], linewidth=1.0, label=row['Class'])
+                            dlist.append(np.array([ row['prcurve:recall'], row['prcurve:precision'] ]))
+                    else:
+                            ax.plot([-1], [-1], linewidth=1.0, label=row['Class'] + "-No Sys Output")
+
+            if (len(dlist) > 0):
+                    agg_recall, agg_precision, agg_stderr = aggregate_xy(dlist)
+                    ax.plot(agg_recall, agg_precision, linewidth=1.0, label="Average")
+            else:
+                    ax.plot([-1], [-1], linewidth=1.0, label="No Average")
+            #print("    Saving plot {}".format(out))
+            if (info_dict is not None):
+                    info_dict.append({ 'task': task, 'graph_type': 'pr_curve', 'graph_factor': 'genre', 'graph_factor_value': genre, 'correctness_constraint': iou, 'filename': out})
+            plt.legend(loc='upper right')
+            plt.savefig(out)
+            plt.close()
+    
+    #print("Making Precision-Recall Curves by Class")
+    for iou, class_data in apScore.items():
+        iou_str = str(iou).replace(':', '_')        
+        classes = list(set( [ x['Class'] for x in class_data ] ) )
+        for Class in classes:
+            out = os.path.join(output_dir, f"pr_{iou_str}_class_{Class}.png")
+            fig, ax = plt.subplots(figsize=(8,6), constrained_layout=True)
+            ax.set(xlim=(0, 1), xticks=np.arange(0, 1, 0.1),
+                   ylim=(0, 1), yticks=np.arange(0, 1, 0.1))
+            ax.set_xlabel('Recall')
+            ax.set_ylabel('Precision')
+            ax.set_title(f"{title}, Correctness:{iou}, Class={Class}")
+            dlist = []
+            for row in class_data:
+                if (row['Class'] == Class):
+                    if (row['prcurve:recall'] is not None):
+                            ax.plot(row['prcurve:recall'], row['prcurve:precision'], linewidth=1.0, label=row['type'])
+                            dlist.append(np.array([ row['prcurve:recall'], row['prcurve:precision'] ]))
+                    else:
+                            ax.plot([-1], [-1], linewidth=1.0, label=row['type'] + "-No Sys Output")
+            if (len(dlist) > 0):
+                    agg_recall, agg_precision, agg_stderr = aggregate_xy(dlist)
+                    ax.plot(agg_recall, agg_precision, linewidth=1.0, label="Average")
+            else:
+                    ax.plot([-1], [-1], linewidth=1.0, label="No Average")
+            #print("    Saving plot {}".format(out))
+            if (info_dict is not None):
+                    info_dict.append({ 'task': task, 'graph_type': 'pr_curve', 'graph_factor': 'class', 'graph_factor_value': Class, 'correctness_constraint': iou, 'filename': out})
+            plt.legend(loc='upper right')
+            plt.savefig(out)
+            plt.close()
+
+    return(info_dict)

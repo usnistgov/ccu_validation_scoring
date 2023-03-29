@@ -21,17 +21,17 @@ def parse_thresholds(arg):
     for item in arg.split(','):
         match = re.match('^([\\d]*\\.[\\d]+|[\\d]+|[\\d]+\\.)$', item)
         if (match is not None):
-            dic['iou=' + match.group()] = {'metric': 'IoU', 'thresh': float(match.group())}
+            dic['iou=' + match.group()] = {'metric': 'IoU', 'op': 'gte', 'thresh': float(match.group())}
         else:
-            match = re.match('^(iou|intersection)=([\\d]*\\.[\\d]+|[\\d]+|[\\d]+\\.)$', item)
+            match = re.match('^(iou|intersection):(gt|gte):([\\d]*\\.[\\d]+|[\\d]+|[\\d]+\\.)$', item)
             if (match is not None):
                 met = match.group(1)
                 if met == "iou":
                         met = "IoU"
-                dic[item] = { 'metric':met, 'thresh': float(match.group(2)) }
+                dic[item] = { 'metric':met, 'op': match.group(2), 'thresh': float(match.group(3)) }
             else:
                 succeed = False
-                print(f"Error: Could not parse the threshold {item}")
+                print(f"Error: Could not parse the threshold {item}.  Options are comma-separated variants of:\n    #\n    (iou|intersection):(gt|gte):#\n")
                 
     assert succeed, "Parse thresholds failed"
     return(dic)
@@ -112,7 +112,7 @@ def score_nd_submission_dir_cli(args):
 	if (args.dump_inputs):
                 ref.to_csv(os.path.join(args.output_dir, "inputs.ref.scored.tab"), sep = "\t", index = None)
                 merged_hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.scored.tab"), sep = "\t", index = None)
-	score_tad(ref, merged_hyp, "norm", iou_thresholds=thresholds, output_dir=args.output_dir, mapping_df = mapping_df)
+	score_tad(ref, merged_hyp, "norm", thresholds, args.output_dir, mapping_df, float(args.time_span_scale_collar), float(args.text_span_scale_collar))
 	generate_scoring_parameter_file(args)
 
 	print("Alignment")
@@ -150,6 +150,8 @@ def score_ed_submission_dir_cli(args):
 	if args.emotion_list_file:
 		ref = process_subset_norm_emotion(args.emotion_list_file, ref)
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "emotions")
+	if (args.dump_inputs):
+                hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.read.tab"), sep = "\t", index = None)
 
 	if args.merge_sys_text_gap:
 		merge_sys_text_gap = int(args.merge_sys_text_gap)
@@ -168,8 +170,11 @@ def score_ed_submission_dir_cli(args):
 	thresholds = parse_thresholds(args.iou_thresholds)
 
 	statistic(args.reference_dir, ref, args.submission_dir, merged_hyp, args.output_dir, "emotions")
+	if (args.dump_inputs):
+                ref.to_csv(os.path.join(args.output_dir, "inputs.ref.scored.tab"), sep = "\t", index = None)
+                merged_hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.scored.tab"), sep = "\t", index = None)
 
-	score_tad(ref, merged_hyp, "emotion", iou_thresholds=thresholds, output_dir=args.output_dir, mapping_df = None)
+	score_tad(ref, merged_hyp, "emotion", thresholds, args.output_dir, None, float(args.time_span_scale_collar), float(args.text_span_scale_collar))
 	generate_scoring_parameter_file(args)
 
 	print("Alignment")
@@ -196,7 +201,6 @@ def score_vd_submission_dir_cli(args):
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "valence_continuous")
 
 	statistic(args.reference_dir, ref, args.submission_dir, hyp, args.output_dir, "valence_continuous")
-
 	score_valence_arousal(ref, hyp, output_dir = args.output_dir, task = "valence_continuous")
 	generate_scoring_parameter_file(args)	
 

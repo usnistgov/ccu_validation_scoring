@@ -1,0 +1,12 @@
+class	file_id	eval	ref	sys	llr	parameters	ref_status	hyp_status
+101	F1	unmapped	{start=30,end=100}	{}		{}	adhere	EMPTY_NA
+101	F10	mapped	{start=25,end=75}	{start=20,end=55}	0.0	{iou=0.545,intersection=30.000,union=55.000,shifted_start_hyp=20.000,shifted_end_hyp=70.000,pct_temp_tp=0.900,pct_temp_fp=0.100,collar=15.000}	adhere	adhere
+101	F11	unmapped	{}	{start=5,end=35}	0.0	{}	EMPTY_NA	adhere
+101	F2	unmapped	{start=70,end=120}	{}		{}	adhere	EMPTY_NA
+101	F3	unmapped	{}	{start=20,end=100}	0.0	{}	EMPTY_NA	adhere
+101	F4	mapped	{start=25,end=55}	{start=20,end=60}	0.0	{iou=0.750,intersection=30.000,union=40.000,shifted_start_hyp=20.000,shifted_end_hyp=60.000,pct_temp_tp=1.000,pct_temp_fp=0.333,collar=15.000}	adhere	adhere
+101	F5	mapped	{start=20,end=60}	{start=25,end=55}	0.0	{iou=0.750,intersection=30.000,union=40.000,shifted_start_hyp=20.000,shifted_end_hyp=60.000,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=15.000}	adhere	adhere
+101	F6	mapped	{start=25,end=55}	{start=5,end=75}	0.0	{iou=0.429,intersection=30.000,union=70.000,shifted_start_hyp=5.000,shifted_end_hyp=75.000,pct_temp_tp=1.000,pct_temp_fp=1.333,collar=15.000}	adhere	adhere
+101	F7	mapped	{start=5,end=75}	{start=25,end=55}	0.0	{iou=0.429,intersection=30.000,union=70.000,shifted_start_hyp=10.000,shifted_end_hyp=70.000,pct_temp_tp=0.857,pct_temp_fp=0.000,collar=15.000}	adhere	adhere
+101	F8	mapped	{start=20,end=55}	{start=25,end=75}	0.0	{iou=0.545,intersection=30.000,union=55.000,shifted_start_hyp=20.000,shifted_end_hyp=75.000,pct_temp_tp=1.000,pct_temp_fp=0.571,collar=15.000}	adhere	adhere
+101	F9	mapped	{start=5,end=55}	{start=25,end=65}	0.0	{iou=0.500,intersection=30.000,union=60.000,shifted_start_hyp=10.000,shifted_end_hyp=65.000,pct_temp_tp=0.900,pct_temp_fp=0.200,collar=15.000}	adhere	adhere

@@ -93,7 +93,9 @@ def main():
     score_nd_parser.add_argument('-i','--scoring-index-file', type=str, required=True, help='Use to filter file from scoring (REF)')
     score_nd_parser.add_argument('-m','--mapping-submission-dir', type=str, help='Directory containing a norm mapping submission')
     score_nd_parser.add_argument('-n', '--norm_list_file', type=str, required=False, help="Use to filter norm from scoring (REF)")
-    score_nd_parser.add_argument("-t", "--iou_thresholds", nargs='?', default="0.2", help="A comma separated list of IoU thresholds and the default value is 0.2.  Alternative criteria can be used by specifying the metric and its value using the form <METRIC>=<VALUE>.  'iou=0.2' is the default value. The defined <METRIC>s are 'iou' and 'intersection'")
+    score_nd_parser.add_argument("-t", "--iou_thresholds", nargs='?', default="0.2", help="A comma separated list of IoU thresholds and the default value is 0.2.  Alternative criteria can be used by specifying the metric and its value using the form <METRIC>:<OPERATION>:<VALUE>.  'iou:gt:0.2' is the default value. The defined <METRIC>s are 'iou' and 'intersection'. The operations are 'gt' for '>', or 'gte' for '>='")
+    score_nd_parser.add_argument("-aC", "--time_span_scale_collar", nargs='?', default="15", help="The duration of TP and FP Scaling collar for text")
+    score_nd_parser.add_argument("-xC", "--text_span_scale_collar", nargs='?', default="150", help="The duration of TP and FP Scaling collar for audio")
     score_nd_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output directory")
     score_nd_parser.add_argument("-xR", "--merge_ref_text_gap", type=str, required=False, help="merge reference text gap character")
     score_nd_parser.add_argument("-aR", "--merge_ref_time_gap", type=str, required=False, help="merge reference time gap second")
@@ -104,7 +106,6 @@ def main():
     score_nd_parser.add_argument("-vS", "--merge_sys_label", type=str, choices=['class', 'class-status'], required=False, help="choose class or class-status to define how to handle the adhere/violate labels for the system instances merging. class is to use the class label only (ignoring status) to merge and class-status is to use the class and status label to merge")
     score_nd_parser.add_argument("-d", "--dump_inputs", action='store_true', help="Dump reference and system inputs as they are processed during scoring.")
 
-
     score_nd_parser.set_defaults(func=score_submission.score_nd_submission_dir_cli)
 
     score_ed_parser = subs.add_parser('score-ed', description='Score an emotion detection submission directory')
@@ -112,7 +113,9 @@ def main():
     score_ed_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
     score_ed_parser.add_argument('-i','--scoring-index-file', type=str, required=True, help='Use to filter file from scoring (REF)')
     score_ed_parser.add_argument('-e', '--emotion_list_file', type=str, required=False, help="Use to filter emotion from scoring (REF)")
-    score_ed_parser.add_argument("-t", "--iou_thresholds", nargs='?', default="0.2", help="A comma separated list of IoU thresholds and the default value is 0.2.  Alternative criteria can be used by specifying the metric and its value using the form <METRIC>=<VALUE>.  'iou=0.2' is the default value. The defined <METRIC>s are 'iou' and 'intersection'")
+    score_ed_parser.add_argument("-t", "--iou_thresholds", nargs='?', default="0.2", help="A comma separated list of IoU thresholds and the default value is 0.2.  Alternative criteria can be used by specifying the metric and its value using the form <METRIC>:<OPERATION>:<VALUE>.  'iou:gt:0.2' is the default value. The defined <METRIC>s are 'iou' and 'intersection'. The operations are 'gt' for '>', or 'gte' for '>='")
+    score_ed_parser.add_argument("-aC", "--time_span_scale_collar", nargs='?', default="15", help="The duration of TP and FP Scaling collar for text")
+    score_ed_parser.add_argument("-xC", "--text_span_scale_collar", nargs='?', default="150", help="The duration of TP and FP Scaling collar for audio")
     score_ed_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output directory")
     score_ed_parser.add_argument("-xR", "--merge_ref_text_gap", type=str, required=False, help="merge reference text gap character")
     score_ed_parser.add_argument("-aR", "--merge_ref_time_gap", type=str, required=False, help="merge reference time gap second")
