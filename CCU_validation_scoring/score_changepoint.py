@@ -217,7 +217,9 @@ def compute_multiclass_cp_pr(ref, hyp, delta_cp_text_thresholds = 100, delta_cp_
     # Initialize
 
     scores = {}
-    [ scores.setdefault(iout, pd.DataFrame([], columns = ['type', 'ap', 'precision', 'recall', 'llr'])) for iout in delta_cp_text_thresholds + delta_cp_time_thresholds ]
+    #[ scores.setdefault(iout, pd.DataFrame([], columns = ['type', 'ap', 'precision', 'recall', 'llr'])) for iout in delta_cp_text_thresholds + delta_cp_time_thresholds ]
+    from collections import defaultdict
+    scores = defaultdict(list)
 
     ### Capture the noscores for later use
     ref_noscore = ref.loc[ref.impact_scalar == 'NO_SCORE_REGION']

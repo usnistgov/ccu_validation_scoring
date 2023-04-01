@@ -1,1 +1,7 @@
-
+class	genre	metric	value	correctness_criteria
+cp	text	AP	0.0	{delta_cp=100}
+cp	text	PRCurve_json	"{""precision"": [0.0], ""recall"": [0.0], ""llr"": [0.0]}"	{delta_cp=100}
+cp	audio	AP	0.0	{delta_cp=10.0}
+cp	video	AP	1.0	{delta_cp=10.0}
+cp	audio	PRCurve_json	"{""precision"": [0.0], ""recall"": [0.0], ""llr"": [0.0]}"	{delta_cp=10.0}
+cp	video	PRCurve_json	"{""precision"": [0.0], ""recall"": [0.0], ""llr"": [0.0]}"	{delta_cp=10.0}
