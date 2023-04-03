@@ -204,14 +204,18 @@ def segment_iou_v2(sys_start, sys_end, refs, collar):
     cse = [ sys_end+collar if (re > sys_end + collar) else end_max for re, end_max in zip(ref_end, np.maximum(ref_end, sys_end)) ] 
     #print(f"cse {cse}")
 
-    scaled_pct_TP = [ (np.minimum(re, ce)  - np.maximum(rs, cb)) / (re - rs) for rs, re, cb, ce in zip(ref_start, ref_end, csb, cse) ]
+    ### Set the min to be zero if the numerator is negative
+    scaled_pct_TP = [ 0.0 if ((np.minimum(re, ce)  - np.maximum(rs, cb)) < 0.0) else (np.minimum(re, ce)  - np.maximum(rs, cb)) / (re - rs) for rs, re, cb, ce in zip(ref_start, ref_end, csb, cse) ]
     #print(f"scaled_pct_TP {scaled_pct_TP}")
 
-    scaled_pct_FP = [ ( (rs-cb if (rs-cb > 0) else 0) + (ce - re if (ce-re > 0) else 0)) / (re - rs) for rs, re, cb, ce in zip(ref_start, ref_end, csb, cse) ] 
+    ### This formula will set pct_FP to be > 1.  The second command sets the max to 1
+    scaled_pct_FP = [ ( (rs-cb if (rs-cb > 0) else 0) + (ce - re if (ce-re > 0) else 0)) / (re - rs) for rs, re, cb, ce in zip(ref_start, ref_end, csb, cse) ]
+    scaled_pct_FP = [ 1.0 if (inter <= 0.0) else spfp for spfp, inter in zip(scaled_pct_FP, inter) ]
     #print(f"scaled_pct_TP {scaled_pct_FP}")
 
     # Segment union.
-    union = (sys_end - sys_start) + (ref_end - ref_start) - inter    
+    #union = (sys_end - sys_start) + (ref_end - ref_start) - inter      ### This assumes intersection is non-zero
+    union = [ np.maximum(re, sys_end) - np.minimum(rb, sys_start) for rb, re in zip(ref_start, ref_end) ]
     tIoU = inter.astype(float) / union
     return tIoU, inter, union, csb, cse, scaled_pct_TP, scaled_pct_FP, collar
 
@@ -370,10 +374,14 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
         ### This resets the tp and fp for each correctness threshold 
         ihyp[['tp', 'fp', 'md']] = [ 0, 1, 0 ] 
         ### Ref exists, above threshold (implying a TP)
+        #print(ihyp)
         if (params['op'] == 'gte'):
             ihyp.loc[~ihyp['start_ref'].isna() & (ihyp[params['metric']] >= params['thresh']), ['tp', 'fp', 'md']] = [ 1, 0, 0 ] 
+            #print(f"GTE test {params['metric']} ->  {ihyp[params['metric']]} >= {params['thresh']}")
         if (params['op'] == 'gt'):
             ihyp.loc[~ihyp['start_ref'].isna() & (ihyp[params['metric']] > params['thresh']), ['tp', 'fp', 'md']] = [ 1, 0, 0 ] 
+            #print(f"GT test {params['metric']} -> {params['thresh']}")
+            #print(ihyp)
        
         # Mark TP as FP for duplicate ref matches at lower CS
         nhyp = ihyp.duplicated(subset = ['file_id', 'start_ref', 'end_ref', 'tp'], keep='first')
@@ -424,7 +432,8 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
                      'scaled_precision_at_MinLLR':  scaled_precision,
                      'scaled_f1_at_MinLLR':  f1(scaled_precision, scaled_recall),
                     }
-       
+        #print(ihyp)
+        #exit(0)
         output[iout] = measures
  
         ihyp_fields = ["Class","type","tp","fp","file_id","start_ref","end_ref","start_hyp","end_hyp","IoU","llr","intersection", "union", 'shifted_sys_start', 'shifted_sys_end', 'pct_tp', 'pct_fp', 'scale_collar']

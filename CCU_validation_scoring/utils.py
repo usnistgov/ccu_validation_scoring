@@ -542,14 +542,14 @@ def generate_alignment_file(ref, hyp, task):
 		hyp_format["ref"] = "{start=" + hyp_format["start_ref"].astype(str) + ",end=" + hyp_format["end_ref"].astype(str) + "}"
 		hyp_format["sys"] = "{start=" + hyp_format["start_hyp"].astype(str) + ",end=" + hyp_format["end_hyp"].astype(str) + "}"
 
-		hyp_format['IoU_f'] =               hyp_format['IoU'].apply(              lambda x: 'iou={:,.3f}'.format(x))
-		hyp_format['intersection_f'] =      hyp_format['intersection'].apply(     lambda x: 'intersection={:,.3f}'.format(x))
-		hyp_format['union_f'] =             hyp_format['union'].apply(            lambda x: 'union={:,.3f}'.format(x))
-		hyp_format['shifted_sys_start_f'] = hyp_format['shifted_sys_start'].apply(lambda x: 'shifted_start_hyp={:,.3f}'.format(x))
-		hyp_format['shifted_sys_end_f'] =   hyp_format['shifted_sys_end'].apply(  lambda x: 'shifted_end_hyp={:,.3f}'.format(x))
-		hyp_format['pct_tp_f'] =            hyp_format['pct_tp'].apply(           lambda x: 'pct_temp_tp={:,.3f}'.format(x))
-		hyp_format['pct_fp_f'] =            hyp_format['pct_fp'].apply(           lambda x: 'pct_temp_fp={:,.3f}'.format(x))
-		hyp_format['collar'] =              hyp_format['scale_collar'].apply(     lambda x: 'collar={:,.3f}'.format(x))
+		hyp_format['IoU_f'] =               hyp_format['IoU'].apply(              lambda x: 'iou={:.3f}'.format(x))
+		hyp_format['intersection_f'] =      hyp_format['intersection'].apply(     lambda x: 'intersection={:.3f}'.format(x))
+		hyp_format['union_f'] =             hyp_format['union'].apply(            lambda x: 'union={:.3f}'.format(x))
+		hyp_format['shifted_sys_start_f'] = hyp_format['shifted_sys_start'].apply(lambda x: 'shifted_start_hyp={:.3f}'.format(x))
+		hyp_format['shifted_sys_end_f'] =   hyp_format['shifted_sys_end'].apply(  lambda x: 'shifted_end_hyp={:.3f}'.format(x))
+		hyp_format['pct_tp_f'] =            hyp_format['pct_tp'].apply(           lambda x: 'pct_temp_tp={:.3f}'.format(x))
+		hyp_format['pct_fp_f'] =            hyp_format['pct_fp'].apply(           lambda x: 'pct_temp_fp={:.3f}'.format(x))
+		hyp_format['collar'] =              hyp_format['scale_collar'].apply(     lambda x: 'collar={:.3f}'.format(x))
 
 		hyp_format['parameters'] = '{' + hyp_format['IoU_f'] + ',' + hyp_format['intersection_f'] + ',' + hyp_format['union_f'] + ',' + hyp_format['shifted_sys_start_f'] + ',' + hyp_format['shifted_sys_end_f'] + ',' + hyp_format['pct_tp_f'] + ',' + hyp_format['pct_fp_f'] + ',' + hyp_format['collar'] + '}'
 
@@ -560,6 +560,7 @@ def generate_alignment_file(ref, hyp, task):
 
 		#print("hyp_format befor filtering columns")
 		#print(hyp_format)
+		#exit(0)
                 
                 ### Filter columns
 		if (task == "norm"):
