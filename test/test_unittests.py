@@ -126,6 +126,7 @@ class IOUTests_v2(unittest.TestCase):
                        { 'expected': [ [0.50],   [30], [60], [10], [65],  [0.9],    [0.2] ] ,    'inputs': { 'file': 'F9', 'ref':  [ [  5, 55 ] ], 'hyp': [25, 65] } },
                        { 'expected': [ [0.5454], [30], [55], [20], [70],  [0.9],    [0.1] ] ,    'inputs': { 'file': 'F10', 'ref': [ [ 25, 75 ] ], 'hyp': [20, 55] } },
                        { 'expected': [ [0.1667], [10], [60],  [5], [50],  [0.625],  [0.5] ] ,    'inputs': { 'file': 'F11', 'ref': [ [ 25, 65 ] ], 'hyp': [ 5, 35] } },
+                       { 'expected': [ [0.0], [0], [90],  [45], [100],  [0.0],  [1.0] ] ,    'inputs': { 'file': 'F11', 'ref': [ [ 10, 40 ] ], 'hyp': [ 60, 100] } },
                        { 'expected': [ [0.75, 0.4],   [30, 20], [40, 50], [20, 20], [60, 70],  [1.0, 1.0],    [0.333, 0.6667] ] ,  'inputs': { 'file': 'Multi', 'ref':  [ [ 25, 55 ], [ 40, 70 ] ], 'hyp': [20, 60] } },
                        ]
                                                 
@@ -142,13 +143,14 @@ class IOUTests_v2(unittest.TestCase):
                                  self.cases[case]['inputs']['hyp'][1],
                                  [ d.start, d.end],
                                  15)
-            #print("IoU  [0]: " + str(ret[0].to_list()))
-            #print("Int  [1]: " + str(ret[1].to_list()))
-            #print("Uni  [2]: " + str(ret[2].to_list()) + " type " + str(type(ret[2])) )
-            #print("csb  [3]: " + str(ret[3]))
-            #print("cse  [4]: " + str(ret[4]))
-            #print("ScTP [5]: " + str(ret[5]))
-            #print("ScFP [6]: " + str(ret[6]))
+            print(f"\nCase {self.cases[case]['inputs']['file']}: ref({' '.join([ f'({x},{y})' for x, y in zip(d.start, d.end) ])}):  hyp:({self.cases[case]['inputs']['hyp'][0]},{self.cases[case]['inputs']['hyp'][1]})")
+            print("IoU  [0]: " + str(ret[0].to_list()))
+            print("Int  [1]: " + str(ret[1].to_list()))
+            print("Uni  [2]: " + str(ret[2]))
+            print("csb  [3]: " + str(ret[3]))
+            print("cse  [4]: " + str(ret[4]))
+            print("ScTP [5]: " + str(ret[5]))
+            print("ScFP [6]: " + str(ret[6]))
              
             [ self.assertAlmostEqual(exp, calc, 3, msg=f"IoU Check Fails: case={case} exp={exp} != calc={calc}")             for exp, calc in zip(self.cases[case]['expected'][0], ret[0]) ]
             [ self.assertAlmostEqual(exp, calc, 3, msg=f"intersection Check Fails: case={case} exp={exp} != calc={calc}")    for exp, calc in zip(self.cases[case]['expected'][1], ret[1]) ]
