@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 ## Upcoming changes
 - Add the scaled IoU values and a histogram in instance_alignment_grqphs.png
 
+## [1.2.1] - 2023-04-04
+- The scaled F1 scoring was corrected to replicate the initial scoring sent to teams.
+- Various additiona minor fixes.
+
 ## [1.2.0] - 2023-03-23
 - Major change for the norm and emotion score:
   - The scaled F1 measures were added.
