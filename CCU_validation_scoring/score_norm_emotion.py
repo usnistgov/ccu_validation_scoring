@@ -175,7 +175,7 @@ def segment_iou_v2(sys_start, sys_end, refs, collar):
     ref_start, ref_end = [refs[0], refs[1]]
     
     #print("segment_iou_v2")
-    #print(f"\nsys_start {sys_start} sys_end {sys_end} ----- ref_start {ref_start.to_list()} type {ref_end.to_list()}") 
+    #print(f"\nsys_start {sys_start} sys_end {sys_end} ----- refs = { [ [b,e] for b, e in zip(ref_start.to_list(),ref_end.to_list()) ]}")
 
     ### normal IoU intersection
     tt1 = np.maximum(ref_start, sys_start)
@@ -255,7 +255,7 @@ def compute_ious(row, ref, class_type, time_span_scale_collar, text_span_scale_c
             rout['hyp_status'] = row.status
         return rout
 
-def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_span_scale_collar, text_span_scale_collar):  
+def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_span_scale_collar, text_span_scale_collar, Type):  
     """ 
     Compute average precision and precision-recall curve at specific IoU
     thresholds between ground truth and predictions data frames. If multiple
@@ -330,7 +330,7 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
     ihyp = pd.concat(out)
     #print("-----------------from compute_ious------")
     #print(ihyp)
-    #exit(1)
+    #exit(0)
     
     # Capture naked false alarms that have no overlap with anything regardless of if it is a NO_SCORE_REGION
     #ihyp_naked_fa = ihyp.loc[ihyp.IoU == 0.0]
@@ -342,7 +342,7 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
     ihyp = ihyp.loc[(ihyp.Class.str.contains('NO_SCORE_REGION') == False) | ((ihyp.Class.str.contains('NO_SCORE_REGION') == True) & (ihyp['IoU'] == 0.0)) | ihyp.start_ref.isna()]
     #print("----- ihyp keep ------------------")
     #print(ihyp)
-    #exit(1)
+    #exit(0)
     
     if ihyp.empty:
         for iout in iou_thresholds:
@@ -391,7 +391,7 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
         # Set MDs - This is because MD refs are added
         ihyp.loc [~ihyp['start_ref'].isna() & ihyp['start_hyp'].isna(), ['tp', 'fp', 'md']] = [ 0, 0, 1 ]
 
-        ### Update the data for Class when IoU == 0.  This sets the class for No_score_regions        
+        ### Update the data for Class when IoU == 0.  This sets the class for No_score_regions
         ihyp.loc[ihyp.loc[ihyp['Class'] == 'NO_SCORE_REGION'].index, ['start_ref', 'end_ref']] = [ float("nan"), float("nan") ]
         ihyp.loc[ihyp.loc[ihyp['IoU'] == 0.0].index, ['Class']] = [ Class ]
         
@@ -408,14 +408,19 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
         thyp = fhyp.duplicated(subset = ['llr'], keep='last')
         fhyp = fhyp.loc[thyp == False]
         fhyp = fhyp.loc[fhyp.md == 0]   ### Remove the MDs before AP calc
+        #print("Filtered Hyp for AP Computation")
+        #print(fhyp)
         llr = np.array(fhyp["llr"])
         rec = (np.array(fhyp["cum_tp"]) / npos)
         prec = (np.array(fhyp["cum_tp"]) / (np.array(fhyp["cum_tp"]) + np.array(fhyp["cum_fp"])))
 
         ### OK, add some more metrics!
-        nsys = fhyp.cum_tp.iat[-1] + fhyp.cum_fp.iat[-1] 
-        scaled_recall =    ihyp.pct_tp.sum() / npos
-        scaled_precision = ihyp.pct_tp.sum() / (ihyp.pct_tp.sum() + ihyp.pct_fp.sum())  
+        nsys = fhyp.cum_tp.iat[-1] + fhyp.cum_fp.iat[-1]
+        ### pct_tp can have residual values from being aliged to a NO_SCORE REGION, SO, filter the sum
+        sum_scaled_tp = fhyp[fhyp.tp == 1].pct_tp.sum()
+        sum_scaled_fp = fhyp.pct_fp.sum()
+        scaled_recall =    sum_scaled_tp / npos
+        scaled_precision = sum_scaled_tp / (sum_scaled_tp + sum_scaled_fp)  
         measures = { 'AP': ap_interp(prec, rec), 
                      'prcurve:precision': prec,
                      'prcurve:recall': rec,
@@ -424,16 +429,18 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
                      'recall_at_MinLLR': rec[-1],
                      'f1_at_MinLLR': f1(prec[-1], rec[-1]),
                      'llr_at_MinLLR': llr[-1],
-                     'sum_tp_at_MinLLR': ihyp.tp.sum(),
-                     'sum_fp_at_MinLLR': ihyp.fp.sum(),
-                     'sum_scaled_tp_at_MinLLR': ihyp.pct_tp.sum(),
-                     'sum_scaled_fp_at_MinLLR': ihyp.pct_fp.sum(),
+                     'sum_tp_at_MinLLR': fhyp.tp.sum(),
+                     'sum_fp_at_MinLLR': fhyp.fp.sum(),
+                     'sum_scaled_tp_at_MinLLR': sum_scaled_tp,
+                     'sum_scaled_fp_at_MinLLR': sum_scaled_fp,
                      'scaled_recall_at_MinLLR':  scaled_recall,
                      'scaled_precision_at_MinLLR':  scaled_precision,
                      'scaled_f1_at_MinLLR':  f1(scaled_precision, scaled_recall),
                     }
-        #print(ihyp)
-        #exit(0)
+        # print(ihyp)
+        # if (Class == '102'):
+        #     ihyp.to_csv(f"/mnt/ccu-vol/ccu_results/p1_minieval/AlignmentAnalysis-v5-check/out/ihyp.{Type}.{Class}.txt", sep = "\t", index = None)
+        #     fhyp.to_csv(f"/mnt/ccu-vol/ccu_results/p1_minieval/AlignmentAnalysis-v5-check/out/fhyp.{Type}.{Class}.txt", sep = "\t", index = None)
         output[iout] = measures
  
         ihyp_fields = ["Class","type","tp","fp","file_id","start_ref","end_ref","start_hyp","end_hyp","IoU","llr","intersection", "union", 'shifted_sys_start', 'shifted_sys_end', 'pct_tp', 'pct_fp', 'scale_collar']
@@ -493,13 +500,13 @@ Parameters
 
     final_alignment_df: instance alignment dataframe
     """
-    #print(f"\n**************************************************************************")
-    #print(f"************ compute_multiclass_iou_pr ioU_thresdholdd={iou_thresholds} ******************")
-    #print("Ref")
-    #print(ref)
-    #print("Hyp")
-    #print(hyp)
-    #print(f"*************************************************************************")
+    # print(f"\n**************************************************************************")
+    # print(f"************ compute_multiclass_iou_pr ioU_thresdholdd={iou_thresholds} ******************")
+    # print("Ref")
+    # print(ref)
+    # print("Hyp")
+    # print(hyp)
+    # print(f"*************************************************************************")
 
     # Initialize
     pr_scores = {}
@@ -522,8 +529,10 @@ Parameters
 
     apScores = []
     alignment_df = pd.DataFrame()
+    #print("Class and Types(genre) to iterate through")
+    #print(final_combo_pruned)
     for i in range(len(final_combo_pruned)):
-
+        #print(f"Aligning Class={final_combo_pruned.loc[i, 'Class']} Type={final_combo_pruned.loc[i, 'type']}")
         if final_combo_pruned.loc[i, "type"] == "all":
             match_type = ["audio","text","video"]
         else:
@@ -551,8 +560,9 @@ Parameters
                 iou_thresholds=iou_thresholds,
                 task=class_type, 
                 time_span_scale_collar=time_span_scale_collar,
-                text_span_scale_collar=text_span_scale_collar)
-        
+                text_span_scale_collar=text_span_scale_collar,
+                Type=final_combo_pruned.loc[i, "type"])
+
         #apScores.append(apScore)
         if final_combo_pruned.loc[i, "type"] == "all":
             alignment_df = pd.concat([alignment_df, alignment])
@@ -739,11 +749,11 @@ def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df, time
     """    
     # FIXME: Use a No score-region parameter
     tad_add_noscore_region(ref,hyp)
-    #print(">> Enter score_tad()")
-    #print("REF - With Noscore Regions")
-    #print(ref)
-    #print("HYP")
-    #print(hyp)
+    # print(">> Enter score_tad()")
+    # print("REF - With Noscore Regions")
+    # print(ref)
+    # print("HYP")
+    # print(hyp)
     if len(ref) > 0:
         if len(hyp) > 0:
             pr_iou_scores, final_alignment_df = compute_multiclass_iou_pr(ref, hyp, iou_thresholds, mapping_df, class_type, time_span_scale_collar, text_span_scale_collar)
