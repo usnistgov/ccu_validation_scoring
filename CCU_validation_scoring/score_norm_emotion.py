@@ -346,7 +346,7 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
     
     if ihyp.empty:
         for iout in iou_thresholds:
-            output[iout] = 0.0, [0.0], [0.0], [0.0]
+            output[iout] = generate_zero_scores_norm_emotion(None) # 0.0, [0.0], [0.0], [0.0]
         alignment_df = generate_all_fn_alignment_file(ref, task)
         return output,alignment_df
 
