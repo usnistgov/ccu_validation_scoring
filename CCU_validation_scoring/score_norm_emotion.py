@@ -229,10 +229,13 @@ def compute_ious(row, ref, class_type, time_span_scale_collar, text_span_scale_c
     #print(f"\n\n------------------------------\nThe REF")
     #print(refs)
     #print(f"ROW - - - The HYP: file={row.file_id} start={row.start} end={row.end}")
-
     if len(refs) == 0:
-        return pd.DataFrame(data=[[row.Class, None, row.type, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0, row.status, None, None, None, row.start, row.end, 0.0, 1.0, None]],
-            columns=['Class', 'Class_type', 'type', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU', 'hyp_status', 'length', 'intersection', 'union', 'shifted_sys_start', 'shifted_sys_end', 'pct_tp', 'pct_fp', 'scale_collar'])    
+        if (class_type == "norm"):
+            return pd.DataFrame(data=[[row.Class, None, row.type, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0, row.status, None, None, None, row.start, row.end, 0.0, 1.0, None]],
+                                columns=['Class', 'Class_type', 'type', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU', 'hyp_status', 'length', 'intersection', 'union', 'shifted_sys_start', 'shifted_sys_end', 'pct_tp', 'pct_fp', 'scale_collar'])
+        else:
+            return pd.DataFrame(data=[[row.Class, None, row.type, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0, None, None, None, row.start, row.end, 0.0, 1.0, None]],
+                                columns=['Class', 'Class_type', 'type', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU', 'length', 'intersection', 'union', 'shifted_sys_start', 'shifted_sys_end', 'pct_tp', 'pct_fp', 'scale_collar'])    
     
     else:        
         ### Set the scale collar based on the values (which are check for uniqueness) of type
@@ -326,6 +329,7 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
 
     # Compute IoU for all hyps incl. NO_SCORE_REGION
     for idx, myhyp in hyp.iterrows():
+        print(f"ious   {myhyp.file_id} {myhyp.Class} {ref}.")
         out.append(compute_ious(myhyp, ref, task, time_span_scale_collar, text_span_scale_collar))
     ihyp = pd.concat(out)
     #print("-----------------from compute_ious------")
