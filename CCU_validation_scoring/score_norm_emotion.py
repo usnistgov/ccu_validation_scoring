@@ -27,17 +27,17 @@ def generate_zero_scores_norm_emotion(ref):
                'prcurve:precision': None,
                'prcurve:recall': None,
                'prcurve:llr': None,
-               'precision_at_MinLLR': None,
-               'recall_at_MinLLR': None,
-               'f1_at_MinLLR': None,
+               'precision_at_MinLLR': 0.0,
+               'recall_at_MinLLR': 0.0,
+               'f1_at_MinLLR': 0.0,
                'llr_at_MinLLR': None,
-               'sum_tp_at_MinLLR': None,
-               'sum_fp_at_MinLLR': None,
-               'sum_scaled_tp_at_MinLLR': None, 
-               'sum_scaled_fp_at_MinLLR': None,
-               'scaled_recall_at_MinLLR': None,
-               'scaled_precision_at_MinLLR': None,
-               'scaled_f1_at_MinLLR': None
+               'sum_tp_at_MinLLR': 0.0,
+               'sum_fp_at_MinLLR': 0.0,
+               'sum_scaled_tp_at_MinLLR': 0.0, 
+               'sum_scaled_fp_at_MinLLR': 0.0,
+               'scaled_recall_at_MinLLR': 0.0,
+               'scaled_precision_at_MinLLR': 0.0,
+               'scaled_f1_at_MinLLR': 0.0
              }    
     if (ref is None):
         return(empty.copy())
