@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 ## Upcoming changes
 - Add the scaled IoU values and a histogram in instance_alignment_grqphs.png
 
+## [1.2.2] - 2023-04-11
+- Set the default score for a no system output (or reference) to be 0 for Precision/Recalls/F1.
+
 ## [1.2.1] - 2023-04-04
 - The scaled F1 scoring was corrected to replicate the initial scoring sent to teams.
 - Various additiona minor fixes.
