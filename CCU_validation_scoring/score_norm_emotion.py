@@ -329,7 +329,7 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
 
     # Compute IoU for all hyps incl. NO_SCORE_REGION
     for idx, myhyp in hyp.iterrows():
-        print(f"ious   {myhyp.file_id} {myhyp.Class} {ref}.")
+        #print(f"ious   {myhyp.file_id} {myhyp.Class} {ref}.")
         out.append(compute_ious(myhyp, ref, task, time_span_scale_collar, text_span_scale_collar))
     ihyp = pd.concat(out)
     #print("-----------------from compute_ious------")
