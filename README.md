@@ -1,8 +1,8 @@
 # Computational Cultural Understanding (CCU) Evaluation Validation and Scoring Toolkit
 
-**Version:** 1.2.1
+**Version:** 1.2.3
 
-**Date:** April 4, 2023
+**Date:** April 13, 2023
 
 
 ## Table of Content

@@ -421,8 +421,8 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
         ### OK, add some more metrics!
         nsys = fhyp.cum_tp.iat[-1] + fhyp.cum_fp.iat[-1]
         ### pct_tp can have residual values from being aliged to a NO_SCORE REGION, SO, filter the sum
-        sum_scaled_tp = fhyp[fhyp.tp == 1].pct_tp.sum()
-        sum_scaled_fp = fhyp.pct_fp.sum()
+        sum_scaled_tp = ihyp[ihyp.tp == 1].pct_tp.sum()
+        sum_scaled_fp = ihyp.pct_fp.sum()
         scaled_recall =    sum_scaled_tp / npos
         scaled_precision = sum_scaled_tp / (sum_scaled_tp + sum_scaled_fp)  
         measures = { 'AP': ap_interp(prec, rec), 
