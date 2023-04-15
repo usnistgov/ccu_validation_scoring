@@ -34,6 +34,7 @@ def byte_compare_file(generated, expected):
     else:
         if not tst:
             print(f"Files differ.  Use the command:\ntkdiff {generated}\\\n   {expected}")
+            subprocess.check_call(f"sdiff -w230 {generated} {expected}", shell=True)
             assert tst, "Files differ"
         #else:
         #    os.remove(generated)

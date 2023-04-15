@@ -6,11 +6,11 @@ closing	VIRAT_S_000000	mapped	{start=300,end=350}	{start=300,end=400}	0.7	{iou=0
 closing	VIRAT_S_000000	mapped	{start=400,end=450}	{start=400,end=500}	0.6	{iou=0.500,intersection=50.000,union=100.000,shifted_start_hyp=400.000,shifted_end_hyp=500.000,pct_temp_tp=1.000,pct_temp_fp=1.000,collar=15.000}	adhere	adhere
 closing	VIRAT_S_000000	mapped	{start=500,end=550}	{start=500,end=600}	0.5	{iou=0.500,intersection=50.000,union=100.000,shifted_start_hyp=500.000,shifted_end_hyp=600.000,pct_temp_tp=1.000,pct_temp_fp=1.000,collar=15.000}	adhere	adhere
 closing	VIRAT_S_000000	mapped	{start=600,end=650}	{start=600,end=700}	0.4	{iou=0.500,intersection=50.000,union=100.000,shifted_start_hyp=600.000,shifted_end_hyp=700.000,pct_temp_tp=1.000,pct_temp_fp=1.000,collar=15.000}	adhere	adhere
-closing	VIRAT_S_000000	unmapped	{start=700,end=750}	{}		{}	adhere	EMPTY_NA
-closing	VIRAT_S_000000	unmapped	{}	{start=1100,end=1200}	1.0	{}	EMPTY_NA	violate
-closing	VIRAT_S_000000	unmapped	{}	{start=1100,end=1200}	0.9	{}	EMPTY_NA	violate
-closing	VIRAT_S_000000	unmapped	{}	{start=1100,end=1200}	0.8	{}	EMPTY_NA	violate
-closing	VIRAT_S_000000	unmapped	{}	{start=1100,end=1200}	0.7	{}	EMPTY_NA	violate
-closing	VIRAT_S_000000	unmapped	{}	{start=1100,end=1200}	0.6	{}	EMPTY_NA	violate
-closing	VIRAT_S_000000	unmapped	{}	{start=1100,end=1200}	0.5	{}	EMPTY_NA	violate
-closing	VIRAT_S_000000	unmapped	{}	{start=1100,end=1200}	0.4	{}	EMPTY_NA	violate
+closing	VIRAT_S_000000	unmapped	{start=700,end=750}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0}	adhere	EMPTY_NA
+closing	VIRAT_S_000000	unmapped	{}	{start=1100,end=1200}	1.0	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	violate
+closing	VIRAT_S_000000	unmapped	{}	{start=1100,end=1200}	0.9	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	violate
+closing	VIRAT_S_000000	unmapped	{}	{start=1100,end=1200}	0.8	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	violate
+closing	VIRAT_S_000000	unmapped	{}	{start=1100,end=1200}	0.7	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	violate
+closing	VIRAT_S_000000	unmapped	{}	{start=1100,end=1200}	0.6	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	violate
+closing	VIRAT_S_000000	unmapped	{}	{start=1100,end=1200}	0.5	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	violate
+closing	VIRAT_S_000000	unmapped	{}	{start=1100,end=1200}	0.4	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	violate

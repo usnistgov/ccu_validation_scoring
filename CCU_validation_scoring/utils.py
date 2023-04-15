@@ -532,12 +532,20 @@ def generate_alignment_file(ref, hyp, task):
 		#print(ref_format)
 		
 		hyp_format = hyp.copy()
-
-		hyp_format['start_ref'] = [formatNumber(x) for x in hyp['start_ref']]
-		hyp_format['end_ref'] = [formatNumber(x) for x in hyp['end_ref']]
-		hyp_format['start_hyp'] = [formatNumber(x) for x in hyp['start_hyp']]
-		hyp_format['end_hyp'] = [formatNumber(x) for x in hyp['end_hyp']]
-		hyp_format['sort'] = [r if (math.isnan(h) ) else h for h, r in zip(hyp['start_hyp'], hyp['start_ref']) ]
+		### Duplicate the rows for the MD from the correctness constraint
+		new_md = hyp_format[(hyp_format.fp == 1) & (hyp_format.md == 1)].copy()
+		new_md[['fp', 'md', 'eval_score']] = [0, 1, 'MD']
+		if (task == 'norm'):
+		        new_md[['hyp_status']] = ['EMPTY_NA']
+		hyp_format = pd.concat([hyp_format, new_md])
+		#print(hyp_format)
+		#exit(0)
+                
+		hyp_format['sort'] = [r if (math.isnan(h) ) else h for h, r in zip(hyp_format['start_hyp'], hyp_format['start_ref']) ]
+		hyp_format['start_ref'] = [formatNumber(x) for x in hyp_format['start_ref']]
+		hyp_format['end_ref'] = [formatNumber(x) for x in hyp_format['end_ref']]
+		hyp_format['start_hyp'] = [formatNumber(x) for x in hyp_format['start_hyp']]
+		hyp_format['end_hyp'] = [formatNumber(x) for x in hyp_format['end_hyp']]
 
 		hyp_format["ref"] = "{start=" + hyp_format["start_ref"].astype(str) + ",end=" + hyp_format["end_ref"].astype(str) + "}"
 		hyp_format["sys"] = "{start=" + hyp_format["start_hyp"].astype(str) + ",end=" + hyp_format["end_hyp"].astype(str) + "}"
@@ -556,7 +564,8 @@ def generate_alignment_file(ref, hyp, task):
 		hyp_format.loc[hyp_format.eval_score == 'FA', "ref"] = "{}"  ### start_ref is now a string!!!
 		hyp_format.loc[hyp_format.eval_score == 'MD', "sys"] = "{}"  ### start_ref is now a string!!!
 		#hyp_format.loc[hyp_format["eval"] == "unmapped", "ref"] = "{}"
-		hyp_format.loc[hyp_format["eval"] == "unmapped", "parameters"] = "{}"
+		hyp_format.loc[hyp_format.eval_score == 'FA', "parameters"] = "{pct_temp_tp=0.0,pct_temp_fp=1.0}"
+		hyp_format.loc[hyp_format.eval_score == 'MD', "parameters"] = "{pct_temp_tp=0.0,pct_temp_fp=0.0}"
 
 		#print("hyp_format befor filtering columns")
 		#print(hyp_format)

@@ -297,11 +297,11 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
 
     final_alignment_df: instance alignment dataframe
     """
-    #print(f"\n=========================================================================")
-    #print(f"=============  compute_average_precision_tad Class={Class} =====================")
-    #print(ref[((ref.Class == Class) | (ref.Class == 'NO_SCORE_REGION'))])
-    #print(hyp[hyp.Class == Class])
-    #print(f"=============  compute_average_precision_tad Class={Class} =====================")
+    # print(f"\n=========================================================================")
+    # print(f"=============  compute_average_precision_tad Class={Class} =====================")
+    # print(ref[((ref.Class == Class) | (ref.Class == 'NO_SCORE_REGION'))])
+    # print(hyp[hyp.Class == Class])
+    # print(f"=============  compute_average_precision_tad Class={Class} =====================")
 
     # REF has same amount of !score_regions for all runs, which need to be
     # excluded from overall REF count.
@@ -395,6 +395,11 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
         # Set MDs - This is because MD refs are added
         ihyp.loc [~ihyp['start_ref'].isna() & ihyp['start_hyp'].isna(), ['tp', 'fp', 'md']] = [ 0, 0, 1 ]
 
+        ### handle the dual fp+md lines  IFF this is a true MD where no other usage of it is a TP|MD
+        used_ref_uids = ihyp[(ihyp.isNSCR) | ((ihyp.tp == 1) | (ihyp.md == 1))].ref_uid.to_list()
+        #print(f"Correct Ref UIDs {used_ref_uids}")
+        ihyp.loc[~ihyp['start_ref'].isna() & ~ihyp['start_hyp'].isna() & (ihyp['tp'] == 0) & (~ ihyp['ref_uid'].isin(used_ref_uids)), ['md']] = [ 1 ] 
+        
         ### Update the data for Class when IoU == 0.  This sets the class for No_score_regions
         ihyp.loc[ihyp.loc[ihyp['Class'] == 'NO_SCORE_REGION'].index, ['start_ref', 'end_ref']] = [ float("nan"), float("nan") ]
         ihyp.loc[ihyp.loc[ihyp['IoU'] == 0.0].index, ['Class']] = [ Class ]
@@ -422,7 +427,8 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
         nsys = fhyp.cum_tp.iat[-1] + fhyp.cum_fp.iat[-1]
         ### pct_tp can have residual values from being aliged to a NO_SCORE REGION, SO, filter the sum
         sum_scaled_tp = ihyp[ihyp.tp == 1].pct_tp.sum()
-        sum_scaled_fp = ihyp.pct_fp.sum()
+        ### pct_fp is complicated.  It's two parts: (1) if it's labeled as FP, default to 1, (2) Sum of the pct_fp for TPs
+        sum_scaled_fp = 1.0 * len(ihyp[ihyp.fp == 1].pct_fp) + ihyp[ihyp.tp == 1].pct_fp.sum()
         scaled_recall =    sum_scaled_tp / npos
         scaled_precision = sum_scaled_tp / (sum_scaled_tp + sum_scaled_fp)  
         measures = { 'AP': ap_interp(prec, rec), 
@@ -447,7 +453,7 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
         #     fhyp.to_csv(f"/mnt/ccu-vol/ccu_results/p1_minieval/AlignmentAnalysis-v5-check/out/fhyp.{Type}.{Class}.txt", sep = "\t", index = None)
         output[iout] = measures
  
-        ihyp_fields = ["Class","type","tp","fp","file_id","start_ref","end_ref","start_hyp","end_hyp","IoU","llr","intersection", "union", 'shifted_sys_start', 'shifted_sys_end', 'pct_tp', 'pct_fp', 'scale_collar']
+        ihyp_fields = ["Class","type","tp","fp","md","ref_uid","file_id","start_ref","end_ref","start_hyp","end_hyp","IoU","llr","intersection", "union", 'shifted_sys_start', 'shifted_sys_end', 'pct_tp', 'pct_fp', 'scale_collar']
         if (task == "norm"):
             ihyp_fields.append("status")
             ihyp_fields.append("hyp_status")

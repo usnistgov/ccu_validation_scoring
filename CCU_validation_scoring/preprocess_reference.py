@@ -768,7 +768,8 @@ def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time
                                 if (end < length):
                                         ref_final.loc[len(ref_final)] = [0, file_id, end, 'NO_SCORE_REGION', "EndNoScore", type_col, length, end, length]
 
-	ref_final['ref_uid'] = [ "R"+str(s) for s in range(len(ref_final['file_id'])) ] ### This is a unique REF ID to help find FN 
+	ref_final['ref_uid'] = [ "R"+str(s) for s in range(len(ref_final['file_id'])) ] ### This is a unique REF ID to help find FN
+	ref_final['isNSCR'] = ref_final.Class.isin(['noann', 'NO_SCORE_REGION'])
 	#print("DONE - ref_final")
 	#print(ref_final)
 	#exit(0)

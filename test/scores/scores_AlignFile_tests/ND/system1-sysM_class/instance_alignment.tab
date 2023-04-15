@@ -1,10 +1,10 @@
 class	file_id	eval	ref	sys	llr	parameters	ref_status	hyp_status
-105	AlignFile	unmapped	{}	{start=402.83,end=430.95}	0.3721057792406806	{}	EMPTY_NA	adhere,violate
+105	AlignFile	unmapped	{}	{start=402.83,end=430.95}	0.3721057792406806	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere,violate
 105	AlignFile	mapped	{start=428.81,end=443.74}	{start=431.94,end=446.68}	-0.0942033121208331	{iou=0.660,intersection=11.800,union=17.870,shifted_start_hyp=428.810,shifted_end_hyp=446.680,pct_temp_tp=1.000,pct_temp_fp=0.197,collar=15.000}	adhere	adhere
 105	AlignFile	mapped	{start=474.65,end=503.64}	{start=447.31,end=491.21}	0.162294560638525	{iou=0.294,intersection=16.560,union=56.330,shifted_start_hyp=447.310,shifted_end_hyp=503.640,pct_temp_tp=1.000,pct_temp_fp=0.943,collar=15.000}	adhere	adhere
 105	AlignFile	mapped	{start=519.13,end=534.71}	{start=491.72,end=535.96}	0.4503278933457539	{iou=0.352,intersection=15.580,union=44.240,shifted_start_hyp=491.720,shifted_end_hyp=535.960,pct_temp_tp=1.000,pct_temp_fp=1.840,collar=15.000}	adhere	adhere
-105	AlignFile	unmapped	{}	{start=536.38,end=550.46}	-0.218709274785916	{}	EMPTY_NA	adhere
-105	AlignFile	unmapped	{}	{start=551.09,end=609.96}	-0.104485118744117	{}	EMPTY_NA	adhere,violate
-105	AlignFile	unmapped	{start=622.93,end=633.84}	{}		{}	violate	EMPTY_NA
+105	AlignFile	unmapped	{}	{start=536.38,end=550.46}	-0.218709274785916	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
+105	AlignFile	unmapped	{}	{start=551.09,end=609.96}	-0.104485118744117	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere,violate
+105	AlignFile	unmapped	{start=622.93,end=633.84}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0}	violate	EMPTY_NA
 105	AlignFile	mapped	{start=647.04,end=660.45}	{start=640.29,end=653.57}	-0.1937132180681171	{iou=0.324,intersection=6.530,union=20.160,shifted_start_hyp=640.290,shifted_end_hyp=660.450,pct_temp_tp=1.000,pct_temp_fp=0.503,collar=15.000}	adhere	adhere
-105	AlignFile	unmapped	{}	{start=656.18,end=685.34}	-0.5780252749761348	{}	EMPTY_NA	adhere
+105	AlignFile	unmapped	{}	{start=656.18,end=685.34}	-0.5780252749761348	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
