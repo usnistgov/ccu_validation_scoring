@@ -105,6 +105,7 @@ def main():
     score_nd_parser.add_argument("-lS", "--combine_sys_llrs", type=str, choices=['min_llr', 'max_llr'], required=False, help="choose min_llr or max_llr to combine system llrs for the system instances merging")
     score_nd_parser.add_argument("-vS", "--merge_sys_label", type=str, choices=['class', 'class-status'], required=False, help="choose class or class-status to define how to handle the adhere/violate labels for the system instances merging. class is to use the class label only (ignoring status) to merge and class-status is to use the class and status label to merge")
     score_nd_parser.add_argument("-d", "--dump_inputs", action='store_true', help="Dump reference and system inputs as they are processed during scoring.")
+    score_nd_parser.add_argument("-q", "--quiet", action='store_true', default=False, help="Do not dump ther final alignment and scores to stdout.")
 
     score_nd_parser.set_defaults(func=score_submission.score_nd_submission_dir_cli)
 
@@ -124,6 +125,7 @@ def main():
     score_ed_parser.add_argument("-lS", "--combine_sys_llrs", type=str, choices=['min_llr', 'max_llr'], required=False, help="choose min_llr or max_llr to combine system llrs for the system instances merging")
     score_ed_parser.add_argument("-vS", "--merge_sys_label", type=str, choices=['class'], required=False, help="provide class only to define how to handle the status labels for the system instances merging. class is to use the class label only to merge")
     score_ed_parser.add_argument("-d", "--dump_inputs", action='store_true', help="Dump reference and system inputs as they are processed during scoring.")
+    score_ed_parser.add_argument("-q", "--quiet", action='store_true', default=False, help="Do not dump ther final alignment and scores to stdout.")
 
     score_ed_parser.set_defaults(func=score_submission.score_ed_submission_dir_cli)
 

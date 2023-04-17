@@ -115,15 +115,16 @@ def score_nd_submission_dir_cli(args):
 	score_tad(ref, merged_hyp, "norm", thresholds, args.output_dir, mapping_df, float(args.time_span_scale_collar), float(args.text_span_scale_collar))
 	generate_scoring_parameter_file(args)
 
-	print("Alignment")
-	print("---------------")
-	print(open(os.path.join(args.output_dir, 'instance_alignment.tab')).read())
-	print("Class Scores")
-	print("---------------")
-	print(open(os.path.join(args.output_dir, 'scores_by_class.tab')).read())
-	print("Aggregated Scores")
-	print("-------------")
-	print(open(os.path.join(args.output_dir, 'scores_aggregated.tab')).read())
+	if (not args.quiet):
+	    print("Alignment")
+	    print("---------------")
+	    print(open(os.path.join(args.output_dir, 'instance_alignment.tab')).read())
+	    print("Class Scores")
+	    print("---------------")
+	    print(open(os.path.join(args.output_dir, 'scores_by_class.tab')).read())
+	    print("Aggregated Scores")
+	    print("-------------")
+	    print(open(os.path.join(args.output_dir, 'scores_aggregated.tab')).read())
 
 
 def score_ed_submission_dir_cli(args):
@@ -176,17 +177,17 @@ def score_ed_submission_dir_cli(args):
 
 	score_tad(ref, merged_hyp, "emotion", thresholds, args.output_dir, None, float(args.time_span_scale_collar), float(args.text_span_scale_collar))
 	generate_scoring_parameter_file(args)
-
-	print("Alignment")
-	print("---------------")
-	print(open(os.path.join(args.output_dir, 'instance_alignment.tab')).read())
-	print("Class Scores")
-	print("---------------")
-	print(open(os.path.join(args.output_dir, 'scores_by_class.tab')).read())
-	print("Aggregated Scores")
-	print("-------------")
-	print(open(os.path.join(args.output_dir, 'scores_aggregated.tab')).read())
-
+        
+	if (args.quiet):
+            print("Alignment")
+            print("---------------")
+            print(open(os.path.join(args.output_dir, 'instance_alignment.tab')).read())
+            print("Class Scores")
+            print("---------------")
+            print(open(os.path.join(args.output_dir, 'scores_by_class.tab')).read())
+            print("Aggregated Scores")
+            print("-------------")
+            print(open(os.path.join(args.output_dir, 'scores_aggregated.tab')).read())            
 
 def score_vd_submission_dir_cli(args):
 

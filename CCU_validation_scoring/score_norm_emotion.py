@@ -231,11 +231,11 @@ def compute_ious(row, ref, class_type, time_span_scale_collar, text_span_scale_c
     #print(f"ROW - - - The HYP: file={row.file_id} start={row.start} end={row.end}")
     if len(refs) == 0:
         if (class_type == "norm"):
-            return pd.DataFrame(data=[[row.Class, None, row.type, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0, row.status, None, None, None, row.start, row.end, 0.0, 1.0, None]],
-                                columns=['Class', 'Class_type', 'type', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU', 'hyp_status', 'length', 'intersection', 'union', 'shifted_sys_start', 'shifted_sys_end', 'pct_tp', 'pct_fp', 'scale_collar'])
+            return pd.DataFrame(data=[[row.Class, None, row.type, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0, row.status, None, None, None, row.start, row.end, 0.0, 1.0, None, False]],
+                                columns=['Class', 'Class_type', 'type', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU', 'hyp_status', 'length', 'intersection', 'union', 'shifted_sys_start', 'shifted_sys_end', 'pct_tp', 'pct_fp', 'scale_collar', 'isNSCR'])
         else:
-            return pd.DataFrame(data=[[row.Class, None, row.type, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0, None, None, None, row.start, row.end, 0.0, 1.0, None]],
-                                columns=['Class', 'Class_type', 'type', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU', 'length', 'intersection', 'union', 'shifted_sys_start', 'shifted_sys_end', 'pct_tp', 'pct_fp', 'scale_collar'])    
+            return pd.DataFrame(data=[[row.Class, None, row.type, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0, None, None, None, row.start, row.end, 0.0, 1.0, None, False]],
+                                columns=['Class', 'Class_type', 'type', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU', 'length', 'intersection', 'union', 'shifted_sys_start', 'shifted_sys_end', 'pct_tp', 'pct_fp', 'scale_collar', 'isNSCR'])    
     
     else:        
         ### Set the scale collar based on the values (which are check for uniqueness) of type
@@ -297,11 +297,11 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
 
     final_alignment_df: instance alignment dataframe
     """
-    # print(f"\n=========================================================================")
-    # print(f"=============  compute_average_precision_tad Class={Class} =====================")
-    # print(ref[((ref.Class == Class) | (ref.Class == 'NO_SCORE_REGION'))])
-    # print(hyp[hyp.Class == Class])
-    # print(f"=============  compute_average_precision_tad Class={Class} =====================")
+    #print(f"\n=========================================================================")
+    #print(f"=============  compute_average_precision_tad Class={Class} =====================")
+    #print(ref[((ref.Class == Class) | (ref.Class == 'NO_SCORE_REGION'))])
+    #print(hyp[hyp.Class == Class])
+    #print(f"=============  compute_average_precision_tad Class={Class} =====================")
 
     # REF has same amount of !score_regions for all runs, which need to be
     # excluded from overall REF count.
@@ -376,7 +376,10 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
     # Determine TP/FP @ IoU-Threshold
     for iout, params in iou_thresholds.items():
         ### This resets the tp and fp for each correctness threshold 
-        ihyp[['tp', 'fp', 'md']] = [ 0, 1, 0 ] 
+        ihyp[['tp', 'fp', 'md']] = [ 0, 1, 0 ]
+        ### This resets no-score regions to be nothing making them no scores
+        ihyp.loc[ihyp.isNSCR & ihyp.intersection > 0.0, ['tp', 'fp', 'md']] = [ 0, 0, 0 ]
+        
         ### Ref exists, above threshold (implying a TP)
         #print(ihyp)
         if (params['op'] == 'gte'):
@@ -451,6 +454,8 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
         # if (Class == '102'):
         #     ihyp.to_csv(f"/mnt/ccu-vol/ccu_results/p1_minieval/AlignmentAnalysis-v5-check/out/ihyp.{Type}.{Class}.txt", sep = "\t", index = None)
         #     fhyp.to_csv(f"/mnt/ccu-vol/ccu_results/p1_minieval/AlignmentAnalysis-v5-check/out/fhyp.{Type}.{Class}.txt", sep = "\t", index = None)
+        #print(measures)
+        #exit(0)
         output[iout] = measures
  
         ihyp_fields = ["Class","type","tp","fp","md","ref_uid","file_id","start_ref","end_ref","start_hyp","end_hyp","IoU","llr","intersection", "union", 'shifted_sys_start', 'shifted_sys_end', 'pct_tp', 'pct_fp', 'scale_collar']
