@@ -198,6 +198,7 @@ def merge_sys_time_periods(result_dict, llr_value, allowed_gap, merge_label, tas
 		while i < len(time_array):
 			first_time_period = time_array[i]
 			current_time_period = time_array[i]
+			hyp_uid_merge = time_array[i]["hyp_uid"]
 			llr_merge = time_array[i]["llr"]
 			llr_list = []
 			llr_list.append(time_array[i]["llr"])
@@ -218,7 +219,7 @@ def merge_sys_time_periods(result_dict, llr_value, allowed_gap, merge_label, tas
 					llr_merge = max(llr_list)
 				if (task == "norms"):
                                         status_dict[current_time_period['status']] = 1
-			med = {'start': first_time_period['start'], 'end': current_time_period['end'], 'llr': llr_merge, 'type': first_time_period['type']}
+			med = {'start': first_time_period['start'], 'end': current_time_period['end'], 'llr': llr_merge, 'type': first_time_period['type'], 'hyp_uid': hyp_uid_merge}
 			if (task == "norms"):
                                 st =list(status_dict.keys())
                                 st.sort()
@@ -254,16 +255,15 @@ def get_result_dict(sorted_df, merge_label, task):
 	for i in sorted_df.Class.unique():
 		result_dict_list = []
 		sub_df = sorted_df.loc[sorted_df["Class"] == i].reset_index()
+		hid = ""
 		if (task == "norms"):
 		        for j in range(sub_df.shape[0]):
-			        result_dict_list.append({"start": sub_df.iloc[j]['start'], "end": sub_df.iloc[j]['end'], "llr": sub_df.iloc[j]['llr'], "type": sub_df.iloc[j]['type'], "status":  sub_df.iloc[j]['status']})
+			        result_dict_list.append({"start": sub_df.iloc[j]['start'], "end": sub_df.iloc[j]['end'], "llr": sub_df.iloc[j]['llr'], "type": sub_df.iloc[j]['type'], 'hyp_uid': sub_df.iloc[j]['hyp_uid'], "status":  sub_df.iloc[j]['status']})
 		else:
 		        for j in range(sub_df.shape[0]):
-			        result_dict_list.append({"start": sub_df.iloc[j]['start'], "end": sub_df.iloc[j]['end'], "llr": sub_df.iloc[j]['llr'], "type": sub_df.iloc[j]['type']})
+			        result_dict_list.append({"start": sub_df.iloc[j]['start'], "end": sub_df.iloc[j]['end'], "llr": sub_df.iloc[j]['llr'], "type": sub_df.iloc[j]['type'], 'hyp_uid': sub_df.iloc[j]['hyp_uid']})
 		result_dict[i] = result_dict_list
 
-	#print(pprint.pprint(result_dict, width=200))
-	#exit(0)
 	return result_dict
 
 def get_merged_dict(file_ids, data_frame, text_gap, time_gap, llr_value, merge_label, task):
@@ -290,7 +290,10 @@ def get_merged_dict(file_ids, data_frame, text_gap, time_gap, llr_value, merge_l
 				merged_df = convert_merge_dict_df(file_id, result_array, merge_label, task)
 			else:
 				merged_df = sorted_df
-		
+		#print(f"alignfileid   {file_id}")
+		#print(f"   {result_array}")
+		#print(f"   {merged_df}")
+		#exit(0)
 		merged_sorted_df = merged_df.sort_values(by=['Class','start','end'])
 		final_df = pd.concat([final_df,merged_sorted_df], ignore_index = True) 
 
@@ -308,6 +311,7 @@ def convert_merge_dict_df(file_id, results_array, merge_label, task):
 	status = []
 	llrs = []
 	types = []
+	hypuids = []
         	
 	#print(f"Converting {task}")
 	for segment in results_array:
@@ -319,11 +323,12 @@ def convert_merge_dict_df(file_id, results_array, merge_label, task):
 			status.append(segment['content']['status'])
 		llrs.append(segment['content']['llr'])
 		types.append(segment['content']['type'])
+		hypuids.append(segment['content']['hyp_uid'])
                 
 	if (task == "norms"):
-                result_df = pd.DataFrame({"file_id":file_ids,"Class":Class,"start":starts,"end":ends,"status":status,"llr":llrs,"type":types})
+                result_df = pd.DataFrame({"file_id":file_ids,"Class":Class,"start":starts,"end":ends,"hyp_uid":hypuids,"status":status,"llr":llrs,"type":types})
 	else:
-                result_df = pd.DataFrame({"file_id":file_ids,"Class":Class,"start":starts,"end":ends,"llr":llrs,"type":types})
+                result_df = pd.DataFrame({"file_id":file_ids,"Class":Class,"start":starts,"end":ends,"hyp_uid":hypuids, "llr":llrs,"type":types})
                 
 	return result_df
 
@@ -332,6 +337,7 @@ def preprocess_submission_file(subm_dir, ref_dir, scoring_index, task):
 	hyp = concatenate_submission_file(subm_dir, task)
 	hyp_type = add_type_column(ref_dir, hyp)
 	hyp_final = filter_hyp_use_scoring_index(hyp_type, scoring_index)
+	hyp_final['hyp_uid'] = [ "H"+str(s) for s in range(len(hyp_final['file_id'])) ] ### This is a unique HYP ID
 
 	return hyp_final
 
@@ -516,11 +522,11 @@ def generate_alignment_file(ref, hyp, task):
 	hyp["eval"] = hyp.apply(lambda row: categorise(row), axis=1)
 	hyp["eval_score"] = hyp.apply(lambda row: categorise_score(row), axis=1)
 
-	# print(f">> Generate alignment file for task {task}")
-	# print("REF")
-	# print(ref)
-	# print("HYP")
-	# print(hyp)
+	#print(f">> Generate alignment file for task {task}")
+	#print("REF")
+	#print(ref)
+	#print("HYP")
+	#print(hyp)
 	#exit(0)
 	if task in ["norm","emotion"]:
                 ### Refs are in the hyp df
