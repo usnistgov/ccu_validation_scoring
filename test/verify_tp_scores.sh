@@ -12,6 +12,9 @@ grep sum_scaled_fp_at_MinLLR $dir/scores_by_class.tab | grep all
 cl_sfp=`grep sum_scaled_fp_at_MinLLR $dir/scores_by_class.tab | grep all | awk '{s=s+$4}END{print s}'`
 #echo SFP $nfp + $sfp = `echo $nfp $sfp | awk '{print $1 + $2}'`
 echo SFP $sfp - class $cl_sfp
+for cl in 101 102 103 104 105 ; do
+    echo $cl `cat $dir/instance_alignment.tab |egrep "^$cl" | grep pct_temp_fp= | perl -pe 's/.*pct_temp_fp=//; s/[,\}].*//' | awk '{s=s+$1}END{print s}'`
+done
 echo
 grep sum_scaled_tp_at_MinLLR $dir/scores_aggregated.tab | grep all
 grep sum_scaled_tp_at_MinLLR $dir/scores_by_class.tab | grep all
