@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 ## Upcoming changes
 - Add the scaled IoU values and a histogram in instance_alignment_grqphs.png
 
-## [1.2.3] - 2023-04-13
+## [1.2.3] - 2023-04-17
 - Corrected an incorrect repair to the scaled FP/TP/F1 calculations.  Some alignment records were not included.
 
 ## [1.2.2] - 2023-04-11
