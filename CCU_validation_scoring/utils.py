@@ -387,11 +387,11 @@ def replace_hyp_norm_mapping(sub_mapping_df, hyp, act):
 	sys_norm_list = list(sub_mapping_df.sys_norm)
 	sub_hyp = hyp[hyp.Class.isin(sys_norm_list)]
 	new_sub_hyp = sub_mapping_df.merge(sub_hyp, left_on='sys_norm', right_on='Class')
-	new_sub_hyp = new_sub_hyp[["file_id","ref_norm","start","end","status","llr","type"]]
+	new_sub_hyp = new_sub_hyp[["file_id","ref_norm","start","end","status","llr","type","hyp_uid","file_uid"]]
 	new_sub_hyp.rename(columns={"ref_norm": "Class"}, inplace=True)
 	new_sub_hyp.drop_duplicates(inplace = True)
 	final_sub_hyp = pd.concat([new_sub_hyp, hyp.loc[(hyp.Class == act)]])
-
+        
 	return final_sub_hyp
 
 def generate_alignment_statistics(ali, task, output_dir, info_dict = None):

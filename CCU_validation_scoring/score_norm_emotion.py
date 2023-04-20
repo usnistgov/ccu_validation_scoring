@@ -232,11 +232,11 @@ def compute_ious(row, ref, class_type, time_span_scale_collar, text_span_scale_c
     #print(f"ROW - - - The HYP: file={row.file_id} start={row.start} end={row.end}")
     if len(refs) == 0:
         if (class_type == "norm"):
-            return pd.DataFrame(data=[[row.Class, None, row.type, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0, row.status, None, None, None, row.start, row.end, 0.0, 1.0, None, False, None]],
-                                columns=['Class', 'Class_type', 'type', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU', 'hyp_status', 'length', 'intersection', 'union', 'shifted_sys_start', 'shifted_sys_end', 'pct_tp', 'pct_fp', 'scale_collar', 'isNSCR', 'hyp_uid'])
+            return pd.DataFrame(data=[[row.Class, class_type, row.type, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0, row.status, None, None, None, row.start, row.end, 0.0, 1.0, None, False, None, None]],
+                                columns=['Class', 'Class_type', 'type', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU', 'hyp_status', 'length', 'intersection', 'union', 'shifted_sys_start', 'shifted_sys_end', 'pct_tp', 'pct_fp', 'scale_collar', 'isNSCR', 'hyp_uid', 'ref_uid'])
         else:
-            return pd.DataFrame(data=[[row.Class, None, row.type, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0, None, None, None, row.start, row.end, 0.0, 1.0, None, False, None]],
-                                columns=['Class', 'Class_type', 'type', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU', 'length', 'intersection', 'union', 'shifted_sys_start', 'shifted_sys_end', 'pct_tp', 'pct_fp', 'scale_collar', 'isNSCR', 'hyp_uid'])    
+            return pd.DataFrame(data=[[row.Class, class_type, row.type, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0,             None, None, None, row.start, row.end, 0.0, 1.0, None, False, None, None]],
+                                columns=['Class', 'Class_type', 'type', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU', 'length', 'intersection', 'union', 'shifted_sys_start', 'shifted_sys_end', 'pct_tp', 'pct_fp', 'scale_collar', 'isNSCR', 'hyp_uid', 'ref_uid'])    
     
     else:        
         ### Set the scale collar based on the values (which are check for uniqueness) of type
@@ -298,11 +298,12 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
 
     final_alignment_df: instance alignment dataframe
     """
-    #print(f"\n=========================================================================")
-    #print(f"=============  compute_average_precision_tad Class={Class} =====================")
-    #print(ref[((ref.Class == Class) | (ref.Class == 'NO_SCORE_REGION'))])
-    #print(hyp[hyp.Class == Class])
-    #print(f"=============  compute_average_precision_tad Class={Class} =====================")
+    if (True):
+        print(f"\n=========================================================================")
+        print(f"=============  compute_average_precision_tad Class={Class} =====================")
+        print(ref[((ref.Class == Class) | (ref.Class == 'NO_SCORE_REGION'))])
+        print(hyp[hyp.Class == Class])
+        print(f"=============  compute_average_precision_tad Class={Class} =====================")
 
     # REF has same amount of !score_regions for all runs, which need to be
     # excluded from overall REF count.
@@ -333,8 +334,8 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
         #print(f"ious   {myhyp.file_id} {myhyp.Class} {ref}.")
         out.append(compute_ious(myhyp, ref, task, time_span_scale_collar, text_span_scale_collar))
     ihyp = pd.concat(out)
-    #print("-----------------from compute_ious------")
-    #print(ihyp)
+    print("-----------------from compute_ious------")
+    print(ihyp)
     #exit(0)
     
     # Capture naked false alarms that have no overlap with anything regardless of if it is a NO_SCORE_REGION
@@ -345,8 +346,8 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
     # Exclude NO_SCORE_REGIONs but keep FP NA's
     #ihyp = ihyp.loc[(ihyp.Class.str.contains('NO_SCORE_REGION') == False) | ihyp.start_ref.isna()]
     ihyp = ihyp.loc[(ihyp.Class.str.contains('NO_SCORE_REGION') == False) | ((ihyp.Class.str.contains('NO_SCORE_REGION') == True) & (ihyp['IoU'] == 0.0)) | ihyp.start_ref.isna()]
-    #print("----- ihyp keep ------------------")
-    #print(ihyp)
+    print("----- ihyp keep ------------------")
+    print(ihyp)
     #exit(0)
     
     if ihyp.empty:
@@ -355,7 +356,9 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
         alignment_df = generate_all_fn_alignment_file(ref, task)
         return output,alignment_df
 
-    #print("------------Adding FNs]--------------");
+    print("------------Adding FNs from ref--------------");
+    print(ref)
+    print(ihyp)
     ref_fn = ref.loc[~(ref["ref_uid"].isin(ihyp["ref_uid"])) & (ref.Class.str.contains('NO_SCORE_REGION') == False)]
     ref_fn = ref_fn.rename(columns={'start': 'start_ref', 'end': 'end_ref'})
     if (task == "norm"):
@@ -364,7 +367,8 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
     ref_fn['pct_fp'] = 0.0
     ref_fn['hyp_uid'] = None
     ihyp = pd.concat([ihyp, ref_fn])
-    #print(ihyp)
+    print("New ihyp with FNs")
+    print(ihyp)
     #exit(0)
     
     # Sort by confidence score
@@ -432,7 +436,6 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
         # MDs are still in the alignment struct so the need to be removed for AP calc
         #print(f"--------Alignment for this threshold {params['metric']} >= {params['thresh']} --------------");
         #print(ihyp)
-        #exit(0)
     
         ihyp["cum_tp"] = np.cumsum(ihyp.tp).astype(float)
         ihyp["cum_fp"] = np.cumsum(ihyp.fp).astype(float)
@@ -538,13 +541,14 @@ Parameters
 
     final_alignment_df: instance alignment dataframe
     """
-    # print(f"\n**************************************************************************")
-    # print(f"************ compute_multiclass_iou_pr ioU_thresdholdd={iou_thresholds} ******************")
-    # print("Ref")
-    # print(ref)
-    # print("Hyp")
-    # print(hyp)
-    # print(f"*************************************************************************")
+    if (True):
+        print(f"\n**************************************************************************")
+        print(f"************ compute_multiclass_iou_pr ioU_thresdholdd={iou_thresholds} ******************")
+        print("Ref")
+        print(ref)
+        print("Hyp")
+        print(hyp)
+        print(f"*************************************************************************")
 
     # Initialize
     pr_scores = {}
@@ -578,6 +582,8 @@ Parameters
 
         if mapping_df is not None:
             sub_mapping_df = mapping_df.loc[mapping_df.ref_norm == final_combo_pruned.loc[i, "Class"]]
+            ## Remove lines were the mapping goes to the same norm
+            sub_mapping_df = sub_mapping_df[sub_mapping_df.sys_norm != sub_mapping_df.ref_norm]
             if not sub_mapping_df.empty:
                 final_sub_hyp = replace_hyp_norm_mapping(sub_mapping_df, hyp, final_combo_pruned.loc[i, "Class"])
                 final_sub_hyp_type = final_sub_hyp.loc[(final_sub_hyp.type.isin(match_type))]
@@ -607,6 +613,7 @@ Parameters
 
         #print("-----------------------")
         #print(apScore)
+        #print(alignment_df)
         ### Load the results into the IoU-specific data frame.  The first time the IoU is found, the DF is began
         for iout in iou_thresholds:
             ### Add Values then append
@@ -616,18 +623,18 @@ Parameters
             apScore[iout]['Class'] = final_combo_pruned.loc[i, "Class"]
             apScore[iout]['type'] = final_combo_pruned.loc[i, "type"]
             pr_scores[iout].append(apScore[iout])
-
-    final_alignment_df = alignment_df.drop_duplicates() ### Good heavens, this must take a TON of time. IT's needed if multiple IoU thresholds are used
-
-    # print("SCORING COMPLETE")
-    # for iout, val in pr_scores.items():
-    #     print(iout)
-    #     for sc in range(len(pr_scores[iout])):
-    #         for met, met_val in pr_scores[iout][sc].items():
-    #             print(f"   {sc} {met} -> {met_val}")
-    # print(final_alignment_df)
+    ### No longer needed 
+    final_alignment_df = alignment_df # alignment_df.drop_duplicates() ### Good heavens, this must take a TON of time. IT's needed if multiple IoU thresholds are used
+    
+    if (True):
+        print("SCORING COMPLETE")
+        for iout, val in pr_scores.items():
+            print(iout)
+            for sc in range(len(pr_scores[iout])):
+                for met, met_val in pr_scores[iout][sc].items():
+                    print(f"   {sc} {met} -> {met_val}")
+        print(final_alignment_df)
         
-    # exit(0)
     # exit(0)
     
     # for i in range(len(final_combo_pruned)):
