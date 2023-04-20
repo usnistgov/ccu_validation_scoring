@@ -447,34 +447,37 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
         fhyp = fhyp.loc[fhyp.md == 0]   ### Remove the MDs before AP calc
         #print("Filtered Hyp for AP Computation")
         #print(fhyp)
-        llr = np.array(fhyp["llr"])
-        rec = (np.array(fhyp["cum_tp"]) / npos)
-        prec = (np.array(fhyp["cum_tp"]) / (np.array(fhyp["cum_tp"]) + np.array(fhyp["cum_fp"])))
+        measures = generate_zero_scores_norm_emotion(None)
+        if (len(fhyp["llr"]) > 0):
+            llr = np.array(fhyp["llr"])
+            rec = (np.array(fhyp["cum_tp"]) / npos)
+            prec = (np.array(fhyp["cum_tp"]) / (np.array(fhyp["cum_tp"]) + np.array(fhyp["cum_fp"])))
+            
+            ### OK, add some more metrics!
+            nsys = fhyp.cum_tp.iat[-1] + fhyp.cum_fp.iat[-1]
+            ### pct_tp can have residual values from being aliged to a NO_SCORE REGION, SO, filter the sum
+            sum_scaled_tp = ihyp[ihyp.tp == 1].pct_tp.sum()
+            ### pct_fp is complicated.  It's two parts: (1) if it's labeled as FP, default to 1, (2) Sum of the pct_fp for TPs
+            sum_scaled_fp = 1.0 * len(ihyp[ihyp.fp == 1].pct_fp) + ihyp[ihyp.tp == 1].pct_fp.sum()
+            scaled_recall =    sum_scaled_tp / npos
+            scaled_precision = sum_scaled_tp / (sum_scaled_tp + sum_scaled_fp)  
+            
+            measures['AP'] = ap_interp(prec, rec)
+            measures['prcurve:precision'] = prec
+            measures['prcurve:recall'] = rec
+            measures['prcurve:llr'] = llr
+            measures['precision_at_MinLLR'] = prec[-1]
+            measures['recall_at_MinLLR'] = rec[-1]
+            measures['f1_at_MinLLR'] = f1(prec[-1], rec[-1])
+            measures['llr_at_MinLLR'] = llr[-1]
+            measures['sum_tp_at_MinLLR'] = ihyp.tp.sum()
+            measures['sum_fp_at_MinLLR'] = ihyp.fp.sum()
+            measures['sum_scaled_tp_at_MinLLR'] = sum_scaled_tp
+            measures['sum_scaled_fp_at_MinLLR'] = sum_scaled_fp
+            measures['scaled_recall_at_MinLLR'] =  scaled_recall
+            measures['scaled_precision_at_MinLLR'] =  scaled_precision
+            measures['scaled_f1_at_MinLLR'] =  f1(scaled_precision, scaled_recall)
 
-        ### OK, add some more metrics!
-        nsys = fhyp.cum_tp.iat[-1] + fhyp.cum_fp.iat[-1]
-        ### pct_tp can have residual values from being aliged to a NO_SCORE REGION, SO, filter the sum
-        sum_scaled_tp = ihyp[ihyp.tp == 1].pct_tp.sum()
-        ### pct_fp is complicated.  It's two parts: (1) if it's labeled as FP, default to 1, (2) Sum of the pct_fp for TPs
-        sum_scaled_fp = 1.0 * len(ihyp[ihyp.fp == 1].pct_fp) + ihyp[ihyp.tp == 1].pct_fp.sum()
-        scaled_recall =    sum_scaled_tp / npos
-        scaled_precision = sum_scaled_tp / (sum_scaled_tp + sum_scaled_fp)  
-        measures = { 'AP': ap_interp(prec, rec), 
-                     'prcurve:precision': prec,
-                     'prcurve:recall': rec,
-                     'prcurve:llr': llr,
-                     'precision_at_MinLLR': prec[-1],
-                     'recall_at_MinLLR': rec[-1],
-                     'f1_at_MinLLR': f1(prec[-1], rec[-1]),
-                     'llr_at_MinLLR': llr[-1],
-                     'sum_tp_at_MinLLR': ihyp.tp.sum(),
-                     'sum_fp_at_MinLLR': ihyp.fp.sum(),
-                     'sum_scaled_tp_at_MinLLR': sum_scaled_tp,
-                     'sum_scaled_fp_at_MinLLR': sum_scaled_fp,
-                     'scaled_recall_at_MinLLR':  scaled_recall,
-                     'scaled_precision_at_MinLLR':  scaled_precision,
-                     'scaled_f1_at_MinLLR':  f1(scaled_precision, scaled_recall),
-                    }
         # if (Class == '102'):
         #     ihyp.to_csv(f"/mnt/ccu-vol/ccu_results/p1_minieval/AlignmentAnalysis-v5-check/out/ihyp.{Type}.{Class}.txt", sep = "\t", index = None)
         #     fhyp.to_csv(f"/mnt/ccu-vol/ccu_results/p1_minieval/AlignmentAnalysis-v5-check/out/fhyp.{Type}.{Class}.txt", sep = "\t", index = None)
