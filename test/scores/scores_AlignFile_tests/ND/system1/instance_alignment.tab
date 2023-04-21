@@ -1,19 +1,19 @@
 class	file_id	eval	ref	sys	llr	parameters	ref_status	hyp_status
 105	AlignFile	unmapped	{}	{start=417.43,end=430.95}	0.3721057792406806	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
-105	AlignFile	mapped	{start=428.81,end=443.74}	{start=431.94,end=446.68}	-0.0942033121208331	{iou=0.660,intersection=11.800,union=17.870,shifted_start_hyp=428.810,shifted_end_hyp=446.680,pct_temp_tp=1.000,pct_temp_fp=0.197,collar=15.000}	adhere	adhere
+105	AlignFile	mapped	{start=428.81,end=443.74}	{start=431.94,end=446.68}	-0.0942033121208331	{iou=0.660,intersection=11.800,union=17.870,shifted_start_hyp=428.810,shifted_end_hyp=446.680,pct_temp_tp=1.000,pct_temp_fp=0.197,collar=15.000,type=audio}	adhere	adhere
 105	AlignFile	unmapped	{}	{start=447.31,end=461.91}	-0.4006415574484445	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
 105	AlignFile	unmapped	{}	{start=462.12,end=476.78}	0.162294560638525	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
 105	AlignFile	unmapped	{}	{start=476.9,end=491.21}	0.1058344074850603	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
-105	AlignFile	mapped	{start=474.65,end=503.64}	{start=491.72,end=506.55}	0.4503278933457539	{iou=0.374,intersection=11.920,union=31.900,shifted_start_hyp=476.720,shifted_end_hyp=506.550,pct_temp_tp=0.929,pct_temp_fp=0.100,collar=15.000}	adhere	adhere
+105	AlignFile	mapped	{start=474.65,end=503.64}	{start=491.72,end=506.55}	0.4503278933457539	{iou=0.374,intersection=11.920,union=31.900,shifted_start_hyp=476.720,shifted_end_hyp=506.550,pct_temp_tp=0.929,pct_temp_fp=0.100,collar=15.000,type=audio}	adhere	adhere
 105	AlignFile	unmapped	{}	{start=506.7,end=521.3}	-0.542366674545642	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
-105	AlignFile	mapped	{start=519.13,end=534.71}	{start=521.57,end=535.96}	0.1001806885207335	{iou=0.781,intersection=13.140,union=16.830,shifted_start_hyp=519.130,shifted_end_hyp=535.960,pct_temp_tp=1.000,pct_temp_fp=0.080,collar=15.000}	adhere	adhere
+105	AlignFile	mapped	{start=519.13,end=534.71}	{start=521.57,end=535.96}	0.1001806885207335	{iou=0.781,intersection=13.140,union=16.830,shifted_start_hyp=519.130,shifted_end_hyp=535.960,pct_temp_tp=1.000,pct_temp_fp=0.080,collar=15.000,type=audio}	adhere	adhere
 105	AlignFile	unmapped	{}	{start=536.38,end=550.46}	-0.218709274785916	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
 105	AlignFile	unmapped	{}	{start=551.09,end=565.87}	-0.104485118744117	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	violate
 105	AlignFile	unmapped	{}	{start=566.2,end=580.83}	-0.739682939470728	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
 105	AlignFile	unmapped	{}	{start=581.04,end=595.33}	-0.7041471350696402	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
 105	AlignFile	unmapped	{}	{start=595.63,end=609.96}	-0.6760302283003996	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
 105	AlignFile	unmapped	{start=622.93,end=633.84}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0}	violate	EMPTY_NA
-105	AlignFile	mapped	{start=647.04,end=660.45}	{start=640.29,end=653.57}	-0.1937132180681171	{iou=0.324,intersection=6.530,union=20.160,shifted_start_hyp=640.290,shifted_end_hyp=660.450,pct_temp_tp=1.000,pct_temp_fp=0.503,collar=15.000}	adhere	adhere
+105	AlignFile	mapped	{start=647.04,end=660.45}	{start=640.29,end=653.57}	-0.1937132180681171	{iou=0.324,intersection=6.530,union=20.160,shifted_start_hyp=640.290,shifted_end_hyp=660.450,pct_temp_tp=1.000,pct_temp_fp=0.503,collar=15.000,type=audio}	adhere	adhere
 105	AlignFile	unmapped	{}	{start=656.18,end=670.62}	-0.5780252749761348	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
 105	AlignFile	unmapped	{}	{start=670.74,end=685.34}	-0.7675668871841698	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
 105	AlignFile	unmapped	{}	{start=685.82,end=700.48}	0.3361060472351425	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
