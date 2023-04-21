@@ -298,7 +298,7 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
 
     final_alignment_df: instance alignment dataframe
     """
-    if (True):
+    if (False):
         print(f"\n=========================================================================")
         print(f"=============  compute_average_precision_tad Class={Class} =====================")
         print(ref[((ref.Class == Class) | (ref.Class == 'NO_SCORE_REGION'))])
@@ -327,8 +327,8 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
         #print(f"ious   {myhyp.file_id} {myhyp.Class} {ref}.")
         out.append(compute_ious(myhyp, ref, task, time_span_scale_collar, text_span_scale_collar))
     ihyp = pd.concat(out)
-    print("-----------------from compute_ious------")
-    print(ihyp)
+    #print("-----------------from compute_ious------")
+    #print(ihyp)
     #exit(0)
     
     # Capture naked false alarms that have no overlap with anything regardless of if it is a NO_SCORE_REGION
@@ -339,8 +339,8 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
     # Exclude NO_SCORE_REGIONs but keep FP NA's
     #ihyp = ihyp.loc[(ihyp.Class.str.contains('NO_SCORE_REGION') == False) | ihyp.start_ref.isna()]
     ihyp = ihyp.loc[(ihyp.Class.str.contains('NO_SCORE_REGION') == False) | ((ihyp.Class.str.contains('NO_SCORE_REGION') == True) & (ihyp['IoU'] == 0.0)) | ihyp.start_ref.isna()]
-    print("----- ihyp keep ------------------")
-    print(ihyp)
+    #print("----- ihyp keep ------------------")
+    #print(ihyp)
     #exit(0)
     
     if ihyp.empty:
@@ -349,9 +349,9 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
         alignment_df = generate_all_fn_alignment_file(ref, task)
         return output,alignment_df
 
-    print("------------Adding FNs from ref--------------");
-    print(ref)
-    print(ihyp)
+    #print("------------Adding FNs from ref--------------");
+    #print(ref)
+    #print(ihyp)
     ref_fn = ref.loc[~(ref["ref_uid"].isin(ihyp["ref_uid"])) & (ref.Class.str.contains('NO_SCORE_REGION') == False)]
     ref_fn = ref_fn.rename(columns={'start': 'start_ref', 'end': 'end_ref'})
     if (task == "norm"):
@@ -360,8 +360,8 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
     ref_fn['pct_fp'] = 0.0
     ref_fn['hyp_uid'] = None
     ihyp = pd.concat([ihyp, ref_fn])
-    print("New ihyp with FNs")
-    print(ihyp)
+    #print("New ihyp with FNs")
+    #print(ihyp)
     #exit(0)
     
     # Sort by confidence score
@@ -444,7 +444,7 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
             fhyp = fhyp[fhyp.duplicated(subset = ['llr'], keep='last') == False]  ### Keep the last llr
         #print("Filtered Hyp for AP Computation")
         #print(fhyp)
-        print(f"Filtered ihyp len {fhyp.shape[0]} for {Class}, {Type} data using empty scores for {iout} {fhyp.start_hyp}")
+        #print(f"Filtered ihyp len {fhyp.shape[0]} for {Class}, {Type} data using empty scores for {iout} {fhyp.start_hyp}")
 
         measures = generate_zero_scores_norm_emotion(None)
         llr = np.array(fhyp["llr"])
@@ -572,10 +572,10 @@ Parameters
 
     apScores = []
     alignment_df = pd.DataFrame()
-    print("Class and Types(genre) to iterate through")
-    print(final_combo_pruned)
+    #print("Class and Types(genre) to iterate through")
+    #print(final_combo_pruned)
     for i in range(len(final_combo_pruned)):
-        print(f"Aligning Class={final_combo_pruned.loc[i, 'Class']} Type={final_combo_pruned.loc[i, 'type']}")
+        #print(f"Aligning Class={final_combo_pruned.loc[i, 'Class']} Type={final_combo_pruned.loc[i, 'type']}")
         if final_combo_pruned.loc[i, "type"] == "all":
             match_type = ["audio","text","video"]
         else:
