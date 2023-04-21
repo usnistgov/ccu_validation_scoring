@@ -322,13 +322,6 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
     pd.set_option('display.width', 1000)
     pd.set_option('display.max_rows', None)
     
-    if (False):
-        #print("------------Remove Noscores-----------")
-        #print(ref.loc[ref.Class.str.contains('NO_SCORE_REGION') == True])
-        #print("------------Residual Noscores-----------")
-        ref = ref.loc[ref.Class.str.contains('NO_SCORE_REGION') == False]
-        #print(ref)
-
     # Compute IoU for all hyps incl. NO_SCORE_REGION
     for idx, myhyp in hyp.iterrows():
         #print(f"ious   {myhyp.file_id} {myhyp.Class} {ref}.")
@@ -441,42 +434,47 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
         ihyp["cum_fp"] = np.cumsum(ihyp.fp).astype(float)
 
         ############ Beware: fhyp is the LAST row per LLR value to reduce the PR curve size!!!
-        fhyp = ihyp
-        thyp = fhyp.duplicated(subset = ['llr'], keep='last')
-        fhyp = fhyp.loc[thyp == False]
-        fhyp = fhyp.loc[fhyp.md == 0]   ### Remove the MDs before AP calc
+        if (False):  ## Old code
+            fhyp = ihyp
+            thyp = fhyp.duplicated(subset = ['llr'], keep='last')
+            fhyp = fhyp.loc[thyp == False]
+            fhyp = fhyp.loc[fhyp.md == 0]   ### Remove the MDs before AP calc
+        else:
+            fhyp = ihyp[(ihyp.tp == 1) | (ihyp.fp == 1)]  ### Keep the tps and fps
+            fhyp = fhyp[fhyp.duplicated(subset = ['llr'], keep='last') == False]  ### Keep the last llr
         #print("Filtered Hyp for AP Computation")
         #print(fhyp)
+        print(f"Filtered ihyp len {fhyp.shape[0]} for {Class}, {Type} data using empty scores for {iout} {fhyp.start_hyp}")
+
         measures = generate_zero_scores_norm_emotion(None)
-        if (len(fhyp["llr"]) > 0):
-            llr = np.array(fhyp["llr"])
-            rec = (np.array(fhyp["cum_tp"]) / npos)
-            prec = (np.array(fhyp["cum_tp"]) / (np.array(fhyp["cum_tp"]) + np.array(fhyp["cum_fp"])))
-            
-            ### OK, add some more metrics!
-            nsys = fhyp.cum_tp.iat[-1] + fhyp.cum_fp.iat[-1]
-            ### pct_tp can have residual values from being aliged to a NO_SCORE REGION, SO, filter the sum
-            sum_scaled_tp = ihyp[ihyp.tp == 1].pct_tp.sum()
-            ### pct_fp is complicated.  It's two parts: (1) if it's labeled as FP, default to 1, (2) Sum of the pct_fp for TPs
-            sum_scaled_fp = 1.0 * len(ihyp[ihyp.fp == 1].pct_fp) + ihyp[ihyp.tp == 1].pct_fp.sum()
-            scaled_recall =    sum_scaled_tp / npos
-            scaled_precision = sum_scaled_tp / (sum_scaled_tp + sum_scaled_fp)  
-            
-            measures['AP'] = ap_interp(prec, rec)
-            measures['prcurve:precision'] = prec
-            measures['prcurve:recall'] = rec
-            measures['prcurve:llr'] = llr
-            measures['precision_at_MinLLR'] = prec[-1]
-            measures['recall_at_MinLLR'] = rec[-1]
-            measures['f1_at_MinLLR'] = f1(prec[-1], rec[-1])
-            measures['llr_at_MinLLR'] = llr[-1]
-            measures['sum_tp_at_MinLLR'] = ihyp.tp.sum()
-            measures['sum_fp_at_MinLLR'] = ihyp.fp.sum()
-            measures['sum_scaled_tp_at_MinLLR'] = sum_scaled_tp
-            measures['sum_scaled_fp_at_MinLLR'] = sum_scaled_fp
-            measures['scaled_recall_at_MinLLR'] =  scaled_recall
-            measures['scaled_precision_at_MinLLR'] =  scaled_precision
-            measures['scaled_f1_at_MinLLR'] =  f1(scaled_precision, scaled_recall)
+        llr = np.array(fhyp["llr"])
+        rec = (np.array(fhyp["cum_tp"]) / npos)
+        prec = (np.array(fhyp["cum_tp"]) / (np.array(fhyp["cum_tp"]) + np.array(fhyp["cum_fp"])))
+        
+        ### OK, add some more metrics!
+        nsys = fhyp.cum_tp.iat[-1] + fhyp.cum_fp.iat[-1]
+        ### pct_tp can have residual values from being aliged to a NO_SCORE REGION, SO, filter the sum
+        sum_scaled_tp = ihyp[ihyp.tp == 1].pct_tp.sum()
+        ### pct_fp is complicated.  It's two parts: (1) if it's labeled as FP, default to 1, (2) Sum of the pct_fp for TPs
+        sum_scaled_fp = 1.0 * len(ihyp[ihyp.fp == 1].pct_fp) + ihyp[ihyp.tp == 1].pct_fp.sum()
+        scaled_recall =    sum_scaled_tp / npos
+        scaled_precision = sum_scaled_tp / (sum_scaled_tp + sum_scaled_fp)  
+        
+        measures['AP'] = ap_interp(prec, rec)
+        measures['prcurve:precision'] = prec
+        measures['prcurve:recall'] = rec
+        measures['prcurve:llr'] = llr
+        measures['precision_at_MinLLR'] = prec[-1]
+        measures['recall_at_MinLLR'] = rec[-1]
+        measures['f1_at_MinLLR'] = f1(prec[-1], rec[-1])
+        measures['llr_at_MinLLR'] = llr[-1]
+        measures['sum_tp_at_MinLLR'] = ihyp.tp.sum()
+        measures['sum_fp_at_MinLLR'] = ihyp.fp.sum()
+        measures['sum_scaled_tp_at_MinLLR'] = sum_scaled_tp
+        measures['sum_scaled_fp_at_MinLLR'] = sum_scaled_fp
+        measures['scaled_recall_at_MinLLR'] =  scaled_recall
+        measures['scaled_precision_at_MinLLR'] =  scaled_precision
+        measures['scaled_f1_at_MinLLR'] =  f1(scaled_precision, scaled_recall)
 
         # if (Class == '102'):
         #     ihyp.to_csv(f"/mnt/ccu-vol/ccu_results/p1_minieval/AlignmentAnalysis-v5-check/out/ihyp.{Type}.{Class}.txt", sep = "\t", index = None)
@@ -544,7 +542,7 @@ Parameters
 
     final_alignment_df: instance alignment dataframe
     """
-    if (True):
+    if (False):
         print(f"\n**************************************************************************")
         print(f"************ compute_multiclass_iou_pr ioU_thresdholdd={iou_thresholds} ******************")
         print("Ref")
@@ -574,10 +572,10 @@ Parameters
 
     apScores = []
     alignment_df = pd.DataFrame()
-    #print("Class and Types(genre) to iterate through")
-    #print(final_combo_pruned)
+    print("Class and Types(genre) to iterate through")
+    print(final_combo_pruned)
     for i in range(len(final_combo_pruned)):
-        #print(f"Aligning Class={final_combo_pruned.loc[i, 'Class']} Type={final_combo_pruned.loc[i, 'type']}")
+        print(f"Aligning Class={final_combo_pruned.loc[i, 'Class']} Type={final_combo_pruned.loc[i, 'type']}")
         if final_combo_pruned.loc[i, "type"] == "all":
             match_type = ["audio","text","video"]
         else:
@@ -626,10 +624,11 @@ Parameters
             apScore[iout]['Class'] = final_combo_pruned.loc[i, "Class"]
             apScore[iout]['type'] = final_combo_pruned.loc[i, "type"]
             pr_scores[iout].append(apScore[iout])
+
     ### No longer needed 
     final_alignment_df = alignment_df # alignment_df.drop_duplicates() ### Good heavens, this must take a TON of time. IT's needed if multiple IoU thresholds are used
     
-    if (True):
+    if (False):
         print("SCORING COMPLETE")
         for iout, val in pr_scores.items():
             print(iout)
@@ -638,8 +637,6 @@ Parameters
                     print(f"   {sc} {met} -> {met_val}")
         print(final_alignment_df)
         
-    # exit(0)
-    
     # for i in range(len(final_combo_pruned)):
     #     for iout in iou_thresholds:
     #         #print(f"i{i} iout{iout}")
