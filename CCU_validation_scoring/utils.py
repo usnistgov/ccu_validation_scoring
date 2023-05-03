@@ -271,6 +271,7 @@ def get_merged_dict(file_ids, data_frame, text_gap, time_gap, llr_value, merge_l
 	#print(f"----- Get merge dict {text_gap}, {time_gap}, {llr_value}, {merge_label}, {task}")
 	data_frame.set_index("file_id")
 	final_df = pd.DataFrame()
+
 	for file_id in file_ids:
 		sorted_df = extract_df(data_frame, file_id)
                 
@@ -305,6 +306,7 @@ def convert_merge_dict_df(file_id, results_array, merge_label, task):
 	"""
 
 	file_ids = []
+	file_uids = []
 	starts = []
 	ends = []
 	Class = []
@@ -316,6 +318,7 @@ def convert_merge_dict_df(file_id, results_array, merge_label, task):
 	#print(f"Converting {task}")
 	for segment in results_array:
 		file_ids.append(file_id)
+		file_uids.append(file_id)
 		starts.append(float(segment['content']['start']))
 		ends.append(float(segment['content']['end']))
 		Class.append(segment['group'])
@@ -326,9 +329,9 @@ def convert_merge_dict_df(file_id, results_array, merge_label, task):
 		hypuids.append(segment['content']['hyp_uid'])
                 
 	if (task == "norms"):
-                result_df = pd.DataFrame({"file_id":file_ids,"Class":Class,"start":starts,"end":ends,"hyp_uid":hypuids,"status":status,"llr":llrs,"type":types})
+                result_df = pd.DataFrame({"file_id":file_ids,"file_uid":file_uids,"Class":Class,"start":starts,"end":ends,"hyp_uid":hypuids,"status":status,"llr":llrs,"type":types})
 	else:
-                result_df = pd.DataFrame({"file_id":file_ids,"Class":Class,"start":starts,"end":ends,"hyp_uid":hypuids, "llr":llrs,"type":types})
+                result_df = pd.DataFrame({"file_id":file_ids,"file_uid":file_uids,"Class":Class,"start":starts,"end":ends,"hyp_uid":hypuids, "llr":llrs,"type":types})
                 
 	return result_df
 
@@ -346,7 +349,6 @@ def merge_sys_instance(hyp, text_gap, time_gap, llr_value, merge_label, task):
 	#print(f"Merging hyp {text_gap} {time_gap} {llr_value} {merge_label} {task}")
 	if text_gap is None and time_gap is None:
 		return hyp
-
 	# Split input_file into parts based on file_id column
 	file_ids = get_unique_items_in_array(hyp['file_id'])
 	# Generate file_id map for vote processing
