@@ -251,7 +251,7 @@ def check_start_small_end(file, type):
 			for i in range(df.shape[0]):
 				if df.iloc[i]["start"] >= df.iloc[i]["end"]:
 					logger.error('Invalid file {}:'.format(file))
-					logger.error("Start is equal to/higher than end in audio/video {}".format(file))
+					logger.error("Start {} is equal to/higher than end {} in audio/video {}".format(df.iloc[i]["start"],df.iloc[i]["end"],file))
 					return False
 	return True
 
@@ -780,7 +780,7 @@ def check_valid_timestamps(file, docs_dir):
 			elif row['file_id'] in audvid_ids:
 				if row['start'] >= row['end']:
 					logger.error('Invalid file {}:'.format(file))
-					logger.error("Start is equal to/higher than end in audio/video {}".format(file))
+					logger.error("Start {} is equal to/higher than end {} in audio/video {}".format(row['start'], row['end'], file))
 					return False
 			else:
 				logger.error("Validation failed")
