@@ -174,8 +174,8 @@ def segment_iou_v2(sys_start, sys_end, sys_uid, refs, collar):
     ### Unpack for computation
     ref_start, ref_end = [refs[0], refs[1]]
     
-    #print("segment_iou_v2")
-    #print(f"\nsys_start {sys_start} sys_end {sys_end} ----- refs = { [ [b,e] for b, e in zip(ref_start.to_list(),ref_end.to_list()) ]}")
+    print("segment_iou_v2")
+    print(f"   sys_start {sys_start} sys_end {sys_end} ----- refs = { [ [b,e] for b, e in zip(ref_start.to_list(),ref_end.to_list()) ]}")
 
     ### normal IoU intersection
     tt1 = np.maximum(ref_start, sys_start)
@@ -216,20 +216,23 @@ def segment_iou_v2(sys_start, sys_end, sys_uid, refs, collar):
     # Segment union.
     #union = (sys_end - sys_start) + (ref_end - ref_start) - inter      ### This assumes intersection is non-zero
     union = [ np.maximum(re, sys_end) - np.minimum(rb, sys_start) for rb, re in zip(ref_start, ref_end) ]
+    [ print(f"np.maximum({re}, {sys_end}) - np.minimum({rb}, {sys_start})") for rb, re in zip(ref_start, ref_end) ]
+
     tIoU = inter.astype(float) / union
     sys_uids = [ sys_uid for x in tIoU ]  ### make the sys_uid array
+    print(f"   IoU={tIoU}, inter={inter}, union={union}, csb={csb}, csb={cse}")
     return tIoU, inter, union, csb, cse, scaled_pct_TP, scaled_pct_FP, collar, sys_uids
 
 
-def compute_ious(row, ref, class_type, time_span_scale_collar, text_span_scale_collar):
+def compute_ious(row, ref, class_type, time_span_scale_collar, text_span_scale_collar, align_hacks):
     """
     Compute the ref/hyp matching table
     """
     refs = ref.loc[ ref['file_id'] == row.file_id ].copy() ### This filters by file ----  SUPER EXPENSIVE
     
-    #print(f"\n\n------------------------------\nThe REF")
-    #print(refs)
-    #print(f"ROW - - - The HYP: file={row.file_id} start={row.start} end={row.end}")
+    print(f"\n\n------------------------------\nThe REF")
+    print(refs)
+    print(f"ROW - - - The HYP: file={row.file_id} start={row.start} end={row.end} hyp_uid={row.hyp_uid}")
     if len(refs) == 0:
         if (class_type == "norm"):
             return pd.DataFrame(data=[[row.Class, class_type, row.type, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0, row.status, None, None, None, row.start, row.end, 0.0, 1.0, None, False, None, None]],
@@ -247,19 +250,78 @@ def compute_ious(row, ref, class_type, time_span_scale_collar, text_span_scale_c
         ### This computes the IoU regardless of the threshold for scoring.  We are going to 
         #refs['IoU'], refs['intersection'], refs['union'], refs['cb_intersection'], refs['cb_IoU'] = segment_iou_v1(row.start, row.end, [refs.start, refs.end])
         refs['IoU'], refs['intersection'], refs['union'], refs['shifted_sys_start'], refs['shifted_sys_end'], refs['pct_tp'],  refs['pct_fp'], refs['scale_collar'], refs['hyp_uid'] = segment_iou_v2(row.start, row.end, row.hyp_uid, [refs.start, refs.end], collar)  #####  ROW is the hyp #######
-        if (len(refs.loc[refs.IoU > 0]) > 1) & ("NO_SCORE_REGION" in refs.loc[refs.IoU == refs.IoU.max()].Class.values):
-            #If the class of highest iou is no score region, then pick the second highest
-            rmax = refs.loc[refs.IoU == refs.loc[refs.Class != "NO_SCORE_REGION"].IoU.max()]
+        if (align_hacks != "ManyRef:OneHyp"):
+            print("One to One")
+            if (len(refs.loc[refs.IoU > 0]) > 1) & ("NO_SCORE_REGION" in refs.loc[refs.IoU == refs.IoU.max()].Class.values):
+                #If the class of highest iou is no score region, then pick the second highest
+                rmax = refs.loc[refs.IoU == refs.loc[refs.Class != "NO_SCORE_REGION"].IoU.max()]
+            else:
+                rmax_candidate = refs.loc[refs.IoU == refs.IoU.max()]
+                rmax = rmax_candidate.loc[rmax_candidate.start == rmax_candidate.start.min()]
+            rout = rmax.copy()
+            rout[['start_hyp', 'end_hyp', 'llr']] = row.start, row.end, row.llr
+        elif (align_hacks == "ManyRef:OneHyp"):
+            ### One to Many
+            rout = refs
+            print("One to many - beginning with")
+            print(rout)
+            rout = rout[rout.isNSCR | ((~rout.isNSCR) & (rout.intersection > 0))]   ### Removes rout with non-zero intersection
+            if (len(rout[~ rout.isNSCR].intersection) > 0):                         ### Remove noscores because at least one ref matches
+                rout = rout[~ rout.isNSCR].copy()
+                print("   First Step - dividing hyp.  This uses the new_hyp_[start|end] columns")
+                rout['new_hyp_start'] = row.start  ### Seed with the real start start/end
+                rout['new_hyp_end'] = row.end
+                beg = row.start  ### use for the first item
+                rout_index = rout.index
+                for i in range(0, len(rout_index)):
+                    #print(f"------- {i}")
+                    if (i > 0):  ### Reset the start to the previous mid
+                        gap_mid = (rout.loc[rout_index[i-1]].end + rout.loc[rout_index[i]].start) / 2
+                        #print(f"  Start {i}  {gap_mid}")
+                        rout.loc[rout_index[i], 'new_hyp_start'] = gap_mid
+                    if (i < len(rout_index)-1):  ### Reset the start to the previous mid
+                        gap_mid = (rout.loc[rout_index[i+1]].end + rout.loc[rout_index[i]].start) / 2
+                        #print(f"    End {i}  {gap_mid}")
+                        rout.loc[rout_index[i], 'new_hyp_end'] = gap_mid
+                print(rout)
+                print("   Second step, re-run segment_iou_to re-calculate the stats for EACH ROW")
+                for index, ro_ in rout.iterrows():
+                    print(f"index {index}")
+                    o = {}
+                    single_df = rout[rout.index == index]  ### segment_iou_v2 uses the ref times from as dataframe column 
+                    o['IoU'], o['intersection'], o['union'], o['shifted_sys_start'], o['shifted_sys_end'], o['pct_tp'],  o['pct_fp'], o['scale_collar'], o['hyp_uid'] = segment_iou_v2(ro_['new_hyp_start'], ro_['new_hyp_end'], row.hyp_uid, [single_df.start, single_df.end], collar)
+                    print(o)
+                    for v in ['IoU', 'intersection', 'scale_collar']:
+                        rout.at[index,v] = o[v]
+                    for s in ['union', 'shifted_sys_start', 'shifted_sys_end','pct_tp', 'pct_fp', 'hyp_uid']:
+                        rout.at[index,s] = o[s][0]
+                    rout.loc[index, 'start_hyp'] = rout.loc[index, 'new_hyp_start']
+                    rout.loc[index, 'end_hyp'] = rout.loc[index, 'new_hyp_end']
+                rout[['llr']] = row.llr
+                print("   Result")
+                print(rout)
+                      
+            else:                                                                   ### No rout, keep one No score 
+                print("   First Step - single noscore - no re-do") 
+                rout = refs[refs.isNSCR == True]
+                rout = rout[rout.index == rout.index[0]]
+                rout[['start_hyp', 'end_hyp', 'llr']] = row.start, row.end, row.llr
+                print(rout)
         else:
-            rmax_candidate = refs.loc[refs.IoU == refs.IoU.max()]
-            rmax = rmax_candidate.loc[rmax_candidate.start == rmax_candidate.start.min()]
-        rout = rmax.rename(columns={'start':'start_ref', 'end':'end_ref'})
-        rout[['start_hyp', 'end_hyp', 'llr']] = row.start, row.end, row.llr
+            assert (align_hacks != "ManyRef:OneHyp"), f"Error: unknown alignment hack {align_hack}"
+                
+        rout = rout.rename(columns={'start':'start_ref', 'end':'end_ref'})
         if (class_type == "norm"):
             rout['hyp_status'] = row.status
-        return rout
+        print("Final Output")
+        print(rout)
+           
+        return(rout)
 
-def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_span_scale_collar, text_span_scale_collar, Type):  
+        
+        
+
+def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_span_scale_collar, text_span_scale_collar, Type, align_hacks):  
     """ 
     Compute average precision and precision-recall curve at specific IoU
     thresholds between ground truth and predictions data frames. If multiple
@@ -284,6 +346,9 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
         The time span collar for scaled scoring
     text_span_scale_collar:
         The text span collar for scaled scoring
+    align_hacks:
+        A conduit to pass alignment tweaks on the command line.  Recognized values are:
+            ManyRef:OneHyp   -> divide HYPs when they overlap many refs
 
     Returns
     -------
@@ -298,12 +363,12 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
 
     final_alignment_df: instance alignment dataframe
     """
-    if (False):
+    if (True):
         print(f"\n=========================================================================")
-        print(f"=============  compute_average_precision_tad Class={Class} =====================")
+        print(f"=============  compute_average_precision_tad Class={Class} align_hacks={align_hacks}  =====================")
         print(ref[((ref.Class == Class) | (ref.Class == 'NO_SCORE_REGION'))])
         print(hyp[hyp.Class == Class])
-        print(f"=============  compute_average_precision_tad Class={Class} =====================")
+        print(f"=============  compute_average_precision_tad")
 
     # REF has same amount of !score_regions for all runs, which need to be
     # excluded from overall REF count.
@@ -325,11 +390,11 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
     # Compute IoU for all hyps incl. NO_SCORE_REGION
     for idx, myhyp in hyp.iterrows():
         #print(f"ious   {myhyp.file_id} {myhyp.Class} {ref}.")
-        out.append(compute_ious(myhyp, ref, task, time_span_scale_collar, text_span_scale_collar))
+        out.append(compute_ious(myhyp, ref, task, time_span_scale_collar, text_span_scale_collar, align_hacks))
+        print(out[-1])
     ihyp = pd.concat(out)
-    #print("-----------------from compute_ious------")
-    #print(ihyp)
-    #exit(0)
+    print("\n\n-----------------from compute_ious------")
+    print(ihyp)
     
     # Capture naked false alarms that have no overlap with anything regardless of if it is a NO_SCORE_REGION
     #ihyp_naked_fa = ihyp.loc[ihyp.IoU == 0.0]
@@ -368,9 +433,9 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
     ihyp.sort_values(["llr"], ascending=False, inplace=True)        
     ihyp.reset_index(inplace=True, drop=True)
 
-    #print("------------Pre AP Calc Alignment--------------");
-    #print(ihyp)
-    #exit(0)
+    print("------------Pre AP Calc Alignment--------------");
+    #######@@@@@@@######### ihyp.sort_values(["Class", "type", "end_ref"], inplace=True)
+    print(ihyp)
 
     # Determine TP/FP @ IoU-Threshold
     for iout, params in iou_thresholds.items():
@@ -427,9 +492,13 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
                 first = False            
         
         # MDs are still in the alignment struct so the need to be removed for AP calc
-        #print(f"--------Alignment for this threshold {params['metric']} >= {params['thresh']} --------------");
-        #print(ihyp)
-    
+        print(f"--------Alignment for this threshold {params['metric']} >= {params['thresh']} --------------");
+        #ihyp.sort_values(["Class", "type", "end_ref"], inplace=True)
+        print(ihyp)
+        #file_id Class  start_ref  end_ref    status Class_type   type  length ref_uid  isNSCR       IoU  intersection   union  shifted_sys_start  shifted_sys_end  pct_tp    pct_fp  scale_collar hyp_uid  start_hyp  end_hyp
+        print()
+        print(ihyp[["file_id", "Class", "start_ref", "end_ref", "start_hyp", "end_hyp", "ref_uid", "hyp_uid", "IoU"]])
+        
         ihyp["cum_tp"] = np.cumsum(ihyp.tp).astype(float)
         ihyp["cum_fp"] = np.cumsum(ihyp.fp).astype(float)
 
@@ -444,7 +513,6 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
             fhyp = fhyp[fhyp.duplicated(subset = ['llr'], keep='last') == False]  ### Keep the last llr
         #print("Filtered Hyp for AP Computation")
         #print(fhyp)
-        #print(f"Filtered ihyp len {fhyp.shape[0]} for {Class}, {Type} data using empty scores for {iout} {fhyp.start_hyp}")
 
         measures = generate_zero_scores_norm_emotion(None)
         llr = np.array(fhyp["llr"])
@@ -508,7 +576,7 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
 
     return output,final_alignment_df
 
-def compute_multiclass_iou_pr(ref, hyp, iou_thresholds, mapping_df, class_type, time_span_scale_collar, text_span_scale_collar):
+def compute_multiclass_iou_pr(ref, hyp, iou_thresholds, mapping_df, class_type, time_span_scale_collar, text_span_scale_collar, align_hacks):
     """ Compute average precision score (AP) and precision-recall curves for
     each class at a set of specific temp. intersection-over-union (tIoU)
     thresholds. If references have empty class they will be marked as
@@ -532,7 +600,9 @@ Parameters
         The time span collar for scaled scoring
     text_span_scale_collar:
         The text span collar for scaled scoring
-
+    align_hacks:
+        A conduit to pass alignment tweaks on the command line.  Recognized values are:
+            ManyRef:OneHyp   -> divide HYPs when they overlap many refs
 
     Returns
     -------
@@ -542,9 +612,9 @@ Parameters
 
     final_alignment_df: instance alignment dataframe
     """
-    if (False):
+    if (True):
         print(f"\n**************************************************************************")
-        print(f"************ compute_multiclass_iou_pr ioU_thresdholdd={iou_thresholds} ******************")
+        print(f"************ compute_multiclass_iou_pr ioU_thresdholdd={iou_thresholds} align_hacks={align_hacks}  ******************")
         print("Ref")
         print(ref)
         print("Hyp")
@@ -606,7 +676,8 @@ Parameters
                 task=class_type, 
                 time_span_scale_collar=time_span_scale_collar,
                 text_span_scale_collar=text_span_scale_collar,
-                Type=final_combo_pruned.loc[i, "type"])
+                Type=final_combo_pruned.loc[i, "type"],
+                align_hacks=align_hacks)
 
         #apScores.append(apScore)
         if final_combo_pruned.loc[i, "type"] == "all":
@@ -768,7 +839,7 @@ def write_type_level_scores(output_dir, results, delta_cp_text_thresholds, delta
 
     results_long.to_csv(os.path.join(output_dir, "scores_by_class.tab"), sep = "\t", index = None, quoting=None)   
 
-def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df, time_span_scale_collar, text_span_scale_collar):
+def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df, time_span_scale_collar, text_span_scale_collar, align_hacks=""):
     """ Score System output of Norm/Emotion Detection Task
  
     Parameters
@@ -801,7 +872,7 @@ def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df, time
     # print(hyp)
     if len(ref) > 0:
         if len(hyp) > 0:
-            pr_iou_scores, final_alignment_df = compute_multiclass_iou_pr(ref, hyp, iou_thresholds, mapping_df, class_type, time_span_scale_collar, text_span_scale_collar)
+            pr_iou_scores, final_alignment_df = compute_multiclass_iou_pr(ref, hyp, iou_thresholds, mapping_df, class_type, time_span_scale_collar, text_span_scale_collar, align_hacks)
         else:
             pr_iou_scores = {}
             for iout in iou_thresholds:

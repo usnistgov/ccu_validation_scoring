@@ -114,7 +114,7 @@ def score_nd_submission_dir_cli(args):
 	if (args.dump_inputs):
                 ref.to_csv(os.path.join(args.output_dir, "inputs.ref.scored.tab"), sep = "\t", index = None)
                 merged_hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.scored.tab"), sep = "\t", index = None)
-	score_tad(ref, merged_hyp, "norm", thresholds, args.output_dir, mapping_df, float(args.time_span_scale_collar), float(args.text_span_scale_collar))
+	score_tad(ref, merged_hyp, "norm", thresholds, args.output_dir, mapping_df, float(args.time_span_scale_collar), float(args.text_span_scale_collar), args.align_hacks)
 	generate_scoring_parameter_file(args)
 
 	if (not args.quiet):
@@ -177,7 +177,7 @@ def score_ed_submission_dir_cli(args):
                 ref.to_csv(os.path.join(args.output_dir, "inputs.ref.scored.tab"), sep = "\t", index = None)
                 merged_hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.scored.tab"), sep = "\t", index = None)
 
-	score_tad(ref, merged_hyp, "emotion", thresholds, args.output_dir, None, float(args.time_span_scale_collar), float(args.text_span_scale_collar))
+	score_tad(ref, merged_hyp, "emotion", thresholds, args.output_dir, None, float(args.time_span_scale_collar), float(args.text_span_scale_collar), args.align_hacks)
 	generate_scoring_parameter_file(args)
         
 	if (args.quiet):
