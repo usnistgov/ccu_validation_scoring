@@ -1,0 +1,29 @@
+class	genre	metric	value	correctness_criteria
+102	all	AP	0.25	{intersection:gt:0}
+102	all	average_precision	0.25	{intersection:gt:0}
+102	all	f1_at_MinLLR	0.4	{intersection:gt:0}
+102	all	llr_at_MinLLR	-1.291	{intersection:gt:0}
+102	all	precision_at_MinLLR	0.333	{intersection:gt:0}
+102	all	recall_at_MinLLR	0.5	{intersection:gt:0}
+102	all	scaled_f1_at_MinLLR	0.371	{intersection:gt:0}
+102	all	scaled_precision_at_MinLLR	0.294	{intersection:gt:0}
+102	all	scaled_recall_at_MinLLR	0.5	{intersection:gt:0}
+102	all	sum_fp_at_MinLLR	2	{intersection:gt:0}
+102	all	sum_scaled_fp_at_MinLLR	2.397	{intersection:gt:0}
+102	all	sum_scaled_tp_at_MinLLR	1.0	{intersection:gt:0}
+102	all	sum_tp_at_MinLLR	1	{intersection:gt:0}
+102	all	PRCurve_json	"{""precision"": [0.0, 0.5, 0.3333333333333333], ""recall"": [0.0, 0.5, 0.5], ""llr"": [-0.8287143874568343, -1.0364856094673576, -1.2910254857704302]}"	{intersection:gt:0}
+102	audio	AP	0.25	{intersection:gt:0}
+102	audio	average_precision	0.25	{intersection:gt:0}
+102	audio	f1_at_MinLLR	0.4	{intersection:gt:0}
+102	audio	llr_at_MinLLR	-1.291	{intersection:gt:0}
+102	audio	precision_at_MinLLR	0.333	{intersection:gt:0}
+102	audio	recall_at_MinLLR	0.5	{intersection:gt:0}
+102	audio	scaled_f1_at_MinLLR	0.371	{intersection:gt:0}
+102	audio	scaled_precision_at_MinLLR	0.294	{intersection:gt:0}
+102	audio	scaled_recall_at_MinLLR	0.5	{intersection:gt:0}
+102	audio	sum_fp_at_MinLLR	2	{intersection:gt:0}
+102	audio	sum_scaled_fp_at_MinLLR	2.397	{intersection:gt:0}
+102	audio	sum_scaled_tp_at_MinLLR	1.0	{intersection:gt:0}
+102	audio	sum_tp_at_MinLLR	1	{intersection:gt:0}
+102	audio	PRCurve_json	"{""precision"": [0.0, 0.5, 0.3333333333333333], ""recall"": [0.0, 0.5, 0.5], ""llr"": [-0.8287143874568343, -1.0364856094673576, -1.2910254857704302]}"	{intersection:gt:0}
