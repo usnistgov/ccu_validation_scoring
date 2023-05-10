@@ -5,24 +5,41 @@ echo "OneRef:OneHyp - No merge"
 echo "This is similar to Joe's example of needing to split the system accross three reference instances"
 echo ""
 $c > /dev/null
-cat /Users/jon/Programs/CCU/ccu_validation_scoring_BR_one2many/test/test_output/instance_alignment.tab  | ~/Tools/MIGTools/tabby/tabby.py -s "\t" --no_show
+if [ -f test/Demo_ManyRefOneHyp.sh ] ; then
+    cat /Users/jon/Programs/CCU/ccu_validation_scoring_BR_one2many/test/test_output/instance_alignment.tab  | ~/Tools/MIGTools/tabby/tabby.py -s "\t" --no_show
+else
+    cat /Users/jon/Programs/CCU/ccu_validation_scoring_BR_one2many/test/test_output/instance_alignment.tab 
+fi
 
 echo ""
 echo "ManyRef:OneHyp - No merge"
 echo $c --align_hacks "ManyRef:OneHyp" 
 $c --align_hacks "ManyRef:OneHyp" > /dev/null
-cat /Users/jon/Programs/CCU/ccu_validation_scoring_BR_one2many/test/test_output/instance_alignment.tab  | ~/Tools/MIGTools/tabby/tabby.py -s "\t" --no_show
+if [ -f test/Demo_ManyRefOneHyp.sh ] ; then
+    cat /Users/jon/Programs/CCU/ccu_validation_scoring_BR_one2many/test/test_output/instance_alignment.tab  | ~/Tools/MIGTools/tabby/tabby.py -s "\t" --no_show
+else
+    cat /Users/jon/Programs/CCU/ccu_validation_scoring_BR_one2many/test/test_output/instance_alignment.tab 
+fi
 
 echo ""
-echo "ManyRef:OneHyp - RefMerge=30, SysMerge=30"
+echo "ManyRef:OneHyp - RefMerge=30, SysMerge=302"
 $c --align_hacks "ManyRef:OneHyp" -aS 30 -xS 300 -lS max_llr -vS class -aR 30 -xR 300 -vR class > /dev/null
-cat /Users/jon/Programs/CCU/ccu_validation_scoring_BR_one2many/test/test_output/instance_alignment.tab  | ~/Tools/MIGTools/tabby/tabby.py -s "\t" --no_show
+if [ -f test/Demo_ManyRefOneHyp.sh ] ; then
+    cat /Users/jon/Programs/CCU/ccu_validation_scoring_BR_one2many/test/test_output/instance_alignment.tab  | ~/Tools/MIGTools/tabby/tabby.py -s "\t" --no_show
+else
+    cat /Users/jon/Programs/CCU/ccu_validation_scoring_BR_one2many/test/test_output/instance_alignment.tab 
+fi
 
 
 echo ""
 echo "ManyRef:OneHyp - RefMerge=30, SysMerge=NONE"
 $c --align_hacks "ManyRef:OneHyp" -aR 30 -xR 300 -vR class > /dev/null
-cat /Users/jon/Programs/CCU/ccu_validation_scoring_BR_one2many/test/test_output/instance_alignment.tab  | ~/Tools/MIGTools/tabby/tabby.py -s "\t" --no_show
+if [ -f test/Demo_ManyRefOneHyp.sh ] ; then
+    cat /Users/jon/Programs/CCU/ccu_validation_scoring_BR_one2many/test/test_output/instance_alignment.tab  | ~/Tools/MIGTools/tabby/tabby.py -s "\t" --no_show
+else
+    cat /Users/jon/Programs/CCU/ccu_validation_scoring_BR_one2many/test/test_output/instance_alignment.tab 
+fi
+
 
 
 #--align_hacks ManyRef:OneHyp | m
