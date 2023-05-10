@@ -5,8 +5,8 @@ class	file_id	eval	ref	sys	llr	parameters	ref_status	hyp_status
 003	M010005NJ	unmapped	{}	{start=6,end=10}	0.8	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	violate
 003	M010005NJ	unmapped	{}	{start=12,end=16}	0.9	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
 003	M010005NJ	unmapped	{}	{start=12,end=16}	0.9	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
-003	M010005NJ	mapped	{start=20,end=27}	{start=23,end=31}	0.9	{iou=0.364,intersection=4.000,union=11.000,shifted_start_hyp=20.000,shifted_end_hyp=31.000,pct_temp_tp=1.000,pct_temp_fp=0.571,collar=15.000,type=audio}	adhere	violate
-003	M010005NJ	unmapped	{}	{start=23,end=31}	0.9	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	violate
+003	M010005NJ	mapped	{start=20,end=27}	{start=23,end=30}	0.9	{iou=0.400,intersection=4.000,union=10.000,shifted_start_hyp=20.000,shifted_end_hyp=30.000,pct_temp_tp=1.000,pct_temp_fp=0.429,collar=15.000,type=audio}	adhere	violate
+003	M010005NJ	unmapped	{}	{start=23,end=30}	0.9	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	violate
 003	M010005NJ	unmapped	{start=36.8,end=41}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0}	adhere	EMPTY_NA
 003	M010005NJ	unmapped	{}	{start=43,end=47}	0.7	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
 003	M010005NJ	unmapped	{}	{start=43,end=47}	0.7	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
@@ -18,8 +18,8 @@ class	file_id	eval	ref	sys	llr	parameters	ref_status	hyp_status
 004	M010005NJ	unmapped	{}	{start=6,end=10}	0.8	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	violate
 004	M010005NJ	unmapped	{}	{start=12,end=16}	0.9	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
 004	M010005NJ	unmapped	{}	{start=12,end=16}	0.9	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
-004	M010005NJ	mapped	{start=20,end=27}	{start=23,end=31}	0.9	{iou=0.364,intersection=4.000,union=11.000,shifted_start_hyp=20.000,shifted_end_hyp=31.000,pct_temp_tp=1.000,pct_temp_fp=0.571,collar=15.000,type=audio}	adhere	violate
-004	M010005NJ	unmapped	{}	{start=23,end=31}	0.9	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	violate
+004	M010005NJ	mapped	{start=20,end=27}	{start=23,end=30}	0.9	{iou=0.400,intersection=4.000,union=10.000,shifted_start_hyp=20.000,shifted_end_hyp=30.000,pct_temp_tp=1.000,pct_temp_fp=0.429,collar=15.000,type=audio}	adhere	violate
+004	M010005NJ	unmapped	{}	{start=23,end=30}	0.9	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	violate
 004	M010005NJ	unmapped	{start=36.8,end=41}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0}	adhere	EMPTY_NA
 004	M010005NJ	unmapped	{}	{start=43,end=47}	0.7	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
 004	M010005NJ	unmapped	{}	{start=43,end=47}	0.7	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere

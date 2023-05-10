@@ -199,6 +199,7 @@ def merge_sys_time_periods(result_dict, llr_value, allowed_gap, merge_label, tas
 			first_time_period = time_array[i]
 			current_time_period = time_array[i]
 			hyp_uid_merge = time_array[i]["hyp_uid"]
+			hyp_isTruncated = time_array[i]["hyp_isTruncated"]
 			llr_merge = time_array[i]["llr"]
 			llr_list = []
 			llr_list.append(time_array[i]["llr"])
@@ -219,7 +220,8 @@ def merge_sys_time_periods(result_dict, llr_value, allowed_gap, merge_label, tas
 					llr_merge = max(llr_list)
 				if (task == "norms"):
                                         status_dict[current_time_period['status']] = 1
-			med = {'start': first_time_period['start'], 'end': current_time_period['end'], 'llr': llr_merge, 'type': first_time_period['type'], 'hyp_uid': hyp_uid_merge}
+				hyp_isTruncated = True if hyp_isTruncated else time_array[i]["hyp_isTruncated"]
+			med = {'start': first_time_period['start'], 'end': current_time_period['end'], 'llr': llr_merge, 'type': first_time_period['type'], 'hyp_uid': hyp_uid_merge, 'hyp_isTruncated': hyp_isTruncated}
 			if (task == "norms"):
                                 st =list(status_dict.keys())
                                 st.sort()
@@ -258,10 +260,10 @@ def get_result_dict(sorted_df, merge_label, task):
 		hid = ""
 		if (task == "norms"):
 		        for j in range(sub_df.shape[0]):
-			        result_dict_list.append({"start": sub_df.iloc[j]['start'], "end": sub_df.iloc[j]['end'], "llr": sub_df.iloc[j]['llr'], "type": sub_df.iloc[j]['type'], 'hyp_uid': sub_df.iloc[j]['hyp_uid'], "status":  sub_df.iloc[j]['status']})
+			        result_dict_list.append({"start": sub_df.iloc[j]['start'], "end": sub_df.iloc[j]['end'], "llr": sub_df.iloc[j]['llr'], "type": sub_df.iloc[j]['type'], 'hyp_uid': sub_df.iloc[j]['hyp_uid'], "hyp_isTruncated": sub_df.iloc[j]['hyp_isTruncated'], "status":  sub_df.iloc[j]['status']})
 		else:
 		        for j in range(sub_df.shape[0]):
-			        result_dict_list.append({"start": sub_df.iloc[j]['start'], "end": sub_df.iloc[j]['end'], "llr": sub_df.iloc[j]['llr'], "type": sub_df.iloc[j]['type'], 'hyp_uid': sub_df.iloc[j]['hyp_uid']})
+			        result_dict_list.append({"start": sub_df.iloc[j]['start'], "end": sub_df.iloc[j]['end'], "llr": sub_df.iloc[j]['llr'], "type": sub_df.iloc[j]['type'], 'hyp_uid': sub_df.iloc[j]['hyp_uid'], "hyp_isTruncated": sub_df.iloc[j]['hyp_isTruncated']})
 		result_dict[i] = result_dict_list
 
 	return result_dict
@@ -312,6 +314,7 @@ def convert_merge_dict_df(file_id, results_array, merge_label, task):
 	llrs = []
 	types = []
 	hypuids = []
+	hypistrunc = []
         	
 	#print(f"Converting {task}")
 	for segment in results_array:
@@ -324,11 +327,12 @@ def convert_merge_dict_df(file_id, results_array, merge_label, task):
 		llrs.append(segment['content']['llr'])
 		types.append(segment['content']['type'])
 		hypuids.append(segment['content']['hyp_uid'])
+		hypistrunc.append(segment['content']['hyp_isTruncated'])
                 
 	if (task == "norms"):
-                result_df = pd.DataFrame({"file_id":file_ids,"Class":Class,"start":starts,"end":ends,"hyp_uid":hypuids,"status":status,"llr":llrs,"type":types})
+                result_df = pd.DataFrame({"file_id":file_ids,"Class":Class,"start":starts,"end":ends,"hyp_uid":hypuids, "hyp_isTruncated": hypistrunc,"status":status,"llr":llrs,"type":types})
 	else:
-                result_df = pd.DataFrame({"file_id":file_ids,"Class":Class,"start":starts,"end":ends,"hyp_uid":hypuids, "llr":llrs,"type":types})
+                result_df = pd.DataFrame({"file_id":file_ids,"Class":Class,"start":starts,"end":ends,"hyp_uid":hypuids, "hyp_isTruncated": hypistrunc, "llr":llrs,"type":types})
                 
 	return result_df
 
@@ -338,6 +342,7 @@ def preprocess_submission_file(subm_dir, ref_dir, scoring_index, task):
 	hyp_type = add_type_column(ref_dir, hyp)
 	hyp_final = filter_hyp_use_scoring_index(hyp_type, scoring_index)
 	hyp_final['hyp_uid'] = [ "H"+str(s) for s in range(len(hyp_final['file_id'])) ] ### This is a unique HYP ID
+	hyp_final['hyp_isTruncated'] = False
 
 	return hyp_final
 
@@ -387,7 +392,7 @@ def replace_hyp_norm_mapping(sub_mapping_df, hyp, act):
 	sys_norm_list = list(sub_mapping_df.sys_norm)
 	sub_hyp = hyp[hyp.Class.isin(sys_norm_list)]
 	new_sub_hyp = sub_mapping_df.merge(sub_hyp, left_on='sys_norm', right_on='Class')
-	new_sub_hyp = new_sub_hyp[["file_id","ref_norm","start","end","status","llr","type","hyp_uid","file_uid"]]
+	new_sub_hyp = new_sub_hyp[["file_id","ref_norm","start","end","status","llr","type","hyp_uid","file_uid","hyp_isTruncated"]]
 	new_sub_hyp.rename(columns={"ref_norm": "Class"}, inplace=True)
 	new_sub_hyp.drop_duplicates(inplace = True)
 	final_sub_hyp = pd.concat([new_sub_hyp, hyp.loc[(hyp.Class == act)]])

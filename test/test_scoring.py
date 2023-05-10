@@ -89,6 +89,10 @@ def run_scorer(tmp_dir):
                           ('AlignFile_tests', 'AlignFile_tests.scoring_input.index.tab', 'pass_submissions_AlignFile_tests', 'ND', '', 'known_norms_AlignFile_tests_102.txt', '-aC 15 -xC 150 -t intersection:gt:0 --align_hacks ManyRef:OneHyp -aR 30 -xR 300 -vR class', 'AlignFile-102-MROH-RefM-noSysM'),
                           ('AlignFile_tests', 'AlignFile_tests.scoring_input.index.tab', 'pass_submissions_AlignFile_tests', 'ND', '', 'known_norms_AlignFile_tests_102.txt', '-aC 15 -xC 150 -t intersection:gt:0 --align_hacks ManyRef:OneHyp -aS 30 -xS 300 -vR class -lS max_llr -vS class -aR 30 -xR 300', 'AlignFile-102-MROH-RefM-SysM'),
 
+                          ### These use class 108 to test noscore handling changes
+                          ('AlignFile_tests', 'AlignFile_tests.scoring_input.index.tab', 'pass_submissions_AlignFile_tests', 'ND', '', 'known_norms_AlignFile_tests_108.txt', '-aC 15 -xC 150 -t intersection:gt:0', 'AlignFile-108-noopt'),
+                          ('AlignFile_tests', 'AlignFile_tests.scoring_input.index.tab', 'pass_submissions_AlignFile_tests', 'ND', '', 'known_norms_AlignFile_tests_108.txt', '-aC 15 -xC 150 -t intersection:gt:0 -aS 30 -xS 300 -lS max_llr -vS class -aR 300 -xR 3000 -vR class', 'AlignFile-108-SysMerge'),
+
                           ## Test for CD
                           ('AlignFile_tests', 'AlignFile_tests.scoring_input.index.tab', 'pass_submissions_AlignFile_tests', 'CD', '', 'known_norms_AlignFile_tests.txt', '', 'AlignFile-CD-noopt'),
 

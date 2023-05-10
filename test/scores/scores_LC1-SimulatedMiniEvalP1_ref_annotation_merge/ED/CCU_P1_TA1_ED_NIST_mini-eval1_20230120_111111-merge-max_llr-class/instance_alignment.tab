@@ -1,12 +1,18 @@
 class	file_id	eval	ref	sys	llr	parameters
-joy	M010005NJ	mapped	{start=0,end=15}	{start=1,end=16}	0.9	{iou=0.875,intersection=14.000,union=16.000,shifted_start_hyp=0.000,shifted_end_hyp=16.000,pct_temp_tp=1.000,pct_temp_fp=0.067,collar=15.000,type=audio}
+joy	M010005NJ	mapped	{start=0,end=15}	{start=1,end=15}	0.9	{iou=0.933,intersection=14.000,union=15.000,shifted_start_hyp=0.000,shifted_end_hyp=15.000,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=15.000,type=audio}
+joy	M010005NJ	unmapped	{}	{start=23,end=30}	0.9	{pct_temp_tp=0.0,pct_temp_fp=1.0}
 joy	M010005NJ	mapped	{start=44,end=50}	{start=43,end=50}	0.9	{iou=0.857,intersection=6.000,union=7.000,shifted_start_hyp=43.000,shifted_end_hyp=50.000,pct_temp_tp=1.000,pct_temp_fp=0.167,collar=15.000,type=audio}
 joy	M01000H0B	mapped	{start=0,end=70}	{start=0,end=70}	0.8	{iou=1.000,intersection=70.000,union=70.000,shifted_start_hyp=0.000,shifted_end_hyp=70.000,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=150.000,type=text}
-joy	M01000H0B	unmapped	{start=80,end=150}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0}
-joy	M01000H0B	mapped	{start=220,end=280}	{start=120,end=320}	0.9	{iou=0.300,intersection=60.000,union=200.000,shifted_start_hyp=120.000,shifted_end_hyp=320.000,pct_temp_tp=1.000,pct_temp_fp=2.333,collar=150.000,type=text}
-joy	M01000H0B	mapped	{start=360,end=400}	{start=370,end=490}	0.9	{iou=0.231,intersection=30.000,union=130.000,shifted_start_hyp=360.000,shifted_end_hyp=490.000,pct_temp_tp=1.000,pct_temp_fp=2.250,collar=150.000,type=text}
-surprise	M010005NJ	mapped	{start=0,end=5}	{start=1,end=16}	0.9	{iou=0.250,intersection=4.000,union=16.000,shifted_start_hyp=0.000,shifted_end_hyp=16.000,pct_temp_tp=1.000,pct_temp_fp=2.200,collar=15.000,type=audio}
+joy	M01000H0B	mapped	{start=80,end=150}	{start=120,end=170}	0.9	{iou=0.333,intersection=30.000,union=90.000,shifted_start_hyp=80.000,shifted_end_hyp=170.000,pct_temp_tp=1.000,pct_temp_fp=0.286,collar=150.000,type=text}
+joy	M01000H0B	mapped	{start=220,end=280}	{start=220,end=320}	0.8	{iou=0.600,intersection=60.000,union=100.000,shifted_start_hyp=220.000,shifted_end_hyp=320.000,pct_temp_tp=1.000,pct_temp_fp=0.667,collar=150.000,type=text}
+joy	M01000H0B	mapped	{start=360,end=400}	{start=370,end=405}	0.6	{iou=0.667,intersection=30.000,union=45.000,shifted_start_hyp=360.000,shifted_end_hyp=405.000,pct_temp_tp=1.000,pct_temp_fp=0.125,collar=150.000,type=text}
+joy	M01000H0B	unmapped	{}	{start=450,end=490}	0.9	{pct_temp_tp=0.0,pct_temp_fp=1.0}
+surprise	M010005NJ	mapped	{start=0,end=5}	{start=1,end=15}	0.9	{iou=0.267,intersection=4.000,union=15.000,shifted_start_hyp=0.000,shifted_end_hyp=15.000,pct_temp_tp=1.000,pct_temp_fp=2.000,collar=15.000,type=audio}
+surprise	M010005NJ	unmapped	{}	{start=23,end=30}	0.9	{pct_temp_tp=0.0,pct_temp_fp=1.0}
 surprise	M010005NJ	unmapped	{start=36.8,end=41}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0}
 surprise	M010005NJ	unmapped	{}	{start=43,end=50}	0.9	{pct_temp_tp=0.0,pct_temp_fp=1.0}
 surprise	M01000H0B	mapped	{start=0,end=70}	{start=0,end=70}	0.8	{iou=1.000,intersection=70.000,union=70.000,shifted_start_hyp=0.000,shifted_end_hyp=70.000,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=150.000,type=text}
-surprise	M01000H0B	mapped	{start=220,end=280}	{start=140,end=320}	0.9	{iou=0.333,intersection=60.000,union=180.000,shifted_start_hyp=140.000,shifted_end_hyp=320.000,pct_temp_tp=1.000,pct_temp_fp=2.000,collar=150.000,type=text}
+surprise	M01000H0B	unmapped	{}	{start=140,end=170}	0.9	{pct_temp_tp=0.0,pct_temp_fp=1.0}
+surprise	M01000H0B	mapped	{start=220,end=280}	{start=220,end=320}	0.8	{iou=0.600,intersection=60.000,union=100.000,shifted_start_hyp=220.000,shifted_end_hyp=320.000,pct_temp_tp=1.000,pct_temp_fp=0.667,collar=150.000,type=text}
+surprise	M01000H0B	unmapped	{}	{start=370,end=405}	0.6	{pct_temp_tp=0.0,pct_temp_fp=1.0}
+surprise	M01000H0B	unmapped	{}	{start=450,end=490}	0.9	{pct_temp_tp=0.0,pct_temp_fp=1.0}

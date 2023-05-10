@@ -142,6 +142,7 @@ class IOUTests_v2(unittest.TestCase):
             ret = segment_iou_v2(self.cases[case]['inputs']['hyp'][0],
                                  self.cases[case]['inputs']['hyp'][1],
                                  "H1",
+                                 False,
                                  [ d.start, d.end],
                                  15)
             print(f"\nCase {self.cases[case]['inputs']['file']}: ref({' '.join([ f'({x},{y})' for x, y in zip(d.start, d.end) ])}):  hyp:({self.cases[case]['inputs']['hyp'][0]},{self.cases[case]['inputs']['hyp'][1]})")
