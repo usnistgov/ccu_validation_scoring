@@ -250,7 +250,7 @@ def compute_ious(row, ref, class_type, time_span_scale_collar, text_span_scale_c
         ### This computes the IoU regardless of the threshold for scoring.  We are going to 
         #refs['IoU'], refs['intersection'], refs['union'], refs['cb_intersection'], refs['cb_IoU'] = segment_iou_v1(row.start, row.end, [refs.start, refs.end])
         refs['IoU'], refs['intersection'], refs['union'], refs['shifted_sys_start'], refs['shifted_sys_end'], refs['pct_tp'],  refs['pct_fp'], refs['scale_collar'], refs['hyp_uid'] = segment_iou_v2(row.start, row.end, row.hyp_uid, [refs.start, refs.end], collar)  #####  ROW is the hyp #######
-        if (align_hacks != "ManyRef:OneHyp"):
+        if (align_hacks == ""):
             print("One to One")
             if (len(refs.loc[refs.IoU > 0]) > 1) & ("NO_SCORE_REGION" in refs.loc[refs.IoU == refs.IoU.max()].Class.values):
                 #If the class of highest iou is no score region, then pick the second highest
@@ -279,11 +279,10 @@ def compute_ious(row, ref, class_type, time_span_scale_collar, text_span_scale_c
                         gap_mid = (rout.loc[rout_index[i-1]].end + rout.loc[rout_index[i]].start) / 2
                         #print(f"  Start {i}  {gap_mid}")
                         rout.loc[rout_index[i], 'new_hyp_start'] = gap_mid
-                    if (i < len(rout_index)-1):  ### Reset the start to the previous mid
-                        gap_mid = (rout.loc[rout_index[i+1]].end + rout.loc[rout_index[i]].start) / 2
+                    if (i < len(rout_index)-1):  ### Reset the end
+                        gap_mid = (rout.loc[rout_index[i]].end + rout.loc[rout_index[i+1]].start) / 2
                         #print(f"    End {i}  {gap_mid}")
                         rout.loc[rout_index[i], 'new_hyp_end'] = gap_mid
-                print(rout)
                 print("   Second step, re-run segment_iou_to re-calculate the stats for EACH ROW")
                 for index, ro_ in rout.iterrows():
                     print(f"index {index}")
@@ -308,7 +307,8 @@ def compute_ious(row, ref, class_type, time_span_scale_collar, text_span_scale_c
                 rout[['start_hyp', 'end_hyp', 'llr']] = row.start, row.end, row.llr
                 print(rout)
         else:
-            assert (align_hacks != "ManyRef:OneHyp"), f"Error: unknown alignment hack {align_hack}"
+            print(f"Internal Error: unknown alignment hack {align_hacks}")
+            exit(-1)
                 
         rout = rout.rename(columns={'start':'start_ref', 'end':'end_ref'})
         if (class_type == "norm"):
@@ -433,9 +433,12 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
     ihyp.sort_values(["llr"], ascending=False, inplace=True)        
     ihyp.reset_index(inplace=True, drop=True)
 
+    #if (align_hacks == "OneRef:ManySys"):
+    
     print("------------Pre AP Calc Alignment--------------");
     #######@@@@@@@######### ihyp.sort_values(["Class", "type", "end_ref"], inplace=True)
     print(ihyp)
+#    exit(0)
 
     # Determine TP/FP @ IoU-Threshold
     for iout, params in iou_thresholds.items():
