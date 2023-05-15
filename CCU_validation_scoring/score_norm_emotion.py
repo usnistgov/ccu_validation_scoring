@@ -448,6 +448,7 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
     #######@@@@@@@######### ihyp.sort_values(["Class", "type", "end_ref"], inplace=True)
     #print(ihyp)
     #exit(0)
+    #print(f"INFO: {len(ihyp[ihyp.hyp_isTruncated==True].index)} hyp records for type={Type} are hyp_isTruncated==TRUE")
 
     # Determine TP/FP @ IoU-Threshold
     for iout, params in iou_thresholds.items():
