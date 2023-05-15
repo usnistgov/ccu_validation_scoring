@@ -61,12 +61,12 @@ def pre_filter_system_in_noann_region_slow(hyp, ref):
         for fileid in set(ref['file_id']):
                 sref = ref[ref['file_id'] == fileid]
                 #print(sref)
-                ### Straight drop of instances within the begin/end of *ALL* NoScore Regions
-                for ind in sref.index:
-                    hyp.drop(get_contained_index(sref.loc[ind], hyp),  inplace = True)
+                ### Straight drop of instances within the begin/end NoScore Regions
+                hyp.drop(get_contained_index(sref.loc[sref.index[0]], hyp),  inplace = True)
+                hyp.drop(get_contained_index(sref.loc[sref.index[-1]], hyp), inplace = True)
 
                 ### Reset system boundaries to the begin of the NoScore
-                for ind in sref.index:
+                for ns_ref in [sref.index[0], sref.index[-1] ]: #### Only do this to begin and end NS
                     if (sref.loc[ind].Class == 'noann' and True):
                         for index, row in hyp.iterrows():
                             if (sref.loc[ind].file_id == row.file_id):
