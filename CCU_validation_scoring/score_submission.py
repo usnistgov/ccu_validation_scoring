@@ -54,7 +54,7 @@ def pre_filter_system_in_noann_region_old(hyp, ref):
         return(hyp)
 
 
-def pre_filter_system_in_noann_region(hyp, ref):
+def pre_filter_system_in_noann_region_slow(hyp, ref):
         """
         Remove any system instances WHOLLY Contained intial or final file noscore regions
         """
@@ -70,21 +70,60 @@ def pre_filter_system_in_noann_region(hyp, ref):
                     if (sref.loc[ind].Class == 'noann' and True):
                         for index, row in hyp.iterrows():
                             if (sref.loc[ind].file_id == row.file_id):
-                                print(f"index hyp[{index}] {row.Class} H:{row.start}:{row.end} ?? R:{sref.loc[ind].start}:{sref.loc[ind].end}")
+                                #print(f"index hyp[{index}] {row.Class} H:{row.start}:{row.end} ?? R:{sref.loc[ind].start}:{sref.loc[ind].end}")
                                 if (row.start < sref.loc[ind].start and sref.loc[ind].end < row.end): ### Full overlap
-                                    print("Shucks")
+                                    #print("Shucks")
                                     hyp.at[index,'hyp_uid'] = row.hyp_uid + "-UnDroppedFullOverlap"
                                 else:
                                     if (row.start < sref.loc[ind].end and sref.loc[ind].end < row.end):  ### Straddles the boundary
                                         hyp.at[index,'start'] = sref.loc[ind].end
                                         hyp.at[index,'hyp_uid'] = row.hyp_uid + "-TruncStart"
                                         hyp.at[index,'hyp_isTruncated'] = True
-                                        print(f"   Truncated start H:{hyp.at[index,'start']}:{hyp.at[index,'end']}")                                
+                                        #print(f"   Truncated start H:{hyp.at[index,'start']}:{hyp.at[index,'end']}")                                
                                     if (row.start < sref.loc[ind].start and sref.loc[ind].start < row.end):  ### Straddles the boundary
                                         hyp.at[index,'end'] = sref.loc[ind].start
                                         hyp.at[index,'hyp_uid'] = row.hyp_uid + "-TruncEnd"
                                         hyp.at[index,'hyp_isTruncated'] = True
-                                        print(f"   Truncated end H:{hyp.at[index,'start']}:{hyp.at[index,'end']}")
+                                    #print(f"   Truncated end H:{hyp.at[index,'start']}:{hyp.at[index,'end']}")
+                
+        #print(hyp[hyp.Class == '108'])
+        #exit(0)
+        return(hyp)
+
+def pre_filter_system_in_noann_region(hyp, ref):
+        """
+        Remove any system instances WHOLLY Contained intial or final file noscore regions
+        """
+        hyp.reset_index()
+        for fileid in set(ref['file_id']):
+                sref = ref[(ref['file_id'] == fileid) & (ref.Class == 'noann') ]
+                #print(sref)
+                ### Straight drop of instances within the begin/end of *ALL* NoScore Regions
+                for ind in sref.index:
+                    hyp.drop(get_contained_index(sref.loc[ind], hyp),  inplace = True)
+
+                ### Reset system boundaries to the begin of the NoScore
+                if (True):
+                    for ind in sref.index:  ### These are ONLY noscore Refs
+                        for index, row in hyp[hyp.file_id == fileid].iterrows():
+                            #print(f"index hyp[{index}] {row.Class} H:{row.start}:{row.end} ?? R:{sref.loc[ind].start}:{sref.loc[ind].end}")
+                            if (row.start < sref.loc[ind].start and sref.loc[ind].end < row.end): ### Full overlap
+                                #print("Shucks")
+                                hyp.at[index,'hyp_uid'] = row.hyp_uid + "-UnDroppedFullOverlap"
+                                #x=1
+                            else:
+                                if (row.start < sref.loc[ind].end and sref.loc[ind].end < row.end):  ### Straddles the boundary
+                                    hyp.at[index,'start'] = sref.loc[ind].end
+                                    hyp.at[index,'hyp_uid'] = row.hyp_uid + "-TruncStart"
+                                    hyp.at[index,'hyp_isTruncated'] = True
+                                    #print(f"   Truncated start H:{hyp.at[index,'start']}:{hyp.at[index,'end']}")
+                                    #x=1
+                                if (row.start < sref.loc[ind].start and sref.loc[ind].start < row.end):  ### Straddles the boundary
+                                    hyp.at[index,'end'] = sref.loc[ind].start
+                                    hyp.at[index,'hyp_uid'] = row.hyp_uid + "-TruncEnd"
+                                    hyp.at[index,'hyp_isTruncated'] = True
+                                    #x=1
+                            #print(f"   Truncated end H:{hyp.at[index,'start']}:{hyp.at[index,'end']}")
                 
         #print(hyp[hyp.Class == '108'])
         #exit(0)
@@ -119,8 +158,8 @@ def score_nd_submission_dir_cli(args):
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "norms")
 	if (args.dump_inputs):
                 hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.read.tab"), sep = "\t", index = None)
-	print("Pre merge hyp")
-	print(hyp[hyp.Class == '108'])
+	#print("Pre merge hyp")
+	#print(hyp[hyp.Class == '108'])
 
 	if args.mapping_submission_dir:
 		mapping_file = os.path.join(args.mapping_submission_dir, "nd.map.tab")
@@ -140,8 +179,8 @@ def score_nd_submission_dir_cli(args):
 
 	hyp = pre_filter_system_in_noann_region(hyp, ref)
 	merged_hyp = merge_sys_instance(hyp, merge_sys_text_gap, merge_sys_time_gap, args.combine_sys_llrs, args.merge_sys_label, "norms")
-	print("Post merge hyp")
-	print(merged_hyp[merged_hyp.Class == "108"])
+	#print("Post merge hyp")
+	#print(merged_hyp[merged_hyp.Class == "108"])
 	#exit(0)
 
 	thresholds = parse_thresholds(args.iou_thresholds)
