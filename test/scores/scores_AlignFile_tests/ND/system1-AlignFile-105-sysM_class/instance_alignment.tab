@@ -8,4 +8,3 @@ class	file_id	eval	ref	sys	llr	parameters	ref_status	hyp_status
 105	AlignFile	unmapped	{start=622.93,end=633.84}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0}	violate	EMPTY_NA
 105	AlignFile	mapped	{start=647.04,end=660.45}	{start=640.29,end=653.57}	-0.1937132180681171	{iou=0.324,intersection=6.530,union=20.160,shifted_start_hyp=640.290,shifted_end_hyp=660.450,pct_temp_tp=1.000,pct_temp_fp=0.503,collar=15.000,type=audio}	adhere	adhere
 105	AlignFile	unmapped	{}	{start=656.18,end=685.34}	-0.5780252749761348	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
-105	AlignFile	unmapped	{}	{start=685.82,end=721.68}	0.3361060472351425	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
