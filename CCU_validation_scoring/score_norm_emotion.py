@@ -444,9 +444,10 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
 
     #print(f"INFO: {len(ihyp[(ihyp.hyp_isTruncated==True) & (ihyp.isNSCR == True)].index)} hyp records for Class={Class} type={Type} are hyp_isTruncated==TRUE")
     #print(ihyp[(ihyp.hyp_isTruncated==True) & (ihyp.isNSCR == True)])
-    if (align_hacks == "OneRef:ManyHyp"):
-        ### Drop False Alarms that are hyp_isTruncated == TRUE
-        ihyp.drop(ihyp[ihyp.hyp_isTruncated & ihyp.isNSCR].index, inplace=True)
+
+    ### This is NEW FOR 1.3.X
+    ### Drop False Alarms that are hyp_isTruncated == TRUE
+    ihyp.drop(ihyp[ihyp.hyp_isTruncated & ihyp.isNSCR].index, inplace=True)
     
     #print("------------Pre AP Calc Alignment--------------");
     #######@@@@@@@######### ihyp.sort_values(["Class", "type", "end_ref"], inplace=True)

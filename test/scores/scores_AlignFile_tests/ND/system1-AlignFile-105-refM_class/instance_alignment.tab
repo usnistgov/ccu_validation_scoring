@@ -1,5 +1,4 @@
 class	file_id	eval	ref	sys	llr	parameters	ref_status	hyp_status
-105	AlignFile	unmapped	{}	{start=402.85,end=417.34}	-0.0910363368376404	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	violate
 105	AlignFile	unmapped	{}	{start=417.43,end=430.95}	0.3721057792406806	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
 105	AlignFile	mapped	{start=428.81,end=443.74}	{start=431.94,end=446.68}	-0.0942033121208331	{iou=0.660,intersection=11.800,union=17.870,shifted_start_hyp=428.810,shifted_end_hyp=446.680,pct_temp_tp=1.000,pct_temp_fp=0.197,collar=15.000,type=audio}	adhere	adhere
 105	AlignFile	unmapped	{}	{start=447.31,end=461.91}	-0.4006415574484445	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
@@ -18,4 +17,3 @@ class	file_id	eval	ref	sys	llr	parameters	ref_status	hyp_status
 105	AlignFile	unmapped	{}	{start=670.74,end=685.34}	-0.7675668871841698	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
 105	AlignFile	unmapped	{}	{start=685.82,end=700.48}	0.3361060472351425	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
 105	AlignFile	unmapped	{}	{start=700.6,end=715.13}	-0.0088296513016691	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
-105	AlignFile	unmapped	{}	{start=715.31,end=721.68}	-0.5627978748959468	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
