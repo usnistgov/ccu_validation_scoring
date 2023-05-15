@@ -2,28 +2,28 @@ class	genre	metric	value	correctness_criteria
 108	all	AP	1.0	{intersection:gt:0}
 108	all	average_precision	1.0	{intersection:gt:0}
 108	all	f1_at_MinLLR	1.0	{intersection:gt:0}
-108	all	llr_at_MinLLR	-0.778	{intersection:gt:0}
+108	all	llr_at_MinLLR	-0.667	{intersection:gt:0}
 108	all	precision_at_MinLLR	1.0	{intersection:gt:0}
 108	all	recall_at_MinLLR	1.0	{intersection:gt:0}
-108	all	scaled_f1_at_MinLLR	0.837	{intersection:gt:0}
-108	all	scaled_precision_at_MinLLR	0.719	{intersection:gt:0}
+108	all	scaled_f1_at_MinLLR	0.305	{intersection:gt:0}
+108	all	scaled_precision_at_MinLLR	0.18	{intersection:gt:0}
 108	all	scaled_recall_at_MinLLR	1.0	{intersection:gt:0}
 108	all	sum_fp_at_MinLLR	0	{intersection:gt:0}
-108	all	sum_scaled_fp_at_MinLLR	0.39	{intersection:gt:0}
+108	all	sum_scaled_fp_at_MinLLR	4.561	{intersection:gt:0}
 108	all	sum_scaled_tp_at_MinLLR	1.0	{intersection:gt:0}
 108	all	sum_tp_at_MinLLR	1	{intersection:gt:0}
-108	all	PRCurve_json	"{""precision"": [1.0], ""recall"": [1.0], ""llr"": [-0.7777777777777777]}"	{intersection:gt:0}
+108	all	PRCurve_json	"{""precision"": [1.0], ""recall"": [1.0], ""llr"": [-0.6666666666666666]}"	{intersection:gt:0}
 108	audio	AP	1.0	{intersection:gt:0}
 108	audio	average_precision	1.0	{intersection:gt:0}
 108	audio	f1_at_MinLLR	1.0	{intersection:gt:0}
-108	audio	llr_at_MinLLR	-0.778	{intersection:gt:0}
+108	audio	llr_at_MinLLR	-0.667	{intersection:gt:0}
 108	audio	precision_at_MinLLR	1.0	{intersection:gt:0}
 108	audio	recall_at_MinLLR	1.0	{intersection:gt:0}
-108	audio	scaled_f1_at_MinLLR	0.837	{intersection:gt:0}
-108	audio	scaled_precision_at_MinLLR	0.719	{intersection:gt:0}
+108	audio	scaled_f1_at_MinLLR	0.305	{intersection:gt:0}
+108	audio	scaled_precision_at_MinLLR	0.18	{intersection:gt:0}
 108	audio	scaled_recall_at_MinLLR	1.0	{intersection:gt:0}
 108	audio	sum_fp_at_MinLLR	0	{intersection:gt:0}
-108	audio	sum_scaled_fp_at_MinLLR	0.39	{intersection:gt:0}
+108	audio	sum_scaled_fp_at_MinLLR	4.561	{intersection:gt:0}
 108	audio	sum_scaled_tp_at_MinLLR	1.0	{intersection:gt:0}
 108	audio	sum_tp_at_MinLLR	1	{intersection:gt:0}
-108	audio	PRCurve_json	"{""precision"": [1.0], ""recall"": [1.0], ""llr"": [-0.7777777777777777]}"	{intersection:gt:0}
+108	audio	PRCurve_json	"{""precision"": [1.0], ""recall"": [1.0], ""llr"": [-0.6666666666666666]}"	{intersection:gt:0}
