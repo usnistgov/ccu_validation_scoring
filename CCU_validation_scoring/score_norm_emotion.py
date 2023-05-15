@@ -442,13 +442,16 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
     ihyp.sort_values(["llr"], ascending=False, inplace=True)        
     ihyp.reset_index(inplace=True, drop=True)
 
-    #if (align_hacks == "OneRef:ManySys"):
+    #print(f"INFO: {len(ihyp[(ihyp.hyp_isTruncated==True) & (ihyp.isNSCR == True)].index)} hyp records for Class={Class} type={Type} are hyp_isTruncated==TRUE")
+    #print(ihyp[(ihyp.hyp_isTruncated==True) & (ihyp.isNSCR == True)])
+    if (align_hacks == "OneRef:ManyHyp"):
+        ### Drop False Alarms that are hyp_isTruncated == TRUE
+        ihyp.drop(ihyp[ihyp.hyp_isTruncated & ihyp.isNSCR].index, inplace=True)
     
     #print("------------Pre AP Calc Alignment--------------");
     #######@@@@@@@######### ihyp.sort_values(["Class", "type", "end_ref"], inplace=True)
     #print(ihyp)
     #exit(0)
-    #print(f"INFO: {len(ihyp[ihyp.hyp_isTruncated==True].index)} hyp records for type={Type} are hyp_isTruncated==TRUE")
 
     # Determine TP/FP @ IoU-Threshold
     for iout, params in iou_thresholds.items():
