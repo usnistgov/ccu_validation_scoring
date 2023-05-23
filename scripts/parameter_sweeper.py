@@ -77,7 +77,7 @@ def run_score(code_base, command, workdir, param1):
                 com = code_base + " " + command + " " + level['args'] + " -o " + lev_out
             else:
                 com = "( cd " + code_base + " ; python -m CCU_validation_scoring.cli " + command + " " + level['args'] + " -o " + str(pathlib.Path(lev_out).resolve()) + ")"
-            print(com + f" 1> {lev_out}.stdout.txt 1> {lev_out}.stderr.txt", file=open(shfile, 'w'))
+            print(com + f" 1> {lev_out}.stdout.txt 2> {lev_out}.stderr.txt", file=open(shfile, 'w'))
             ret = os.system(f"sh {shfile}")
             print(ret, file=open(retfile, 'w'))
             if (ret != 0):
