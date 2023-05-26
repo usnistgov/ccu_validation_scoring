@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import json
 import sys
 from PIL import Image
+pd.set_option('display.max_rows', 1000)
 
 def add_scorer_file(file, srid, tab):
     t = pd.read_csv(file, sep = "\t")
@@ -64,13 +65,16 @@ def run_score(code_base, command, workdir, param1):
         lev_out = os.path.join(workdir, level['name'])
         run = False
         if (not os.path.isdir(lev_out)):
-            run = True
+            run = True 
+        if (not os.path.isfile(os.path.join(lev_out, 'scoring_parameters.tab'))):
+            run = True        
 
         ######  Scorer execution ####
         if (not run):
             print(f"   Beginning level: {level['name']} args: /{level['args']}/ output: {lev_out}")
         else:
-            os.mkdir(lev_out)
+            if (not os.path.isdir(lev_out)):
+                os.mkdir(lev_out)
             shfile, retfile = [f"{lev_out}.sh", f"{lev_out}.ret"]
             print(f"   Beginning level: {level['name']} args: /{level['args']}/ outputr: {lev_out}  Starting scorer: {shfile}")
             if (code_base == "CCU_scoring"):
@@ -79,9 +83,10 @@ def run_score(code_base, command, workdir, param1):
                 com = "( cd " + code_base + " ; python -m CCU_validation_scoring.cli " + command + " " + level['args'] + " -o " + str(pathlib.Path(lev_out).resolve()) + ")"
             print(com + f" 1> {lev_out}.stdout.txt 2> {lev_out}.stderr.txt", file=open(shfile, 'w'))
             ret = os.system(f"sh {shfile}")
-            print(ret, file=open(retfile, 'w'))
             if (ret != 0):
                 print(f"Error: Scorer returned /{ret}/.  Aborting")
+                exit(1)
+            print(ret, file=open(retfile, 'w'))
 
         ### Load tqbles
         df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact = load_scoring(lev_out, "sweep", level['name'], level['factors'],
@@ -137,8 +142,8 @@ def plot_measures_agg(df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, measures, o
             for tick in axs[i].get_xticklabels():
                 tick.set_rotation(45)
             axs[i].legend(fontsize="5")
-            x = me[(me.metric.isin([mea]) & me.genre.isin([genre]))][factor_cols + ["genre", "metric", "value"]]
-            x.sort_values(by='value', ascending=False, inplace=True)
+            x_ori = me[(me.metric.isin([mea]) & me.genre.isin([genre]))][factor_cols + ["genre", "metric", "value"]]
+            x = x_ori.sort_values(by='value', ascending=False)
             x['ordinal'] = range(0, len(x.index))
             print(f"Top factor level values {mea} {genre} {x.iloc[0].value} {x.iloc[0][factor_cols[0]]} {x.iloc[0][factor_cols[1]]} ")
             print(x.head())
@@ -333,7 +338,24 @@ def plot_measures_agg1(df_jobs, df_sr, df_sbc, df_sa, df_sp, measures, outdir):
         y_offset += im.size[1]
 
     new_im.save('test.jpg')
-        
+
+def copy_bestdir(df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, param, workdir, bestdir, metric):
+    me = pd.merge(df_sa, df_sr, on='srid')
+    
+    genre = 'all'
+    x_ori = me[(me.metric.isin([metric]) & me.genre.isin([genre]))]
+    x = x_ori.sort_values(by='value', ascending=False)
+    print(x.head())
+    best_label = x.iloc[0].label
+    print(f"Best Selected: {best_label}")
+    best_param = [ x for x in param['levels'] if x['name'] == best_label ][0]
+    print(best_param)
+    lev_out = os.path.join(workdir, best_param['name'])
+    print(f"     Work Dir: {lev_out}")
+    print(f"  copy to Dir: {bestdir}")
+    os.system(f"cp {lev_out}.* {bestdir}")
+    os.system(f"cp {lev_out}/* {bestdir}")
+    
 def main():
     parser = argparse.ArgumentParser(description='Generate a random norm/emotion submission')
     
@@ -342,9 +364,8 @@ def main():
     parser.add_argument('-t', '--task', choices=['norm', 'emotion'], required=True, help = 'norm, emotion')
     parser.add_argument('-w', '--workdir', type=str, required=True, help = 'The working director`y to store results')
     parser.add_argument(      '--param_file', type=str, required=True, help = 'The param def JSON')
-    parser.add_argument('-m', '--measures', type=str, default = "average_precision f1_at_MinLLR scaled_f1_at_MinLLR", help = 'The statistics to plot - these are named for class metrics')
-
-    
+    parser.add_argument(      '--bestdir', type=str, default = "", help = 'The directory to copy the top run to')
+    parser.add_argument('-m', '--measures', type=str, default = "average_precision f1_at_MinLLR scaled_f1_at_MinLLR", help = 'The statistics to plot - these are named for class metrics')    
      
     args = parser.parse_args()
     with open(args.param_file,"r") as f: param_txt = f.read()
@@ -365,6 +386,9 @@ def main():
     measures = args.measures.split(" ")
     plot_measures_agg(df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, measures, args.workdir)
 
+    if (args.bestdir != ""):
+        copy_bestdir(df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, param, args.workdir, args.bestdir, metric='mean_f1_at_MinLLR')
+    
 
 if __name__ == '__main__':
 	main()
