@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 ## Upcoming changes
 - Add the scaled IoU values and a histogram in instance_alignment_grqphs.png
 
+## [1.3.0] - 2023-04-26
+- Modified the handling of pre/post annotation NoScore regions.  The old code would drop system instances that span the entire file.
+- Added the  --align_hacks ManyRef:OneHyp option for ND and ED.
+- minor fixes to handle scoring Eval1-LC1.
+
 ## [1.2.4] - 2023-04-21
 - Corrected handling of single LLR ND and ED systems found in the minieval.
 - Added source type to the ED and ND alignmenrs.
