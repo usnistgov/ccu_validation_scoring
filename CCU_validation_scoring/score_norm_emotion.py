@@ -442,8 +442,8 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
     ihyp.sort_values(["llr"], ascending=False, inplace=True)        
     ihyp.reset_index(inplace=True, drop=True)
 
-    print(f"INFO: {len(ihyp[(ihyp.hyp_isTruncated==True) & (ihyp.isNSCR == True)].index)} hyp records for Class={Class} type={Type} are hyp_isTruncated==TRUE")
-    print(ihyp[(ihyp.hyp_isTruncated==True) & (ihyp.isNSCR == True)])
+    #print(f"INFO: {len(ihyp[(ihyp.hyp_isTruncated==True) & (ihyp.isNSCR == True)].index)} hyp records for Class={Class} type={Type} are hyp_isTruncated==TRUE")
+    #print(ihyp[(ihyp.hyp_isTruncated==True) & (ihyp.isNSCR == True)])
 
     ### This is NEW FOR 1.3.X
     ### Drop False Alarms that are hyp_isTruncated == TRUE
