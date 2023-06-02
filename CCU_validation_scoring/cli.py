@@ -136,6 +136,7 @@ def main():
     score_vd_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
     score_vd_parser.add_argument('-i','--scoring-index-file', type=str, required=True, help='Use to filter file from scoring (REF)')
     score_vd_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output directory")
+    score_vd_parser.add_argument("-q", "--quiet", action='store_true', default=False, help="Do not dump ther final alignment and scores to stdout.")
 
     score_vd_parser.set_defaults(func=score_submission.score_vd_submission_dir_cli)
 
@@ -144,6 +145,7 @@ def main():
     score_ad_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
     score_ad_parser.add_argument('-i','--scoring-index-file', type=str, required=True, help='Use to filter file from scoring (REF)')
     score_ad_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output directory")
+    score_ad_parser.add_argument("-q", "--quiet", action='store_true', default=False, help="Do not dump ther final alignment and scores to stdout.")
 
     score_ad_parser.set_defaults(func=score_submission.score_ad_submission_dir_cli)
 
@@ -154,6 +156,7 @@ def main():
     score_cd_parser.add_argument("-e", "--delta_cp_text_thresholds", nargs='?', default="100", help="A comma separated list of delta CP text thresholds.")
     score_cd_parser.add_argument("-m", "--delta_cp_time_thresholds", nargs='?', default="10", help="A comma separated list of delta CP time thresholds.")
     score_cd_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output directory")
+    score_cd_parser.add_argument("-q", "--quiet", action='store_true', default=False, help="Do not dump ther final alignment and scores to stdout.")
 
     score_cd_parser.set_defaults(func=score_submission.score_cd_submission_dir_cli)
 

@@ -352,7 +352,7 @@ def check_index_get_submission_files(ref_dir, subm_dir):
 			length = file_info_df["length"][file_info_df["file_uid"] == j].values[0]
 			if subm_file_path[:2] == './': #Check if path is start with ./
 				subm_file_path = subm_file_path[2:]
-			if subm_dir not in subm_file_path: # Check it's absolute or relative path
+			if "{}/".format(subm_dir) not in subm_file_path: # Check it's absolute or relative path
 				full_subm_file_path = os.path.join(subm_dir, subm_file_path)
 				check_file_exist(full_subm_file_path, subm_file_path, subm_dir)
 				subm_file_paths_dict[j] = {"path": full_subm_file_path, "type": type, "processed": processed_label, "length": length}

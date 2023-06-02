@@ -49,8 +49,8 @@ def change_continuous_non_text(df,step = 2):
 	doc1	0     1   (1*1)/1.0=1
 	doc1	1     2   (2*1.0)/1.0=2
 	"""
-	start = list(df["start"])
-	end = list(df["end"])
+	start = list(np.around(np.array(list(df["start"])),3))
+	end = list(np.around(np.array(list(df["end"])),3))
 	label_list = list(df["Class"])
 	time_pool = start + end
 	if (max(time_pool) - min(time_pool)) % step == 0:

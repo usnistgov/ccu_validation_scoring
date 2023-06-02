@@ -121,7 +121,7 @@ def concatenate_submission_file(subm_dir, task):
 	submission_dfs = pd.DataFrame()
 
 	for subm_file_path in subm_file_paths:
-		if subm_dir in subm_file_path:
+		if "{}/".format(subm_dir) in subm_file_path:
 			submission_df = pd.read_csv(subm_file_path, dtype={'norm': object}, sep='\t')
 		else:
 			submission_df = pd.read_csv(os.path.join(subm_dir,subm_file_path), dtype={'norm': object}, sep='\t')

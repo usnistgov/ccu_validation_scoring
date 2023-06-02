@@ -194,15 +194,15 @@ def score_nd_submission_dir_cli(args):
 	generate_scoring_parameter_file(args)
 
 	if (not args.quiet):
-	    print("Alignment")
-	    print("---------------")
-	    print(open(os.path.join(args.output_dir, 'instance_alignment.tab')).read())
-	    print("Class Scores")
-	    print("---------------")
-	    print(open(os.path.join(args.output_dir, 'scores_by_class.tab')).read())
-	    print("Aggregated Scores")
-	    print("-------------")
-	    print(open(os.path.join(args.output_dir, 'scores_aggregated.tab')).read())
+		print("Alignment")
+		print("---------------")
+		print(open(os.path.join(args.output_dir, 'instance_alignment.tab')).read())
+		print("Class Scores")
+		print("---------------")
+		print(open(os.path.join(args.output_dir, 'scores_by_class.tab')).read())
+		print("Aggregated Scores")
+		print("-------------")
+		print(open(os.path.join(args.output_dir, 'scores_aggregated.tab')).read())
 
 
 def score_ed_submission_dir_cli(args):
@@ -255,16 +255,16 @@ def score_ed_submission_dir_cli(args):
 	score_tad(ref, merged_hyp, "emotion", thresholds, args.output_dir, None, float(args.time_span_scale_collar), float(args.text_span_scale_collar), args.align_hacks)
 	generate_scoring_parameter_file(args)
         
-	if (args.quiet):
-            print("Alignment")
-            print("---------------")
-            print(open(os.path.join(args.output_dir, 'instance_alignment.tab')).read())
-            print("Class Scores")
-            print("---------------")
-            print(open(os.path.join(args.output_dir, 'scores_by_class.tab')).read())
-            print("Aggregated Scores")
-            print("-------------")
-            print(open(os.path.join(args.output_dir, 'scores_aggregated.tab')).read())            
+	if (not args.quiet):
+		print("Alignment")
+		print("---------------")
+		print(open(os.path.join(args.output_dir, 'instance_alignment.tab')).read())
+		print("Class Scores")
+		print("---------------")
+		print(open(os.path.join(args.output_dir, 'scores_by_class.tab')).read())
+		print("Aggregated Scores")
+		print("-------------")
+		print(open(os.path.join(args.output_dir, 'scores_aggregated.tab')).read())            
 
 def score_vd_submission_dir_cli(args):
 
@@ -281,13 +281,14 @@ def score_vd_submission_dir_cli(args):
 	statistic(args.reference_dir, ref, args.submission_dir, hyp, args.output_dir, "valence_continuous")
 	score_valence_arousal(ref, hyp, output_dir = args.output_dir, task = "valence_continuous")
 	generate_scoring_parameter_file(args)	
-
-	print("Diarization")
-	print("---------------")
-	print(open(os.path.join(args.output_dir, 'segment_diarization.tab')).read())
-	print("Aggregated Scores")
-	print("-------------")
-	print(open(os.path.join(args.output_dir, 'scores_aggregated.tab')).read())
+	
+	if (not args.quiet):
+		print("Diarization")
+		print("---------------")
+		print(open(os.path.join(args.output_dir, 'segment_diarization.tab')).read())
+		print("Aggregated Scores")
+		print("-------------")
+		print(open(os.path.join(args.output_dir, 'scores_aggregated.tab')).read())
 	
 
 def score_ad_submission_dir_cli(args):
@@ -306,13 +307,14 @@ def score_ad_submission_dir_cli(args):
 
 	score_valence_arousal(ref, hyp, output_dir = args.output_dir, task = "arousal_continuous")
 	generate_scoring_parameter_file(args)	
-
-	print("Diarization")
-	print("---------------")
-	print(open(os.path.join(args.output_dir, 'segment_diarization.tab')).read())
-	print("Aggregated Scores")
-	print("-------------")
-	print(open(os.path.join(args.output_dir, 'scores_aggregated.tab')).read())
+	
+	if (not args.quiet):
+		print("Diarization")
+		print("---------------")
+		print(open(os.path.join(args.output_dir, 'segment_diarization.tab')).read())
+		print("Aggregated Scores")
+		print("-------------")
+		print(open(os.path.join(args.output_dir, 'scores_aggregated.tab')).read())
 
 def score_cd_submission_dir_cli(args):
 
@@ -333,13 +335,14 @@ def score_cd_submission_dir_cli(args):
 
 	score_cp(ref, hyp, delta_cp_text_thresholds=text_thresholds, delta_cp_time_thresholds=time_thresholds, output_dir=args.output_dir)
 	generate_scoring_parameter_file(args)
-
-	print("Alignment")
-	print("---------------")
-	print(open(os.path.join(args.output_dir, 'instance_alignment.tab')).read())
-	print("Class Scores")
-	print("---------------")
-	print(open(os.path.join(args.output_dir, 'scores_by_class.tab')).read())
+	
+	if (not args.quiet):
+		print("Alignment")
+		print("---------------")
+		print(open(os.path.join(args.output_dir, 'instance_alignment.tab')).read())
+		print("Class Scores")
+		print("---------------")
+		print(open(os.path.join(args.output_dir, 'scores_by_class.tab')).read())
 
 
 
