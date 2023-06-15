@@ -66,6 +66,8 @@ def main():
     else:
         merge_ref_time_gap = None
 
+    stats_all = pd.DataFrame()
+
     for i in range(scoring_index.shape[0]):
         file = scoring_index.iloc[i].to_frame().T
         file.reset_index(drop = True, inplace = True)
@@ -76,7 +78,9 @@ def main():
             ref = preprocess_reference_dir(args.ref_dir, file, args.task, merge_ref_text_gap, merge_ref_time_gap, None, False, None)
 
         stats = compute_stats(ref, file["file_id"].values[0])
-        stats.to_csv("{}_{}.txt".format(args.output_file, file["file_id"].values[0]), sep='\t', index=False, float_format='%.2f')
+        stats_all = pd.concat([stats_all, stats])
+    
+    stats_all.to_csv("{}_PER_FILE.txt".format(args.output_file), sep='\t', index=False, float_format='%.2f')
 
 if __name__ == "__main__":
     main()
