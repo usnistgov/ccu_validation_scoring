@@ -42,20 +42,17 @@ def main():
     parser.add_argument('-r', '--ref-dir', type=str, required=True, help="path to the reference directory")
     parser.add_argument("-xR", "--merge_ref_text_gap", type=str, required=False, help="merge reference text gap character")
     parser.add_argument("-aR", "--merge_ref_time_gap", type=str, required=False, help="merge reference time gap second")
+    parser.add_argument("-vR", "--merge_ref_label", type=str, choices=['class', 'class-status'], required=False, help="choose class or class-status to define how to handle the adhere/violate labels for the reference norm instances merging.")
     parser.add_argument('-t', '--task', choices=['norms', 'emotions'], required=True, help = 'norms, emotions')
     parser.add_argument('-i', '--scoring-index-file', type=str, required=True, help='use to filter file from scoring (REF)')
     parser.add_argument('-o', '--output-file', type=str, required=True, help='file where the statistics will be output')    
 
     args = parser.parse_args()
-    ref_dir = args.ref_dir
-    task = args.task
-    scoring_index_file = args.scoring_index_file
-    output_file = args.output_file
     
     try:
-        scoring_index = pd.read_csv(scoring_index_file, usecols = ['file_id'], sep = "\t")
+        scoring_index = pd.read_csv(args.scoring_index_file, usecols = ['file_id'], sep = "\t")
     except Exception as e:
-        print('ERROR:GENERATING:{} is not a valid scoring index file'.format(scoring_index_file))
+        print('ERROR:GENERATING:{} is not a valid scoring index file'.format(args.scoring_index_file))
         exit(1)
 
     if args.merge_ref_text_gap:
@@ -68,10 +65,13 @@ def main():
     else:
         merge_ref_time_gap = None
 
-    ref = preprocess_reference_dir(ref_dir, scoring_index, task, merge_ref_text_gap, merge_ref_time_gap)
+    if args.task == "norms":
+        ref = preprocess_reference_dir(args.ref_dir, scoring_index, args.task, merge_ref_text_gap, merge_ref_time_gap, args.merge_ref_label, False, None)
+    else:
+        ref = preprocess_reference_dir(args.ref_dir, scoring_index, args.task, merge_ref_text_gap, merge_ref_time_gap, None, False, None)
 
     stats = compute_stats(ref)
-    stats.to_csv(output_file, sep='\t', index=False, float_format='%.2f')
+    stats.to_csv(args.output_file, sep='\t', index=False, float_format='%.2f')
 
 if __name__ == "__main__":
     main()
