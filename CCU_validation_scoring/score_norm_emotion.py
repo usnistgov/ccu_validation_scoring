@@ -321,83 +321,22 @@ def compute_ious(row, ref, class_type, time_span_scale_collar, text_span_scale_c
         return(rout)
 
         
-        
+def separate_alignment_reference_by_type_ap_cal(df):
 
-def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_span_scale_collar, text_span_scale_collar, Type, align_hacks):  
-    """ 
-    Compute average precision and precision-recall curve at specific IoU
-    thresholds between ground truth and predictions data frames. If multiple
-    predictions occur for the same predicted segment, only the one with highest
-    tIoU is matched as true positive. Classes which are missed in referece
-    are treated as a no-score-region and excluded from computation. Parts of
-    this code are inspired by Pascal VOC devkit/ActivityNET.
+    df_audio = pd.DataFrame(columns = df.columns)
+    df_video = pd.DataFrame(columns = df.columns)
+    df_text = pd.DataFrame(columns = df.columns)
     
-    Parameters
-    ----------
-    ref : df
-        Data frame containing the ground truth instances. Required fields:
-        ['file_id', 'Class']
-    hyp : df
-        Data frame containing the prediction instances. Required fields:
-        ['file_id', 'Class', 'llr']
-    iou_thresholds : a dictionary defining the thresholds.  e.g., {'IoU': 0.2}
-        Temporal IoU Threshold (>=0)
-    task:
-        string that indicates task name. e.g. norm/emotion        
-    time_span_scale_collar:
-        The time span collar for scaled scoring
-    text_span_scale_collar:
-        The text span collar for scaled scoring
-    align_hacks:
-        A conduit to pass alignment tweaks on the command line.  Recognized values are:
-            ManyRef:OneHyp   -> divide HYPs when they overlap many refs
+    df_audio = df[df["type"] == "audio"].reset_index(drop=True)
+    df_video = df[df["type"] == "video"].reset_index(drop=True)
+    df_text = df[df["type"] == "text"].reset_index(drop=True) 
 
-    Returns
-    -------
-    output: 
-        Values are tuples [ap, precision, recall]. Keys are tIoU thr.
-        - **ap** (float)
-            Average precision score.
-        - **precision** (1darray)
-            Precision values
-        - **recall** (1darray)
-            Recall values
+    return df_audio,df_video,df_text
 
-    final_alignment_df: instance alignment dataframe
-    """
-    if (False):
-        print(f"\n=========================================================================")
-        print(f"=============  compute_average_precision_tad Class={Class} align_hacks={align_hacks}  =====================")
-        print(ref[((ref.Class == Class) | (ref.Class == 'NO_SCORE_REGION'))])
-        print(hyp[hyp.Class == Class])
-        print(f"=============  compute_average_precision_tad")
+def generate_align_cal_measure_by_type(ihyp, ref, iou_thresholds, Class, task):
 
-    # REF has same amount of !score_regions for all runs, which need to be
-    # excluded from overall REF count.
-    npos = len(ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False])    
-    output, out = {}, []
-    alignment_df = pd.DataFrame()
-
-    # No Class found.
-    if hyp.empty:
-        for iout in iou_thresholds:
-            output[iout] = generate_zero_scores_norm_emotion(None)
-        alignment_df = generate_all_fn_alignment_file(ref, task)
-        return output,alignment_df
-
-    pd.set_option('display.max_columns', None)
-    pd.set_option('display.width', 1000)
-    pd.set_option('display.max_rows', None)
-    
-    # Compute IoU for all hyps incl. NO_SCORE_REGION
-    for idx, myhyp in hyp.iterrows():
-        #print(f"ious   {myhyp.file_id} {myhyp.Class} {ref}.")
-        out.append(compute_ious(myhyp, ref, task, time_span_scale_collar, text_span_scale_collar, align_hacks))
-        #print(out[-1])
-    ihyp = pd.concat(out)
-    #print("\n\n-----------------from compute_ious------")
-    #print(ihyp)
-    
+    npos = len(ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False])
+    output = {}
     # Capture naked false alarms that have no overlap with anything regardless of if it is a NO_SCORE_REGION
     #ihyp_naked_fa = ihyp.loc[ihyp.IoU == 0.0]
     #print("---- Naked FAs -----")
@@ -435,9 +374,10 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
     ref_fn['hyp_isTruncated'] = False
     ihyp = pd.concat([ihyp, ref_fn])
     #print("New ihyp with FNs")
-    #print(ihyp)
+    # print(ihyp)
     #exit(0)
-    
+    alignment_df = pd.DataFrame()
+
     # Sort by confidence score
     ihyp.sort_values(["llr"], ascending=False, inplace=True)        
     ihyp.reset_index(inplace=True, drop=True)
@@ -529,14 +469,12 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
             fhyp = ihyp[(ihyp.tp == 1) | (ihyp.fp == 1)]  ### Keep the tps and fps
             fhyp = fhyp[fhyp.duplicated(subset = ['llr'], keep='last') == False]  ### Keep the last llr
         #print("Filtered Hyp for AP Computation")
-        #print(fhyp)
 
         measures = generate_zero_scores_norm_emotion(None)
         if (len(fhyp.index) > 0):
             llr = np.array(fhyp["llr"])
             rec = (np.array(fhyp["cum_tp"]) / npos)
             prec = (np.array(fhyp["cum_tp"]) / (np.array(fhyp["cum_tp"]) + np.array(fhyp["cum_fp"])))
-            
             ### OK, add some more metrics!
             nsys = fhyp.cum_tp.iat[-1] + fhyp.cum_fp.iat[-1]
             ### pct_tp can have residual values from being aliged to a NO_SCORE REGION, SO, filter the sum
@@ -583,16 +521,108 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
         #    print(f"   {key} -> {value}")
         #print(alignment_df)
         #exit(0)
-        
-    final_alignment_df = generate_alignment_file(ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False], alignment_df, task)
-    #print("late2")
-    #print("Alignment")
-    #print(alignment_df)
-    #print("Alignment Output")
-    #print(final_alignment_df)
-    #exit(0)
+    return output, alignment_df
 
-    return output,final_alignment_df
+def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_span_scale_collar, text_span_scale_collar, Type, align_hacks):  
+    """ 
+    Compute average precision and precision-recall curve at specific IoU
+    thresholds between ground truth and predictions data frames. If multiple
+    predictions occur for the same predicted segment, only the one with highest
+    tIoU is matched as true positive. Classes which are missed in referece
+    are treated as a no-score-region and excluded from computation. Parts of
+    this code are inspired by Pascal VOC devkit/ActivityNET.
+    
+    Parameters
+    ----------
+    ref : df
+        Data frame containing the ground truth instances. Required fields:
+        ['file_id', 'Class']
+    hyp : df
+        Data frame containing the prediction instances. Required fields:
+        ['file_id', 'Class', 'llr']
+    iou_thresholds : a dictionary defining the thresholds.  e.g., {'IoU': 0.2}
+        Temporal IoU Threshold (>=0)
+    task:
+        string that indicates task name. e.g. norm/emotion        
+    time_span_scale_collar:
+        The time span collar for scaled scoring
+    text_span_scale_collar:
+        The text span collar for scaled scoring
+    align_hacks:
+        A conduit to pass alignment tweaks on the command line.  Recognized values are:
+            ManyRef:OneHyp   -> divide HYPs when they overlap many refs
+
+    Returns
+    -------
+    output: 
+        Values are tuples [ap, precision, recall]. Keys are tIoU thr.
+        - **ap** (float)
+            Average precision score.
+        - **precision** (1darray)
+            Precision values
+        - **recall** (1darray)
+            Recall values
+
+    final_alignment_df: instance alignment dataframe
+    """
+    if (False):
+        print(f"\n=========================================================================")
+        print(f"=============  compute_average_precision_tad Class={Class} align_hacks={align_hacks}  =====================")
+        print(ref[((ref.Class == Class) | (ref.Class == 'NO_SCORE_REGION'))])
+        print(hyp[hyp.Class == Class])
+        print(f"=============  compute_average_precision_tad")
+
+    # REF has same amount of !score_regions for all runs, which need to be
+    # excluded from overall REF count.    
+    out = []
+    alignment_df = pd.DataFrame()
+
+    # No Class found.
+    if hyp.empty:
+        alignment_df = generate_all_fn_alignment_file(ref, task)
+        result_tuple = (alignment_df,)
+
+        for i in Type:
+            output_type = {}
+            for iout in iou_thresholds:
+                output_type[iout] = generate_zero_scores_norm_emotion(None)
+                result_tuple = result_tuple + (output_type,)
+         
+        return result_tuple
+
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.width', 1000)
+    pd.set_option('display.max_rows', None)
+    
+    # Compute IoU for all hyps incl. NO_SCORE_REGION
+    for idx, myhyp in hyp.iterrows():
+        #print(f"ious   {myhyp.file_id} {myhyp.Class} {ref}.")
+        out.append(compute_ious(myhyp, ref, task, time_span_scale_collar, text_span_scale_collar, align_hacks))
+        #print(out[-1])
+    ihyp = pd.concat(out)
+    #print("\n\n-----------------from compute_ious------")
+    #print(ihyp)
+
+    ihyp_audio,ihyp_video,ihyp_text = separate_alignment_reference_by_type_ap_cal(ihyp)
+    ref_audio,ref_video,ref_text = separate_alignment_reference_by_type_ap_cal(ref)
+    # exit(0)
+
+    output_all, alignment_all = generate_align_cal_measure_by_type(ihyp, ref, iou_thresholds, Class, task)
+    final_alignment_df = generate_alignment_file(ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False], alignment_all, task)
+    result_tuple = (final_alignment_df, output_all)
+
+    for i in Type:
+        if i == "audio":
+            output_audio, alignment_audio = generate_align_cal_measure_by_type(ihyp_audio, ref_audio, iou_thresholds, Class, task)
+            result_tuple = result_tuple + (output_audio,)
+        if i == "text":
+            output_text, alignment_text = generate_align_cal_measure_by_type(ihyp_text, ref_text, iou_thresholds, Class, task)
+            result_tuple = result_tuple + (output_text,)
+        if i == "video":
+            output_video, alignment_video = generate_align_cal_measure_by_type(ihyp_video, ref_video, iou_thresholds, Class, task)
+            result_tuple = result_tuple + (output_video,)
+    
+    return result_tuple
 
 def compute_multiclass_iou_pr(ref, hyp, iou_thresholds, mapping_df, class_type, time_span_scale_collar, text_span_scale_collar, align_hacks):
     """ Compute average precision score (AP) and precision-recall curves for
@@ -651,6 +681,7 @@ Parameters
     unique_all = ref[["Class"]].value_counts().reset_index()
     unique_all["type"] = "all"
     unique_all_pruned = unique_all.loc[unique_all.Class != 'NO_SCORE_REGION']
+    unique_all_pruned = unique_all_pruned.sort_values(["Class", "type"])
     
     combine_combo_pruned = pd.concat([unique_combo_pruned, unique_all_pruned])
     combine_combo_pruned.sort_values(["Class", "type"], inplace=True)
@@ -661,58 +692,55 @@ Parameters
     apScores = []
     alignment_df = pd.DataFrame()
     #print("Class and Types(genre) to iterate through")
-    #print(final_combo_pruned)
-    for i in range(len(final_combo_pruned)):
-        #print(f"Aligning Class={final_combo_pruned.loc[i, 'Class']} Type={final_combo_pruned.loc[i, 'type']}")
-        if final_combo_pruned.loc[i, "type"] == "all":
-            match_type = ["audio","text","video"]
-        else:
-            match_type = [final_combo_pruned.loc[i, "type"]]
+    unique_all_pruned = unique_all_pruned[["Class","type"]].reset_index()
+    for i in range(len(unique_all_pruned)):
+
+        match_type = ["audio","text","video"]
 
         if mapping_df is not None:
-            sub_mapping_df = mapping_df.loc[mapping_df.ref_norm == final_combo_pruned.loc[i, "Class"]]
+            sub_mapping_df = mapping_df.loc[mapping_df.ref_norm == unique_all_pruned.loc[i, "Class"]]
             ## Remove lines were the mapping goes to the same norm
             sub_mapping_df = sub_mapping_df[sub_mapping_df.sys_norm != sub_mapping_df.ref_norm]
             if not sub_mapping_df.empty:
-                final_sub_hyp = replace_hyp_norm_mapping(sub_mapping_df, hyp, final_combo_pruned.loc[i, "Class"])
+                final_sub_hyp = replace_hyp_norm_mapping(sub_mapping_df, hyp, unique_all_pruned.loc[i, "Class"])
                 final_sub_hyp_type = final_sub_hyp.loc[(final_sub_hyp.type.isin(match_type))]
             else:
-                final_sub_hyp_type = hyp.loc[(hyp.Class == final_combo_pruned.loc[i, "Class"]) & (hyp.type.isin(match_type))]
+                final_sub_hyp_type = hyp.loc[(hyp.Class == unique_all_pruned.loc[i, "Class"]) & (hyp.type.isin(match_type))]
 
             hyp_scoring = final_sub_hyp_type.reset_index(drop=True)
         
         else:
-            hyp_scoring = hyp.loc[(hyp.Class == final_combo_pruned.loc[i, "Class"]) & (hyp.type.isin(match_type))].reset_index(drop=True)
+            hyp_scoring = hyp.loc[(hyp.Class == unique_all_pruned.loc[i, "Class"]) & (hyp.type.isin(match_type))].reset_index(drop=True)
 
+        scoring_type = sorted(list(final_combo_pruned["type"][final_combo_pruned.Class == unique_all_pruned.loc[i, "Class"]]))
         ### Filter the DF by the class and type to compute AP.  This means the both collars need passed so that that code can make decision on which to use.
         ### apScore is dict (for IoU) and a dict (for measures)
-        apScore, alignment = compute_average_precision_tad(
-                ref=ref.loc[((ref.Class == final_combo_pruned.loc[i, "Class"]) | (ref.Class == 'NO_SCORE_REGION')) & (ref.type.isin(match_type))].reset_index(drop=True),                        
+        results = compute_average_precision_tad(
+                ref=ref.loc[((ref.Class == unique_all_pruned.loc[i, "Class"]) | (ref.Class == 'NO_SCORE_REGION')) & (ref.type.isin(match_type))].reset_index(drop=True),                        
                 hyp=hyp_scoring,
-                Class=final_combo_pruned.loc[i, "Class"],
+                Class=unique_all_pruned.loc[i, "Class"],
                 iou_thresholds=iou_thresholds,
                 task=class_type, 
                 time_span_scale_collar=time_span_scale_collar,
                 text_span_scale_collar=text_span_scale_collar,
-                Type=final_combo_pruned.loc[i, "type"],
+                Type=scoring_type,
                 align_hacks=align_hacks)
+        
 
-        #apScores.append(apScore)
-        if final_combo_pruned.loc[i, "type"] == "all":
-            alignment_df = pd.concat([alignment_df, alignment])
+        alignment_all = results[0]
+        alignment_df = pd.concat([alignment_df, alignment_all])
 
-        #print("-----------------------")
-        #print(apScore)
-        #print(alignment_df)
-        ### Load the results into the IoU-specific data frame.  The first time the IoU is found, the DF is began
+
+        # print(all_type)
+        # print(results)
+
         for iout in iou_thresholds:
-            ### Add Values then append
-            #print(f"iout {iout}")
-            #print(apScore[iout])
-            #print(final_combo_pruned.loc[i])
-            apScore[iout]['Class'] = final_combo_pruned.loc[i, "Class"]
-            apScore[iout]['type'] = final_combo_pruned.loc[i, "type"]
-            pr_scores[iout].append(apScore[iout])
+            for j in range(0,len(scoring_type)):
+                apScore = results[j+1]
+                apScore[iout]['type'] = scoring_type[j]
+                apScore[iout]['Class'] = unique_all_pruned.loc[i, "Class"]
+                pr_scores[iout].append(apScore[iout])
+
 
     ### No longer needed 
     final_alignment_df = alignment_df # alignment_df.drop_duplicates() ### Good heavens, this must take a TON of time. IT's needed if multiple IoU thresholds are used
