@@ -217,31 +217,18 @@ def compute_multiclass_cp_pr(ref, hyp, delta_cp_text_thresholds = 100, delta_cp_
     # Initialize
 
     scores = {}
-    #[ scores.setdefault(iout, pd.DataFrame([], columns = ['type', 'ap', 'precision', 'recall', 'llr'])) for iout in delta_cp_text_thresholds + delta_cp_time_thresholds ]
     from collections import defaultdict
     scores = defaultdict(list)
 
     ### Capture the noscores for later use
     ref_noscore = ref.loc[ref.impact_scalar == 'NO_SCORE_REGION']
     ref = ref.loc[ref.impact_scalar != 'NO_SCORE_REGION']
-    #print("orig")
-    #print("ref_noscore")
-    #print(ref_noscore)
-    #print("ref")
-    #print(ref)    
-    #print("hyp")
-    #print(hyp)     
     
     ### Remove system detects in the NOSCORES
     for index, row in ref_noscore.iterrows():
-        #print("Filter Row {} st={} en={}".format(row.file_id, row.start, row.end))
         f, s, e = [row.file_id, row.start, row.end]
         hyp.drop(hyp[(hyp.file_id == f) & (s <= hyp.Class) & (hyp.Class <= e)].index, inplace=True)
         
-
-    #print("post filter hyp")
-    #print(hyp)
-
     # # Iterate over all Classes treating them as a binary detection
     alist = ref.loc[ref.Class != 'NO_SCORE_REGION'].type.unique()
 

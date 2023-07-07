@@ -1,16 +1,13 @@
 import os
-import re
-import pprint
 import logging
-import pprint
 from re import M
 import numpy as np
 import pandas as pd
 from .utils import *
 from .aggregate import *
-import pdb
 import matplotlib.pyplot as plt
 import json
+
 
 logger = logging.getLogger('SCORING')
 
@@ -73,36 +70,6 @@ def generate_zero_scores_norm_emotion(ref):
         y.append(empty.copy)
     return(y)
 
-
-    # y = []
-    # if len(ref) > 0:
-    #     pr_iou_scores = {}
-    #     unique_combo = ref[["Class", "type"]].value_counts().reset_index()
-    #     unique_combo_pruned = unique_combo.loc[unique_combo.Class != 'NO_SCORE_REGION']
-    #     unique_all = ref[["Class"]].value_counts().reset_index()
-    #     unique_all["type"] = "all"
-    #     unique_all_pruned = unique_all.loc[unique_all.Class != 'NO_SCORE_REGION']
-        
-    #     combine_combo_pruned = pd.concat([unique_combo_pruned, unique_all_pruned])
-    #     combine_combo_pruned.sort_values(["Class", "type"], inplace=True)
-
-    #     final_combo_pruned = combine_combo_pruned.reset_index()
-    #     final_combo_pruned = final_combo_pruned[["Class","type"]]
-
-    #     if len(final_combo_pruned)>0:
-    #         for i in range(len(final_combo_pruned)):
-    #             y.append( [final_combo_pruned.loc[i, "Class"], final_combo_pruned.loc[i, "type"], 0.0, [0.0], [0.0], [0.0] ])
-    #     else:
-    #         logger.error("No matching Classes and types found in system output.")
-    #         y.append( [ 'no_macthing_class', 'no_macthing_type', 0.0, [0.0, 0.0], [0.0, 1.0], [0.0, 0,0] ]) 
-    # else:
-    #     logger.error("No reference to score")
-    #     y.append( ["NA", "NA", "NA", "NA", "NA", "NA"])
-    # print("Y")
-    # print(y)
-    # return pd.DataFrame(y, columns=['Class', 'type', 'ap', 'precision', 'recall', 'llr'])
-
-
 def segment_iou_v1(ref_start, ref_end, tgts):
     """
     Compute __Temporal__ Intersection over Union (__IoU__) as defined in 
@@ -123,10 +90,6 @@ def segment_iou_v1(ref_start, ref_end, tgts):
     tIoU, intersection, union, collar_based_IoU : 1d array
         Temporal intersection over union score of the N's candidate segments and sub measurements.
     """
-    #print("------------")
-    #print(ref_start) 
-    #print(ref_end)
-    #print(tgts)
     ### normal IoU intersection
     sys_start, sys_end = [tgts[0], tgts[1]]
     tt1 = np.maximum(ref_start, sys_start)
@@ -174,54 +137,28 @@ def segment_iou_v2(sys_start, sys_end, sys_uid, sys_isTrunc, refs, collar):
     ### Unpack for computation
     ref_start, ref_end = [refs[0], refs[1]]
     
-    #print("segment_iou_v2")
-    #print(f"   sys_start {sys_start} sys_end {sys_end} ----- refs = { [ [b,e] for b, e in zip(ref_start.to_list(),ref_end.to_list()) ]}")
-
     ### normal IoU intersection
     tt1 = np.maximum(ref_start, sys_start)
     tt2 = np.minimum(ref_end, sys_end)    
     inter = (tt2 - tt1).clip(0)    # Segment intersection including Non-negative overlap score
 
-    ### Second variant - Collaring shifts the system towards the reference.
-    ### csb = collared start 
-    ###     = IF(rb<sb-15,sb-15,MIN(rb,sb))
-    ### cse = collared end
-    ###     = IF(re>se+15,se+15,MAX(re,se))
-    ###         minENDs - maxBeg / (refDur)
-    ### %TP = MIN(re,cse)- MAX(rb,csb))/(re-rb)
-    ###       MIN(F33,Q33)-MAX(E33,P33))/(F33-E33)
-    ###
-    ###        Sys:   |XXXXXX------------YYYYY|
-    ###        Ref:         |------------|
-    ### For FP: %FP = 1
-    ### For TP: %FP =  ( UncoveredRefBegin + UncoveredSysEnd )     /  SysDuration       
-    ###                (IF(rb-csb>0,rb-csb,0)+IF(cse-re>0,cse-re,0))/(cse-csb)
-
-
     csb = [ sys_start-collar if (rs < sys_start - collar) else beg_min  for rs, beg_min in zip(ref_start, np.minimum(ref_start, sys_start)) ]
-    #print(f"csb {csb}")
     
     cse = [ sys_end+collar if (re > sys_end + collar) else end_max for re, end_max in zip(ref_end, np.maximum(ref_end, sys_end)) ] 
-    #print(f"cse {cse}")
 
     ### Set the min to be zero if the numerator is negative
     scaled_pct_TP = [ 0.0 if ((np.minimum(re, ce)  - np.maximum(rs, cb)) < 0.0) else (np.minimum(re, ce)  - np.maximum(rs, cb)) / (re - rs) for rs, re, cb, ce in zip(ref_start, ref_end, csb, cse) ]
-    #print(f"scaled_pct_TP {scaled_pct_TP}")
 
     ### This formula will set pct_FP to be > 1.  The second command sets the max to 1
     scaled_pct_FP = [ ( (rs-cb if (rs-cb > 0) else 0) + (ce - re if (ce-re > 0) else 0)) / (re - rs) for rs, re, cb, ce in zip(ref_start, ref_end, csb, cse) ]
     scaled_pct_FP = [ 1.0 if (inter <= 0.0) else spfp for spfp, inter in zip(scaled_pct_FP, inter) ]
-    #print(f"scaled_pct_TP {scaled_pct_FP}")
 
     # Segment union.
-    #union = (sys_end - sys_start) + (ref_end - ref_start) - inter      ### This assumes intersection is non-zero
     union = [ np.maximum(re, sys_end) - np.minimum(rb, sys_start) for rb, re in zip(ref_start, ref_end) ]
-    #[ print(f"np.maximum({re}, {sys_end}) - np.minimum({rb}, {sys_start})") for rb, re in zip(ref_start, ref_end) ]
 
     tIoU = inter.astype(float) / union
     sys_uids = [ sys_uid for x in tIoU ]  ### make the sys_uid array
     sys_isTruncs = [ sys_isTrunc for x in tIoU ]  ### make the sys_uid array
-    #print(f"   IoU={tIoU}, inter={inter}, union={union}, csb={csb}, csb={cse}")
     return tIoU, inter, union, csb, cse, scaled_pct_TP, scaled_pct_FP, collar, sys_uids, sys_isTruncs
 
 
@@ -231,9 +168,6 @@ def compute_ious(row, ref, class_type, time_span_scale_collar, text_span_scale_c
     """
     refs = ref.loc[ ref['file_id'] == row.file_id ].copy() ### This filters by file ----  SUPER EXPENSIVE
     
-    #print(f"\n\n------------------------------\nThe REF")
-    #print(refs)
-    #print(f"ROW - - - The HYP: file={row.file_id} start={row.start} end={row.end} hyp_uid={row.hyp_uid} hyp_isTruncated={row.hyp_isTruncated}")
     if len(refs) == 0:
         if (class_type == "norm"):
             return pd.DataFrame(data=[[row.Class, class_type, row.type, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0, row.status, None, None, None, row.start, row.end, 0.0, 1.0, None, False, None, False, None]],
@@ -247,9 +181,6 @@ def compute_ious(row, ref, class_type, time_span_scale_collar, text_span_scale_c
         types = set(refs.type)
         assert len(types)==1, f"Internal Error: compute_ious() give a reference list with multiple source types: {types}"
         collar = text_span_scale_collar if (list(types)[0] == 'text') else time_span_scale_collar
-        
-        ### This computes the IoU regardless of the threshold for scoring.  We are going to 
-        #refs['IoU'], refs['intersection'], refs['union'], refs['cb_intersection'], refs['cb_IoU'] = segment_iou_v1(row.start, row.end, [refs.start, refs.end])
 
         refs['IoU'], refs['intersection'], refs['union'], refs['shifted_sys_start'], refs['shifted_sys_end'], refs['pct_tp'],  refs['pct_fp'], refs['scale_collar'], refs['hyp_uid'], refs['hyp_isTruncated'] = segment_iou_v2(row.start, row.end, row.hyp_uid, row.hyp_isTruncated, [refs.start, refs.end], collar)  #####  ROW is the hyp #######
         if (align_hacks == ""):
@@ -265,33 +196,24 @@ def compute_ious(row, ref, class_type, time_span_scale_collar, text_span_scale_c
         elif (align_hacks == "ManyRef:OneHyp"):
             ### One to Many
             rout = refs
-            #print("One to many - beginning with")
-            #print(rout)
             rout = rout[rout.isNSCR | ((~rout.isNSCR) & (rout.intersection > 0))]   ### Removes rout with non-zero intersection
             if (len(rout[~ rout.isNSCR].intersection) > 0):                         ### Remove noscores because at least one ref matches
                 rout = rout[~ rout.isNSCR].copy()
-                #print("   First Step - dividing hyp.  This uses the new_hyp_[start|end] columns")
                 rout['new_hyp_start'] = row.start  ### Seed with the real start start/end
                 rout['new_hyp_end'] = row.end
                 beg = row.start  ### use for the first item
                 rout_index = rout.index
                 for i in range(0, len(rout_index)):
-                    #print(f"------- {i}")
                     if (i > 0):  ### Reset the start to the previous mid
                         gap_mid = (rout.loc[rout_index[i-1]].end + rout.loc[rout_index[i]].start) / 2
-                        #print(f"  Start {i}  {gap_mid}")
                         rout.loc[rout_index[i], 'new_hyp_start'] = gap_mid
                     if (i < len(rout_index)-1):  ### Reset the end
                         gap_mid = (rout.loc[rout_index[i]].end + rout.loc[rout_index[i+1]].start) / 2
-                        #print(f"    End {i}  {gap_mid}")
                         rout.loc[rout_index[i], 'new_hyp_end'] = gap_mid
-                #print("   Second step, re-run segment_iou_to re-calculate the stats for EACH ROW")
                 for index, ro_ in rout.iterrows():
-                    #print(f"index {index}")
                     o = {}
                     single_df = rout[rout.index == index]  ### segment_iou_v2 uses the ref times from as dataframe column 
                     o['IoU'], o['intersection'], o['union'], o['shifted_sys_start'], o['shifted_sys_end'], o['pct_tp'],  o['pct_fp'], o['scale_collar'], o['hyp_uid'], o['hyp_isTruncated'] = segment_iou_v2(ro_['new_hyp_start'], ro_['new_hyp_end'], row.hyp_uid, row.hyp_isTruncated, [single_df.start, single_df.end], collar)
-                    #print(o)
                     for v in ['IoU', 'intersection', 'scale_collar']:
                         rout.at[index,v] = o[v]
                     for s in ['union', 'shifted_sys_start', 'shifted_sys_end','pct_tp', 'pct_fp', 'hyp_uid', 'hyp_isTruncated']:
@@ -299,15 +221,11 @@ def compute_ious(row, ref, class_type, time_span_scale_collar, text_span_scale_c
                     rout.loc[index, 'start_hyp'] = rout.loc[index, 'new_hyp_start']
                     rout.loc[index, 'end_hyp'] = rout.loc[index, 'new_hyp_end']
                 rout[['llr']] = row.llr
-                #print("   Result")
-                #print(rout)
                       
             else:                                                                   ### No rout, keep one No score 
-                #print("   First Step - single noscore - no re-do") 
                 rout = refs[refs.isNSCR == True]
                 rout = rout[rout.index == rout.index[0]]
                 rout[['start_hyp', 'end_hyp', 'llr']] = row.start, row.end, row.llr
-                #print(rout)
         else:
             print(f"Internal Error: unknown alignment hack {align_hacks}")
             exit(-1)
@@ -315,8 +233,6 @@ def compute_ious(row, ref, class_type, time_span_scale_collar, text_span_scale_c
         rout = rout.rename(columns={'start':'start_ref', 'end':'end_ref'})
         if (class_type == "norm"):
             rout['hyp_status'] = row.status
-        #print("Final Output")
-        #print(rout)
            
         return(rout)
 
@@ -338,22 +254,11 @@ def generate_align_cal_measure_by_type(ihyp, ref, iou_thresholds, Class, task):
     npos = len(ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False])
     output = {}
     # Capture naked false alarms that have no overlap with anything regardless of if it is a NO_SCORE_REGION
-    #ihyp_naked_fa = ihyp.loc[ihyp.IoU == 0.0]
-    #print("---- Naked FAs -----")
-    #print(ihyp_naked_fa)
 
     # Exclude NO_SCORE_REGIONs but keep FP NA's
-    #ihyp = ihyp.loc[(ihyp.Class.str.contains('NO_SCORE_REGION') == False) | ihyp.start_ref.isna()]
     ihyp = ihyp.loc[(ihyp.Class.str.contains('NO_SCORE_REGION') == False) | ((ihyp.Class.str.contains('NO_SCORE_REGION') == True) & (ihyp['IoU'] == 0.0)) | ihyp.start_ref.isna()]
-    #print("----- ihyp keep ------------------")
-    #print(ihyp)
-    #exit(0)
 
     ### Exclude NOSCORE aligned to hyp_isTruncated
-    #print("Removing NOSCORE Truncated records")
-    #print(ihyp[ihyp.isNSCR & ihyp.hyp_isTruncated]) 
-    #ihyp = ihyp[~ (ihyp.isNSCR & ihyp.hyp_isTruncated)]
-    #exit(0)
     
     if ihyp.empty:
         for iout in iou_thresholds:
@@ -361,9 +266,6 @@ def generate_align_cal_measure_by_type(ihyp, ref, iou_thresholds, Class, task):
         alignment_df = generate_all_fn_alignment_file(ref, task)
         return output,alignment_df
 
-    #print("------------Adding FNs from ref--------------");
-    #print(ref)
-    #print(ihyp)
     ref_fn = ref.loc[~(ref["ref_uid"].isin(ihyp["ref_uid"])) & (ref.Class.str.contains('NO_SCORE_REGION') == False)]
     ref_fn = ref_fn.rename(columns={'start': 'start_ref', 'end': 'end_ref'})
     if (task == "norm"):
@@ -373,49 +275,28 @@ def generate_align_cal_measure_by_type(ihyp, ref, iou_thresholds, Class, task):
     ref_fn['hyp_uid'] = None
     ref_fn['hyp_isTruncated'] = False
     ihyp = pd.concat([ihyp, ref_fn])
-    #print("New ihyp with FNs")
-    # print(ihyp)
-    #exit(0)
     alignment_df = pd.DataFrame()
 
     # Sort by confidence score
     ihyp.sort_values(["llr"], ascending=False, inplace=True)        
     ihyp.reset_index(inplace=True, drop=True)
 
-    #print(f"INFO: {len(ihyp[(ihyp.hyp_isTruncated==True) & (ihyp.isNSCR == True)].index)} hyp records for Class={Class} type={Type} are hyp_isTruncated==TRUE")
-    #print(ihyp[(ihyp.hyp_isTruncated==True) & (ihyp.isNSCR == True)])
-
     ### This is NEW FOR 1.3.X
     ### Drop False Alarms that are hyp_isTruncated == TRUE
     ihyp.drop(ihyp[ihyp.hyp_isTruncated & ihyp.isNSCR].index, inplace=True)
     
-    #print("------------Pre AP Calc Alignment--------------");
-    #######@@@@@@@######### ihyp.sort_values(["Class", "type", "end_ref"], inplace=True)
-    #print(ihyp)
-    #exit(0)
-
     # Determine TP/FP @ IoU-Threshold
     for iout, params in iou_thresholds.items():
         ### This resets the tp and fp for each correctness threshold 
         ihyp[['tp', 'fp', 'md']] = [ 0, 1, 0 ]
         ### This resets no-score regions to be nothing making them no scores
         ihyp.loc[ihyp.isNSCR & ihyp.intersection > 0.0, ['tp', 'fp', 'md']] = [ 0, 0, 0 ]
-
-        #print(f"--reset---")
-        #print(ihyp)
         
         ### Ref exists, above threshold (implying a TP)
-        #print(ihyp)
         if (params['op'] == 'gte'):
             ihyp.loc[~ihyp['start_ref'].isna() & (ihyp[params['metric']] >= params['thresh']), ['tp', 'fp', 'md']] = [ 1, 0, 0 ] 
-            #print(f"GTE test {params['metric']} ->  {ihyp[params['metric']]} >= {params['thresh']}")
         if (params['op'] == 'gt'):
             ihyp.loc[~ihyp['start_ref'].isna() & (ihyp[params['metric']] > params['thresh']), ['tp', 'fp', 'md']] = [ 1, 0, 0 ] 
-            #print(f"GT test {params['metric']} -> {params['thresh']}")
-            #print(ihyp)
-       
-        #print(f"--after iou---")
-        #print(ihyp)
 
         # Mark TP as FP for duplicate ref matches at lower CS
         nhyp = ihyp.duplicated(subset = ['file_id', 'start_ref', 'end_ref', 'tp'], keep='first')
@@ -427,7 +308,6 @@ def generate_align_cal_measure_by_type(ihyp, ref, iou_thresholds, Class, task):
 
         ### handle the dual fp+md lines  IFF this is a true MD where no other usage of it is a TP|MD
         used_ref_uids = ihyp[(ihyp.isNSCR) | ((ihyp.tp == 1) | (ihyp.md == 1))].ref_uid.to_list()
-        #print(f"Correct Ref UIDs {used_ref_uids}")
         ihyp.loc[~ihyp['start_ref'].isna() & ~ihyp['start_hyp'].isna() & (ihyp['tp'] == 0) & (~ ihyp['ref_uid'].isin(used_ref_uids)), ['md']] = [ 1 ] 
         
         ### Update the data for Class when IoU == 0.  This sets the class for No_score_regions
@@ -449,12 +329,6 @@ def generate_align_cal_measure_by_type(ihyp, ref, iou_thresholds, Class, task):
                 first = False            
         
         # MDs are still in the alignment struct so the need to be removed for AP calc
-        #print(f"--------Alignment for this threshold {params['metric']} >= {params['thresh']} --------------");
-        #ihyp.sort_values(["Class", "type", "end_ref"], inplace=True)
-        #print(ihyp)
-        #file_id Class  start_ref  end_ref    status Class_type   type  length ref_uid  isNSCR       IoU  intersection   union  shifted_sys_start  shifted_sys_end  pct_tp    pct_fp  scale_collar hyp_uid  start_hyp  end_hyp
-        #print()
-        #print(ihyp[["file_id", "Class", "start_ref", "end_ref", "start_hyp", "end_hyp", "ref_uid", "hyp_uid", "hyp_isTruncated", "IoU"]])
         
         ihyp["cum_tp"] = np.cumsum(ihyp.tp).astype(float)
         ihyp["cum_fp"] = np.cumsum(ihyp.fp).astype(float)
@@ -468,7 +342,6 @@ def generate_align_cal_measure_by_type(ihyp, ref, iou_thresholds, Class, task):
         else:
             fhyp = ihyp[(ihyp.tp == 1) | (ihyp.fp == 1)]  ### Keep the tps and fps
             fhyp = fhyp[fhyp.duplicated(subset = ['llr'], keep='last') == False]  ### Keep the last llr
-        #print("Filtered Hyp for AP Computation")
 
         measures = generate_zero_scores_norm_emotion(None)
         if (len(fhyp.index) > 0):
@@ -500,12 +373,6 @@ def generate_align_cal_measure_by_type(ihyp, ref, iou_thresholds, Class, task):
             measures['scaled_precision_at_MinLLR'] =  scaled_precision
             measures['scaled_f1_at_MinLLR'] =  f1(scaled_precision, scaled_recall)
 
-        # if (Class == '102'):
-        #     ihyp.to_csv(f"/mnt/ccu-vol/ccu_results/p1_minieval/AlignmentAnalysis-v5-check/out/ihyp.{Type}.{Class}.txt", sep = "\t", index = None)
-        #     fhyp.to_csv(f"/mnt/ccu-vol/ccu_results/p1_minieval/AlignmentAnalysis-v5-check/out/fhyp.{Type}.{Class}.txt", sep = "\t", index = None)
-        #print(ihyp)
-        #print(measures)
-        #exit(0)
         output[iout] = measures
  
         ihyp_fields = ["Class","type","tp","fp","md","ref_uid","hyp_uid","hyp_isTruncated","file_id","start_ref","end_ref","start_hyp","end_hyp","IoU","llr","intersection", "union", 'shifted_sys_start', 'shifted_sys_end', 'pct_tp', 'pct_fp', 'scale_collar']
@@ -515,12 +382,6 @@ def generate_align_cal_measure_by_type(ihyp, ref, iou_thresholds, Class, task):
         ihyp = ihyp[ihyp_fields]
         
         alignment_df = pd.concat([alignment_df, ihyp])
-        #print(f"-------------------------Alignment_df for {iout}--------------");
-        #print(ihyp)
-        #for key, value in output[iout].items():
-        #    print(f"   {key} -> {value}")
-        #print(alignment_df)
-        #exit(0)
     return output, alignment_df
 
 def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_span_scale_collar, text_span_scale_collar, Type, align_hacks):  
@@ -596,12 +457,8 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
     
     # Compute IoU for all hyps incl. NO_SCORE_REGION
     for idx, myhyp in hyp.iterrows():
-        #print(f"ious   {myhyp.file_id} {myhyp.Class} {ref}.")
         out.append(compute_ious(myhyp, ref, task, time_span_scale_collar, text_span_scale_collar, align_hacks))
-        #print(out[-1])
     ihyp = pd.concat(out)
-    #print("\n\n-----------------from compute_ious------")
-    #print(ihyp)
 
     ihyp_audio,ihyp_video,ihyp_text = separate_alignment_reference_by_type_ap_cal(ihyp)
     ref_audio,ref_video,ref_text = separate_alignment_reference_by_type_ap_cal(ref)
@@ -691,7 +548,6 @@ Parameters
 
     apScores = []
     alignment_df = pd.DataFrame()
-    #print("Class and Types(genre) to iterate through")
     unique_all_pruned = unique_all_pruned[["Class","type"]].reset_index()
     for i in range(len(unique_all_pruned)):
 
@@ -730,10 +586,6 @@ Parameters
         alignment_all = results[0]
         alignment_df = pd.concat([alignment_df, alignment_all])
 
-
-        # print(all_type)
-        # print(results)
-
         for iout in iou_thresholds:
             for j in range(0,len(scoring_type)):
                 apScore = results[j+1]
@@ -754,16 +606,6 @@ Parameters
                     print(f"   {sc} {met} -> {met_val}")
         print(final_alignment_df)
         
-    # for i in range(len(final_combo_pruned)):
-    #     for iout in iou_thresholds:
-    #         #print(f"i{i} iout{iout}")
-    #         #print(apScores[i][iout])
-    #         scores[iout].append([final_combo_pruned.loc[i, "Class"], final_combo_pruned.loc[i, "type"], apScores[i][iout][0], apScores[i][iout][1], apScores[i][iout][2], apScores[i][iout][3]])
-
-    # # Build results.  This is a dict of dataframes with the key being IoU.  SO it is pooled by IoU.  
-    # pr_scores = {}
-    # for iout in iou_thresholds: 
-    #     pr_scores[iout] = pd.DataFrame(scores[iout], columns = ['Class', 'type', 'ap', 'precision', 'recall', 'llr'])
     return pr_scores, final_alignment_df
 
 def sumup_tad_system_level_scores(pr_iou_scores, iou_thresholds, class_type, output_dir):
@@ -793,31 +635,11 @@ def sumup_tad_system_level_scores(pr_iou_scores, iou_thresholds, class_type, out
         map_scores_threshold = pd.concat([map_scores, map_scores_threshold])
     
     map_scores_threshold.to_csv(os.path.join(output_dir, "scores_aggregated.tab"), sep = "\t", index = None)
-    
-# def sumup_tad_class_level_scores_orig(pr_iou_scores, iou_thresholds, output_dir):
-#     """
-#     Write class level result into a file
-#     """
-#     prs_threshold = pd.DataFrame()   
-#     for iout in sorted(iou_thresholds):        
-#         prs = pr_iou_scores[iout]
-#         if prs["ap"].values[0] != "NA":
-#             prs.ap = prs.ap.round(3)
-#         prs["metric"] = "AP"        
-#         prs["correctness_criteria"] = "{%s}" % iout
-#         prs = prs.rename(columns={'Class': 'class', 'type': 'genre', 'ap': 'value'})
-#         prs = prs[["class","genre","metric","value","correctness_criteria"]]
-#         prs_threshold = pd.concat([prs, prs_threshold])
-    
-#     prs_threshold.to_csv(os.path.join(output_dir, "scores_by_class.tab"), sep = "\t", index = None)
-
-
-        
+            
 def sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir, class_type):
     """
     Write class level result into a file
     """
-    #print(">>sumup_tad_class_level_scores")
 
     ### Build the class table
     table = []   #class   genre   metric  value   correctness_criteria
@@ -846,7 +668,6 @@ def sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir, clas
 
     table_df = pd.DataFrame(table, columns=["class", "genre", "metric", "value", "correctness_criteria"])
     table_df.to_csv(os.path.join(output_dir, "scores_by_class.tab"), sep = "\t", index = None)
-    #print(table_df)
 
     ### Build the aggregated table from table_df
     agg_table = table_df[table_df.metric != 'PRCurve_json'].groupby(['genre', "metric", "correctness_criteria"])['value'].mean().reset_index()
@@ -911,12 +732,6 @@ def score_tad(ref, hyp, class_type, iou_thresholds, output_dir, mapping_df, time
     """    
     # FIXME: Use a No score-region parameter
     tad_add_noscore_region(ref,hyp)
-    # print(">> Enter score_tad()")
-    # print("REF - With Noscore Regions")
-    # print(ref)
-    # print("HYP")
-    # print(hyp[hyp.Class == '108'])
-    # exit(0)
     if len(ref) > 0:
         if len(hyp) > 0:
             pr_iou_scores, final_alignment_df = compute_multiclass_iou_pr(ref, hyp, iou_thresholds, mapping_df, class_type, time_span_scale_collar, text_span_scale_collar, align_hacks)
