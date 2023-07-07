@@ -41,55 +41,6 @@ def get_contained_index(ref_row, hyp):
                 return([])
         return hyp[(ref_row['file_id'] == hyp['file_id']) & (ref_row['start'] <= hyp['start']) & (ref_row['end'] >= hyp['end'])].index
 
-def pre_filter_system_in_noann_region_old(hyp, ref):
-        """
-        Remove any system instances WHOLLY Contained intial or final file noscore regions
-        """
-        for fileid in set(ref['file_id']):
-                sref = ref[ref['file_id'] == fileid]
-                #print(sref)
-                ### Straight drop of instances within the begin/end NoScore Regions
-                hyp.drop(get_contained_index(sref.loc[sref.index[0]], hyp),  inplace = True)
-                hyp.drop(get_contained_index(sref.loc[sref.index[-1]], hyp), inplace = True)
-        return(hyp)
-
-
-def pre_filter_system_in_noann_region_slow(hyp, ref):
-        """
-        Remove any system instances WHOLLY Contained intial or final file noscore regions
-        """
-        for fileid in set(ref['file_id']):
-                sref = ref[ref['file_id'] == fileid]
-                #print(sref)
-                ### Straight drop of instances within the begin/end NoScore Regions
-                hyp.drop(get_contained_index(sref.loc[sref.index[0]], hyp),  inplace = True)
-                hyp.drop(get_contained_index(sref.loc[sref.index[-1]], hyp), inplace = True)
-
-                ### Reset system boundaries to the begin of the NoScore
-                for ns_ref in [sref.index[0], sref.index[-1] ]: #### Only do this to begin and end NS
-                    if (sref.loc[ind].Class == 'noann' and True):
-                        for index, row in hyp.iterrows():
-                            if (sref.loc[ind].file_id == row.file_id):
-                                #print(f"index hyp[{index}] {row.Class} H:{row.start}:{row.end} ?? R:{sref.loc[ind].start}:{sref.loc[ind].end}")
-                                if (row.start < sref.loc[ind].start and sref.loc[ind].end < row.end): ### Full overlap
-                                    #print("Shucks")
-                                    hyp.at[index,'hyp_uid'] = row.hyp_uid + "-UnDroppedFullOverlap"
-                                else:
-                                    if (row.start < sref.loc[ind].end and sref.loc[ind].end < row.end):  ### Straddles the boundary
-                                        hyp.at[index,'start'] = sref.loc[ind].end
-                                        hyp.at[index,'hyp_uid'] = row.hyp_uid + "-TruncStart"
-                                        hyp.at[index,'hyp_isTruncated'] = True
-                                        #print(f"   Truncated start H:{hyp.at[index,'start']}:{hyp.at[index,'end']}")                                
-                                    if (row.start < sref.loc[ind].start and sref.loc[ind].start < row.end):  ### Straddles the boundary
-                                        hyp.at[index,'end'] = sref.loc[ind].start
-                                        hyp.at[index,'hyp_uid'] = row.hyp_uid + "-TruncEnd"
-                                        hyp.at[index,'hyp_isTruncated'] = True
-                                    #print(f"   Truncated end H:{hyp.at[index,'start']}:{hyp.at[index,'end']}")
-                
-        #print(hyp[hyp.Class == '108'])
-        #exit(0)
-        return(hyp)
-
 def pre_filter_system_in_noann_region(hyp, ref):
         """
         Remove any system instances WHOLLY Contained intial or final file noscore regions
@@ -157,9 +108,7 @@ def score_nd_submission_dir_cli(args):
 	#print(ref)
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "norms")
 	if (args.dump_inputs):
-                hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.read.tab"), sep = "\t", index = None)
-	#print("Pre merge hyp")
-	#print(hyp[hyp.Class == '108'])
+		hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.read.tab"), sep = "\t", index = None)
 
 	if args.mapping_submission_dir:
 		mapping_file = os.path.join(args.mapping_submission_dir, "nd.map.tab")
@@ -188,8 +137,8 @@ def score_nd_submission_dir_cli(args):
 	statistic(args.reference_dir, ref, args.submission_dir, merged_hyp, args.output_dir, "norms")
 
 	if (args.dump_inputs):
-                ref.to_csv(os.path.join(args.output_dir, "inputs.ref.scored.tab"), sep = "\t", index = None)
-                merged_hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.scored.tab"), sep = "\t", index = None)
+		ref.to_csv(os.path.join(args.output_dir, "inputs.ref.scored.tab"), sep = "\t", index = None)
+		merged_hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.scored.tab"), sep = "\t", index = None)
 	score_tad(ref, merged_hyp, "norm", thresholds, args.output_dir, mapping_df, float(args.time_span_scale_collar), float(args.text_span_scale_collar), args.align_hacks)
 	generate_scoring_parameter_file(args)
 
@@ -230,7 +179,7 @@ def score_ed_submission_dir_cli(args):
 		ref = process_subset_norm_emotion(args.emotion_list_file, ref)
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "emotions")
 	if (args.dump_inputs):
-                hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.read.tab"), sep = "\t", index = None)
+		hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.read.tab"), sep = "\t", index = None)
 
 	if args.merge_sys_text_gap:
 		merge_sys_text_gap = int(args.merge_sys_text_gap)
@@ -249,8 +198,8 @@ def score_ed_submission_dir_cli(args):
 
 	statistic(args.reference_dir, ref, args.submission_dir, merged_hyp, args.output_dir, "emotions")
 	if (args.dump_inputs):
-                ref.to_csv(os.path.join(args.output_dir, "inputs.ref.scored.tab"), sep = "\t", index = None)
-                merged_hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.scored.tab"), sep = "\t", index = None)
+		ref.to_csv(os.path.join(args.output_dir, "inputs.ref.scored.tab"), sep = "\t", index = None)
+		merged_hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.scored.tab"), sep = "\t", index = None)
 
 	score_tad(ref, merged_hyp, "emotion", thresholds, args.output_dir, None, float(args.time_span_scale_collar), float(args.text_span_scale_collar), args.align_hacks)
 	generate_scoring_parameter_file(args)

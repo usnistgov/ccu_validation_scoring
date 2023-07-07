@@ -44,6 +44,6 @@ def aggregate_xy(xy_list, method="average", average_resolution=500):
                                 for data in xy_list_filtered]
                 aggregated_dc = [ x, (np.vstack(ys).sum(0) + len(xy_list) - len(xy_list_filtered)) / len(xy_list), stds ]
                 return aggregated_dc
-    log.error("Warning: No data remained after filtering, returning an empty array list")
+    # log.error("Warning: No data remained after filtering, returning an empty array list")
     return [ [], [], [] ]
 

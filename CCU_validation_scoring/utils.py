@@ -1,12 +1,10 @@
 import os
 import fnmatch
-import pprint
 import subprocess
 import logging
 import pandas as pd
 import numpy as np
 import re
-import json
 from matplotlib import pyplot as plt
 from .aggregate import *
 
@@ -204,8 +202,8 @@ def merge_sys_time_periods(result_dict, llr_value, allowed_gap, merge_label, tas
 			llr_list = []
 			llr_list.append(time_array[i]["llr"])
 			if (task == "norms"):
-			        status_dict = {}
-			        status_dict[first_time_period['status']] = 1
+				status_dict = {}
+				status_dict[first_time_period['status']] = 1
 			while ((i + 1 < len(time_array)) and
                                (float(current_time_period['end']) + allowed_gap > float(time_array[i + 1]['start'])) and
                                ((task != "norms") or
@@ -219,13 +217,13 @@ def merge_sys_time_periods(result_dict, llr_value, allowed_gap, merge_label, tas
 				if llr_value == "max_llr":
 					llr_merge = max(llr_list)
 				if (task == "norms"):
-                                        status_dict[current_time_period['status']] = 1
+					status_dict[current_time_period['status']] = 1
 				hyp_isTruncated = True if hyp_isTruncated else time_array[i]["hyp_isTruncated"]
 			med = {'start': first_time_period['start'], 'end': current_time_period['end'], 'llr': llr_merge, 'type': first_time_period['type'], 'hyp_uid': hyp_uid_merge, 'hyp_isTruncated': hyp_isTruncated}
 			if (task == "norms"):
-                                st =list(status_dict.keys())
-                                st.sort()
-                                med['status'] = ",".join(st)
+				st =list(status_dict.keys())
+				st.sort()
+				med['status'] = ",".join(st)
 			merged_time_array.append(med)
 			i = i + 1
 		for item in merged_time_array:
@@ -259,11 +257,11 @@ def get_result_dict(sorted_df, merge_label, task):
 		sub_df = sorted_df.loc[sorted_df["Class"] == i].reset_index()
 		hid = ""
 		if (task == "norms"):
-		        for j in range(sub_df.shape[0]):
-			        result_dict_list.append({"start": sub_df.iloc[j]['start'], "end": sub_df.iloc[j]['end'], "llr": sub_df.iloc[j]['llr'], "type": sub_df.iloc[j]['type'], 'hyp_uid': sub_df.iloc[j]['hyp_uid'], "hyp_isTruncated": sub_df.iloc[j]['hyp_isTruncated'], "status":  sub_df.iloc[j]['status']})
+			for j in range(sub_df.shape[0]):
+				result_dict_list.append({"start": sub_df.iloc[j]['start'], "end": sub_df.iloc[j]['end'], "llr": sub_df.iloc[j]['llr'], "type": sub_df.iloc[j]['type'], 'hyp_uid': sub_df.iloc[j]['hyp_uid'], "hyp_isTruncated": sub_df.iloc[j]['hyp_isTruncated'], "status":  sub_df.iloc[j]['status']})
 		else:
-		        for j in range(sub_df.shape[0]):
-			        result_dict_list.append({"start": sub_df.iloc[j]['start'], "end": sub_df.iloc[j]['end'], "llr": sub_df.iloc[j]['llr'], "type": sub_df.iloc[j]['type'], 'hyp_uid': sub_df.iloc[j]['hyp_uid'], "hyp_isTruncated": sub_df.iloc[j]['hyp_isTruncated']})
+			for j in range(sub_df.shape[0]):
+				result_dict_list.append({"start": sub_df.iloc[j]['start'], "end": sub_df.iloc[j]['end'], "llr": sub_df.iloc[j]['llr'], "type": sub_df.iloc[j]['type'], 'hyp_uid': sub_df.iloc[j]['hyp_uid'], "hyp_isTruncated": sub_df.iloc[j]['hyp_isTruncated']})
 		result_dict[i] = result_dict_list
 
 	return result_dict
@@ -333,9 +331,9 @@ def convert_merge_dict_df(file_id, results_array, merge_label, task):
 		hypistrunc.append(segment['content']['hyp_isTruncated'])
                 
 	if (task == "norms"):
-                result_df = pd.DataFrame({"file_id":file_ids,"file_uid":file_uids,"Class":Class,"start":starts,"end":ends,"hyp_uid":hypuids, "hyp_isTruncated": hypistrunc,"status":status,"llr":llrs,"type":types})
+		result_df = pd.DataFrame({"file_id":file_ids,"file_uid":file_uids,"Class":Class,"start":starts,"end":ends,"hyp_uid":hypuids, "hyp_isTruncated": hypistrunc,"status":status,"llr":llrs,"type":types})
 	else:
-                result_df = pd.DataFrame({"file_id":file_ids,"file_uid":file_uids,"Class":Class,"start":starts,"end":ends,"hyp_uid":hypuids, "hyp_isTruncated": hypistrunc, "llr":llrs,"type":types})
+		result_df = pd.DataFrame({"file_id":file_ids,"file_uid":file_uids,"Class":Class,"start":starts,"end":ends,"hyp_uid":hypuids, "hyp_isTruncated": hypistrunc, "llr":llrs,"type":types})
                 
 	return result_df
 
@@ -549,7 +547,7 @@ def generate_alignment_file(ref, hyp, task):
 		new_md = hyp_format[(hyp_format.fp == 1) & (hyp_format.md == 1)].copy()
 		new_md[['fp', 'md', 'eval_score']] = [0, 1, 'MD']
 		if (task == 'norm'):
-		        new_md[['hyp_status']] = ['EMPTY_NA']
+			new_md[['hyp_status']] = ['EMPTY_NA']
 		hyp_format = pd.concat([hyp_format, new_md])
 		#print(hyp_format)
 		#exit(0)
@@ -587,11 +585,11 @@ def generate_alignment_file(ref, hyp, task):
                 
                 ### Filter columns
 		if (task == "norm"):
-		        hyp_format.loc[hyp_format["eval_score"] == "FA", "status"] = "EMPTY_NA"  ### This is the REF - to be renamed below
-		        hyp_format = hyp_format[["Class","file_id","eval","ref","sys","llr","parameters","sort","status", "hyp_status"]]
-		        hyp_format = hyp_format.rename(columns={"status": "ref_status"})
+			hyp_format.loc[hyp_format["eval_score"] == "FA", "status"] = "EMPTY_NA"  ### This is the REF - to be renamed below
+			hyp_format = hyp_format[["Class","file_id","eval","ref","sys","llr","parameters","sort","status", "hyp_status"]]
+			hyp_format = hyp_format.rename(columns={"status": "ref_status"})
 		else:
-		        hyp_format = hyp_format[["Class","file_id","eval","ref","sys","llr","parameters","sort"]]                        
+			hyp_format = hyp_format[["Class","file_id","eval","ref","sys","llr","parameters","sort"]]                        
 
 
                 ### REF as all in the hyp structure
@@ -674,10 +672,10 @@ def generate_all_fn_alignment_file(ref, task):
 
 		co = ["class","file_id","eval","ref","sys","llr","parameters","sort"]
 		if (task == "norm"):
-                        ref_new['hyp_status'] = "EMPTY_NA"
-                        ref_new = ref_new.rename(columns={'status': "ref_status"})
-                        co.append("ref_status")
-                        co.append("hyp_status")
+			ref_new['hyp_status'] = "EMPTY_NA"
+			ref_new = ref_new.rename(columns={'status': "ref_status"})
+			co.append("ref_status")
+			co.append("hyp_status")
 		ref_new = ref_new[ co ];
 	if task == "changepoint":
 
