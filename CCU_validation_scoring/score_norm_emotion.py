@@ -306,7 +306,7 @@ def generate_align_cal_measure_by_type(ihyp, ref, iou_thresholds, Class, task):
         # Set MDs - This is because MD refs are added
         ihyp.loc [~ihyp['start_ref'].isna() & ihyp['start_hyp'].isna(), ['tp', 'fp', 'md']] = [ 0, 0, 1 ]
 
-        ### handle the dual fp+md lines  IFF this is a true MD where no other usage of it is a TP|MD
+        ### handle the dual fp+md lines  IF this is a true MD where no other usage of it is a TP|MD
         used_ref_uids = ihyp[(ihyp.isNSCR) | ((ihyp.tp == 1) | (ihyp.md == 1))].ref_uid.to_list()
         ihyp.loc[~ihyp['start_ref'].isna() & ~ihyp['start_hyp'].isna() & (ihyp['tp'] == 0) & (~ ihyp['ref_uid'].isin(used_ref_uids)), ['md']] = [ 1 ] 
         

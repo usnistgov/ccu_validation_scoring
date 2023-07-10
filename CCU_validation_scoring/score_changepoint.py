@@ -169,8 +169,7 @@ def compute_average_precision_cps(ref, hyp, delta_cp_thresholds):
         ihyp["cum_fp"] = fp
 
         fhyp = ihyp
-        thyp = fhyp.duplicated(subset = ['llr'], keep='last')
-        fhyp = fhyp.loc[thyp == False]
+        fhyp = fhyp[fhyp.duplicated(subset = ['llr'], keep='last') == False]
                      
         llr = np.array(fhyp["llr"])
         rec = (np.array(fhyp["cum_tp"]) / npos)

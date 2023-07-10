@@ -96,7 +96,6 @@ def fill_start_end(ref):
 	class_type = list(ref["Class_type"])[0]
 	file_ids = get_unique_items_in_array(ref['file_id'])
 	### Check if there is a status field.  If so, then the adjust the array to have an empyt status
-	#print(ref)
 	has_status = ('status' in ref.columns)
 	for i in file_ids:
 		sub_ref = extract_df(ref, i)
@@ -165,14 +164,7 @@ def get_raw_file_id_dict(file_ids, data_frame, class_type, text_gap, time_gap, m
 	result_dict = {}
 	for file_id in file_ids:
 		sorted_df = extract_df(data_frame, file_id)
-		#print(class_type)
-		#if (class_type == 'norm'):  ### Status needs to be serviced
-		#        sorted_df['Class'] = sorted_df['norm_status']
-		#print("Ref data to merge")
-		#print(sorted_df)
 		class_count_vote_dict = get_highest_vote_based_on_time(sorted_df, class_type)
-		#print("\nClass count before time vote")
-		#print(pprint.pprint(class_count_vote_dict))
                 
 		# Check file type to determine the gap of merging
 		if list(sorted_df["type"])[0] == "text" and text_gap is not None:
@@ -184,9 +176,6 @@ def get_raw_file_id_dict(file_ids, data_frame, class_type, text_gap, time_gap, m
 		if list(sorted_df["type"])[0] != "text" and time_gap is None:
 			vote_array_per_file = merge_vote_time_periods(class_count_vote_dict, class_type, merge_label=merge_label)		
                                         
-		#print("Vote array after time merge")
-		#print(pprint.pprint(vote_array_per_file, width=200))
-		#exit(0)
 		result_dict[file_id] = vote_array_per_file
 	return result_dict  
 		
@@ -308,7 +297,6 @@ def get_highest_vote_based_on_time_orig(data_frame, class_type):
 					emo_dict[emo] = []
 				emo_dict[emo].append({'start' : row['start'], 'end' : row['end'] })
 
-	#print(pprint.pprint(emo_dict))
 	return emo_dict  
 
 def get_highest_vote_based_on_time(data_frame, class_type):
@@ -342,16 +330,12 @@ def get_highest_vote_based_on_time(data_frame, class_type):
 	pre_key = ''
 	voter_count = 0
 	counted_items = 0
-	#print("Get_highest")
-	#print(data_frame)
 	for index,row in data_frame.iterrows():
 		# If the start time exists in dictionary, keep voting
 		time_key = str(row['start']) + ' - ' + str(row['end'])                
-		#print("PRocess {}".format(time_key))
 		counted_items = counted_items + 1
 		if time_key in time_dict and class_type != "norm":  #### OK, so!  norms are never multi-annotated.  if they are THIS WILL FAIL!!!!!!
 			# Keep counting classes
-			#print(f"  Appending additional judgement")
 			value = time_dict[time_key]
 			if row['user_id'] != value['user_id']:
 				voter_count = voter_count + 1
@@ -366,12 +350,10 @@ def get_highest_vote_based_on_time(data_frame, class_type):
 								value['status'][row['status']] = 0
 				value['status'][row['status']] += 1
 			time_dict[time_key]=value
-			#print(f"    value{value}")
 		else:
 			# Finish previous counted vote, only leave the majority counted class for all time periods except the last one
 			if pre_key in time_dict:
 				pre_value = time_dict[pre_key]
-				#print("  Finalize dup judgement {}".format(pre_value))
 				if voter_count > 1:
 					# More than one voter, need to get highest voted class
 					highest_vote_class = get_highest_class_vote(pre_value['Class'])
@@ -392,10 +374,8 @@ def get_highest_vote_based_on_time(data_frame, class_type):
 						assert len(pre_value['status'].keys()) == 1, "Error: Multiple norm judgements with differing status"
 						em['status'] = list(pre_value["status"])[0]
 					emo_dict[emo].append(em)
-					#print(f"    Final emo_dict {emo} {em}")
 			# update pre_key
 			pre_key = time_key
-			#print(f"  Start {pre_key}")
 			voter_count = 1
 			# Compose new key value pair
 			cur_classes = row['Class'].replace(" ", "").split(",")
@@ -411,7 +391,6 @@ def get_highest_vote_based_on_time(data_frame, class_type):
 		# By the end, add last collected vote to count
 		if counted_items == len(data_frame.index):
 			cur_value = time_dict[time_key]
-			#print(f"Final items to finalize {cur_value}")
 			if voter_count > 1:
 				# More than one voter, need to get highest voted class
 				highest_vote_class = get_highest_class_vote(cur_value['Class'])
@@ -432,8 +411,6 @@ def get_highest_vote_based_on_time(data_frame, class_type):
 					em['status'] = list(cur_value["status"])[0]
 				emo_dict[emo].append(em)
 
-	#print("emo_dict")
-	#print(pprint.pprint(emo_dict))
 	return emo_dict  
 	
 def merge_vote_time_periods(vote_dict, class_type, allowed_gap = None, merge_label = None):
@@ -451,21 +428,17 @@ def merge_vote_time_periods(vote_dict, class_type, allowed_gap = None, merge_lab
 	"""
 	result_array = []
 	for key in vote_dict.keys():
-		#print("merge for key {}".format(key))
 		time_array = vote_dict[key]
 		# Merge time array
 		merged_time_array = []
 		i = 0
 		while i < len(time_array):                        
 			first_time_period = time_array[i]
-			#print("ftp={} i={} start={} merge_label={} allowed_gap={}".format(first_time_period, i, vote_dict[key][i]['start'], merge_label, allowed_gap))
 			current_time_period = time_array[i]
 			if (class_type == "norm"):
 				status_dict = {}
 				status_dict[current_time_period['status']] = 1  ### add the first one
 			if allowed_gap is not None:
-				#if (i + 1 < len(time_array)):
-				#        print(f"  test {current_time_period['end']} and {time_array[i + 1]['start']}")
 				while ((i + 1 < len(time_array)) and 
                                        (float(current_time_period['end']) + allowed_gap > float(time_array[i + 1]['start'])) and
                                        ((class_type == "emotion") or
@@ -640,21 +613,17 @@ def preprocess_norm_emotion_reference_df(reference_df, class_type, text_gap, tim
 	The wrapper of preprocess for norm/emotion dataframe 
 	"""
 
-	#print("begin convert {}",class_type)
-	#print(reference_df)
 	new_reference_df = change_class_type(reference_df, class_type)
 	# Split input_file into parts based on file_id column
 	file_ids = get_unique_items_in_array(new_reference_df['file_id'])
 	# Generate file_id map for vote processing
 	result = get_raw_file_id_dict(file_ids, new_reference_df, class_type, text_gap, time_gap, merge_label)
-	#print("raw_dict time={} text={}".format(time_gap, text_gap))
-	#print(pprint.pprint(result, width=200))
+
 	# Convert the result dictionary into dataframe
 	result_df = convert_norm_emotion_dict_df(result, class_type)
 
 	## Dropping rows with zero duration
 	result_df = result_df.drop(result_df[result_df.start == result_df.end].index, axis=0)
-	#print(result_df)
 
 	return result_df
 
@@ -700,9 +669,7 @@ def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time
 			reference_prune['norm_status'] = [ n + "::" + s for n,s in zip(reference_prune['norm'], reference_prune['status']) ]
 			#Begin to keep the status here.  Stopping for now
 		ref = preprocess_norm_emotion_reference_df(reference_prune, column_name, text_gap, time_gap, merge_label)
-		#print("final")
-		#print(ref)
-		#exit(0)
+
 		ref.drop_duplicates(inplace = True)
 		ref_inter = ref.merge(index_df)
 		if len(ref_inter) > 0:
@@ -737,17 +704,14 @@ def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time
 		ref = ref[ref.timestamp != "none"]
 		ref['start'] = ref['timestamp']  ### Add the timestamp to handle noscore segments with duration
 		ref['end'] = ref['timestamp']  ### Add the timestamp to handle noscore segments with duration
-		#print("before class change")
-		#printz(ref)
+
 		ref_final = change_class_type(ref, convert_task_column(task))  ### Changes the timestamp to Class
-		#print("Ref before tweaks")
-		#print(ref_final)
+
 		## Load the segment file to add Noscore segments
 		segment_file = os.path.join(ref_dir,"docs","segments.tab")
 		segment_df = read_dedupe_file(segment_file)
 		segment_df = segment_df.merge(index_df)
-		#print("Segment file")
-		#print(segment_df)
+
 		#Add the noscore regions 
 		if (True):
 			for file_id in set(segment_df['file_id']):
@@ -766,9 +730,6 @@ def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time
 
 	ref_final['ref_uid'] = [ "R"+str(s) for s in range(len(ref_final['file_id'])) ] ### This is a unique REF ID to help find FN
 	ref_final['isNSCR'] = ref_final.Class.isin(['noann', 'NO_SCORE_REGION'])
-	#print("DONE - ref_final")
-	#print(ref_final)
-	#exit(0)
 	return ref_final
 
 
