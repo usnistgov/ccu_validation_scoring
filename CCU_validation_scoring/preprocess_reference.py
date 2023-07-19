@@ -18,51 +18,6 @@ def process_subset_norm_emotion(list_file, ref):
 	
 	return pruned_ref
 
-def extend_gap_segment(ref):
-	"""
-	Extend the gap between end of previous segment and start of next segment in reference.
-
-	e.g.
-	From
-	Seg  Start  End
-	Seg1 45.2   60.2
-	Seg2 60.201 75.201
-	To result
-	Seg  Start  End
-	Seg1 45.2   60.201
-	Seg2 60.201   75.201
-
-	Parameters
-	----------
-	ref
-
-	Returns
-	-------
-	ref_sorted: data frame after extending the gap
-
-	"""
-
-	gap_map = {"text": 10, "audio": 1, "video": 1}
-	class_type = list(ref["Class_type"])[0]
-	for i in range(1,ref.shape[0]):
-		if ref.iloc[i]["file_id"] == ref.iloc[i-1]["file_id"]:
-			diff = round(ref.iloc[i]["start"] - ref.iloc[i-1]["end"],3)
-			gap = gap_map[ref.iloc[i]["type"]]
-
-			if ref.iloc[i]["type"] == "text":
-				if diff < gap:
-					ref.iloc[i-1, ref.columns.get_loc('end')] = ref.iloc[i]["start"] - 1
-				else:
-					ref.loc[len(ref.index)] = [ref.iloc[i]["file_id"], silence_string, ref.iloc[i-1, ref.columns.get_loc('end')] + 1, ref.iloc[i]["start"] - 1, class_type, ref.iloc[i]["type"], ref.iloc[i]["length"]]
-			elif ref.iloc[i]["type"] in ["audio", "video"]:
-				if diff < gap:
-					ref.iloc[i-1, ref.columns.get_loc('end')] = ref.iloc[i]["start"]
-				else:
-					ref.loc[len(ref.index)] = [ref.iloc[i]["file_id"], silence_string, ref.iloc[i-1, ref.columns.get_loc('end')], ref.iloc[i]["start"], class_type, ref.iloc[i]["type"], ref.iloc[i]["length"]]
-
-	ref_sorted = ref.sort_values(by=["file_id","start","end"]).reset_index(drop=True)
-	return ref_sorted
-
 def make_row(arr):
         if (arr[7] is None): 
                 return(pd.Series(arr[0:7], index=['file_id', 'Class', 'start', 'end', 'Class_type', 'type', 'length']))
@@ -689,7 +644,7 @@ def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time
 		column_name = task
 		ref = preprocess_valence_arousal_reference_df(reference_prune, column_name)
 		ref = ref.merge(index_df)
-		ref_inter = extend_gap_segment(ref)
+		ref_inter = extend_gap_segment(ref, "ref")
 		if len(ref_inter) > 0:
 			ref_final = fill_start_end(ref_inter)
 		else:

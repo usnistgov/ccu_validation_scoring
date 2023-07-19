@@ -142,7 +142,7 @@ def process_ref_hyp_time_series(ref, hyp, task):
 				# Get the time series of no speech in reference
 				non_silence_point = list(continue_ref["point"][continue_ref["Class"] != silence_string])
 				# Prune system using the time series of no speech in reference
-				pruned_continue_hyp = continue_hyp[continue_hyp["point"].isin(non_silence_point)].copy()
+				pruned_continue_hyp = continue_hyp[(continue_hyp["point"].isin(non_silence_point)) & (continue_hyp["Class"] != silence_string)].copy()
 				pruned_continue_hyp.rename(columns={"Class": "continue_hyp"}, inplace=True)
 
 				ref_hyp_continue = pd.merge(pruned_continue_ref, pruned_continue_hyp)
@@ -178,13 +178,16 @@ def process_ref_hyp_time_series(ref, hyp, task):
 
 			if len(sub_hyp) != 0:
 				continue_hyp = change_continuous_non_text(sub_hyp)
+				# print(continue_hyp.to_string())
 				# Get the time series of no speech in reference
 				non_silence_df = continue_ref.loc[:,["start","end"]][continue_ref["Class"] != silence_string]
 				# Prune system using the time series of no speech in reference
 				pruned_continue_hyp = non_silence_df.merge(continue_hyp)
+				pruned_continue_hyp = pruned_continue_hyp[pruned_continue_hyp["Class"] != silence_string]
 				pruned_continue_hyp.rename(columns={"Class": "continue_hyp"}, inplace=True)
-
+				# print(pruned_continue_ref.to_string())
 				ref_hyp_continue = pd.merge(pruned_continue_ref, pruned_continue_hyp)
+				# print(ref_hyp_continue.to_string())
 				ref_dict[sub_type][file_id] = list(ref_hyp_continue["continue_ref"])
 				hyp_dict[sub_type][file_id] = list(ref_hyp_continue["continue_hyp"])
 

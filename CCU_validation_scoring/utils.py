@@ -342,6 +342,8 @@ def preprocess_submission_file(subm_dir, ref_dir, scoring_index, task):
 	hyp = concatenate_submission_file(subm_dir, task)
 	hyp_type = add_type_column(ref_dir, hyp)
 	hyp_final = filter_hyp_use_scoring_index(hyp_type, scoring_index)
+	if task in ["valence_continuous","arousal_continuous"]:
+		hyp_final = extend_gap_segment(hyp_final, "hyp")
 	hyp_final['hyp_uid'] = [ "H"+str(s) for s in range(len(hyp_final['file_id'])) ] ### This is a unique HYP ID
 	hyp_final['hyp_isTruncated'] = False
 
@@ -358,6 +360,58 @@ def merge_sys_instance(hyp, text_gap, time_gap, llr_value, merge_label, task):
 	merged_df = get_merged_dict(file_ids, hyp, text_gap, time_gap, llr_value, merge_label, task)
 
 	return merged_df
+
+def extend_gap_segment(df, data):
+	"""
+	Extend the gap between end of previous segment and start of next segment in reference.
+
+	e.g.
+	From
+	Seg  Start  End
+	Seg1 45.2   60.2
+	Seg2 60.201 75.201
+	To result
+	Seg  Start  End
+	Seg1 45.2   60.201
+	Seg2 60.201   75.201
+
+	Parameters
+	----------
+	ref
+
+	Returns
+	-------
+	ref_sorted: data frame after extending the gap
+
+	"""
+
+	gap_map = {"text": 10, "audio": 1, "video": 1}
+	if data == "ref":
+		class_type = list(df["Class_type"])[0]
+	for i in range(1,df.shape[0]):
+		if df.iloc[i]["file_id"] == df.iloc[i-1]["file_id"]:
+			diff = round(df.iloc[i]["start"] - df.iloc[i-1]["end"],3)
+			gap = gap_map[df.iloc[i]["type"]]
+
+			if df.iloc[i]["type"] == "text":
+				if diff < gap:
+					df.iloc[i-1, df.columns.get_loc('end')] = df.iloc[i]["start"] - 1
+				else:
+					if data == "ref":
+						df.loc[len(df.index)] = [df.iloc[i]["file_id"], silence_string, df.iloc[i-1, df.columns.get_loc('end')] + 1, df.iloc[i]["start"] - 1, class_type, df.iloc[i]["type"], df.iloc[i]["length"]]
+					if data == "hyp":
+						df.loc[len(df.index)] = [df.iloc[i]["file_id"], df.iloc[i-1, df.columns.get_loc('end')] + 1, df.iloc[i]["start"] - 1, silence_string, df.iloc[i]["file_id"], df.iloc[i]["type"]]
+			elif df.iloc[i]["type"] in ["audio", "video"]:
+				if diff < gap:
+					df.iloc[i-1, df.columns.get_loc('end')] = df.iloc[i]["start"]
+				else:
+					if data == "ref":
+						df.loc[len(df.index)] = [df.iloc[i]["file_id"], silence_string, df.iloc[i-1, df.columns.get_loc('end')], df.iloc[i]["start"], class_type, df.iloc[i]["type"], df.iloc[i]["length"]]
+					if data == "hyp":
+						df.loc[len(df.index)] = [df.iloc[i]["file_id"], df.iloc[i-1, df.columns.get_loc('end')], df.iloc[i]["start"], silence_string, df.iloc[i]["file_id"], df.iloc[i]["type"]]
+
+	df_sorted = df.sort_values(by=["file_id","start","end"]).reset_index(drop=True)
+	return df_sorted
 
 def extract_df(df, file_id):
 	"""

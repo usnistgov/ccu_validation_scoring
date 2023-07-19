@@ -58,6 +58,7 @@ def type_time_sum(df, data):
 
 def type_class_avg(df, data):
 
+	# print(df)
 	type_class_avg = df.groupby(['type'])['Class'].mean().reset_index()
 	type_class_avg.rename(columns={'Class': "value"}, inplace=True)
 	type_class_avg["data"] = data
@@ -145,8 +146,9 @@ def statistic(reference_dir, ref, submission_dir, hyp, output_dir, task):
 		ref_type_class_avg = type_class_avg(ref_ann_prune, "ref")
 		ref_type_class_std = type_class_std(ref_ann_prune, "ref")
 
-		sys_type_class_avg = type_class_avg(hyp, "sys")
-		sys_type_class_std = type_class_std(hyp, "sys")
+		sys_ann_prune = hyp[(hyp['Class'] != "noann")]
+		sys_type_class_avg = type_class_avg(sys_ann_prune, "sys")
+		sys_type_class_std = type_class_std(sys_ann_prune, "sys")
 
 		statistic_aggregated = combine_result(ref_type_class_avg, ref_type_class_std, sys_type_class_avg, sys_type_class_std, ref_unique_file_count, ref_unique_file_count_ann, ref_unique_file_count_noann, sys_unique_file_count, sys_unique_file_count_ann)
 		statistic_aggregated["value"] = statistic_aggregated["value"].apply(formatNumber)
