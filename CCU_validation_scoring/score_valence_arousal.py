@@ -74,7 +74,7 @@ def change_continuous_non_text(df,step = 2):
 				if label_list[k] == silence_string:
 					label_new = silence_string
 				else:
-					label_new = label_new + label_list[k]*(end[k]-i)
+					label_new = label_new + float(label_list[k])*(end[k]-i)
 
 					while j > end[k]:
 						k = k + 1
@@ -82,10 +82,10 @@ def change_continuous_non_text(df,step = 2):
 							if label_list[k] == silence_string:
 								label_new = silence_string
 							else:
-								label_new = label_new + label_list[k]*(end[k]-start[k])
+								label_new = label_new + float(label_list[k])*(end[k]-start[k])
 
 					if label_new != silence_string and label_list[k] != silence_string:
-						label_new = label_new + label_list[k]*(j-start[k])
+						label_new = label_new + float(label_list[k])*(j-start[k])
 					else: 
 						label_new = silence_string
 						
@@ -95,7 +95,7 @@ def change_continuous_non_text(df,step = 2):
 				if label_list[k] == silence_string:
 					label_new = silence_string
 				else:
-					label_new = label_new + label_list[k]*(j-i)
+					label_new = label_new + float(label_list[k])*(j-i)
 			else:
 				continue
 
@@ -179,6 +179,7 @@ def process_ref_hyp_time_series(ref, hyp, task):
 				pruned_continue_hyp = continue_hyp[(continue_hyp["point"].isin(non_silence_point)) & (continue_hyp["continue_hyp"] != silence_string)].copy()
 
 				ref_hyp_continue = pd.merge(pruned_continue_ref, pruned_continue_hyp)
+				ref_hyp_continue["continue_hyp"] = ref_hyp_continue["continue_hyp"].astype(int)
 				ref_dict[sub_type][file_id] = list(ref_hyp_continue["continue_ref"])
 				hyp_dict[sub_type][file_id] = list(ref_hyp_continue["continue_hyp"])
 

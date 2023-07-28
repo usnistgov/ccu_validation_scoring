@@ -407,8 +407,9 @@ def check_value_range(file, task):
 	if df.shape[0] != 0:
 		invalid_value_range = []
 		for i in df[task]:
-			if not((i >= 1) and (i <= 1000)):
-				invalid_value_range.append(i)
+			if i != "noann":
+				if not((int(i) >= 1) and (int(i) <= 1000)):
+					invalid_value_range.append(i)
 
 		if len(invalid_value_range) > 0:
 			logger.error('Invalid file {}:'.format(file))
@@ -439,8 +440,8 @@ def extract_modality_info(file_type):
 	column_map = {"norms": 6, "emotions": 5, "valence_continuous": 4, "arousal_continuous": 4, "changepoint": 3}
 	header_map = {"norms":{"file_id": "object","norm": "object","start": frame_data_type,"end": frame_data_type,"status": "object","llr": "float"},
 				"emotions":{"file_id": "object","emotion": "object","start": frame_data_type,"end": frame_data_type,"llr": "float"},
-				"valence_continuous":{"file_id": "object","start": frame_data_type,"end": frame_data_type,"valence_continuous": "int"},
-				"arousal_continuous":{"file_id": "object","start": frame_data_type,"end": frame_data_type,"arousal_continuous": "int"},
+				"valence_continuous":{"file_id": "object","start": frame_data_type,"end": frame_data_type,"valence_continuous": ["int","object"]},
+				"arousal_continuous":{"file_id": "object","start": frame_data_type,"end": frame_data_type,"arousal_continuous": ["int","object"]},
 				"changepoint":{"file_id": "object","timestamp": frame_data_type,"llr": "float"}}
 
 	return column_map, header_map
