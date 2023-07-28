@@ -108,6 +108,35 @@ def change_continuous_non_text(df,step = 2):
 	
 	return df_new
 
+def calculate_total_duration(df, type):
+
+	if type == "text":
+		return df.shape[0]
+	if type != "text":
+		diff = df["end"] - df["start"]
+		return sum(diff)
+
+def calculate_coverage_outer_join(type, ref, hyp = None):
+
+	if hyp is not None:
+		outer_join_ref_hyp = ref.merge(hyp, how = "outer")
+		both_ref_sys_df = outer_join_ref_hyp.loc[(outer_join_ref_hyp["continue_ref"] != silence_string) & (outer_join_ref_hyp["continue_hyp"] != silence_string)]
+		only_sys_df = outer_join_ref_hyp.loc[(outer_join_ref_hyp["continue_ref"] == silence_string) & (outer_join_ref_hyp["continue_hyp"] != silence_string)]
+		only_ref_df = outer_join_ref_hyp.loc[(outer_join_ref_hyp["continue_ref"] != silence_string) & (outer_join_ref_hyp["continue_hyp"] == silence_string)]
+
+		both_ref_sys = calculate_total_duration(both_ref_sys_df, type)
+		only_sys = calculate_total_duration(only_sys_df, type)
+		only_ref = calculate_total_duration(only_ref_df, type)
+		# ref_coverage = both_ref_sys/(both_ref_sys+only_ref, type)
+	else:
+		both_ref_sys_df = ref.loc[(ref["continue_ref"] != silence_string)]
+		both_ref_sys = calculate_total_duration(both_ref_sys_df, type)
+		only_sys = 0
+		only_ref = 0
+		# ref_coverage = 1
+
+	return both_ref_sys,only_sys,only_ref
+
 def process_ref_hyp_time_series(ref, hyp, task):
 	"""
 	Convert the ref and hyp into discrete time-series that have the same length
@@ -116,16 +145,19 @@ def process_ref_hyp_time_series(ref, hyp, task):
 
 	ref_dict = {}
 	hyp_dict = {}
+	coverage_dict = {}
 	Types = ref.loc[ref["Class"] != silence_string].type.unique()
 
 	for type in Types:
 		ref_dict[type] = {}
 		hyp_dict[type] = {}
+		coverage_dict[type] = {}
+		for coverage in ["both_ref_sys","only_sys","only_ref"]:
+			coverage_dict[type][coverage] = 0
 
 	segment_df = pd.DataFrame()
 	file_ids = get_unique_items_in_array(ref['file_id'])
-	for file_id in file_ids: 
-	
+	for file_id in file_ids:
 		sub_ref = extract_df(ref, file_id)
 		sub_hyp = extract_df(hyp, file_id)
 		sub_type = list(sub_ref["type"])[0]
@@ -133,17 +165,18 @@ def process_ref_hyp_time_series(ref, hyp, task):
 		# Check file type
 		if list(sub_ref["type"])[0] == "text":
 			continue_ref = change_continuous_text(sub_ref)
-			
-			pruned_continue_ref = continue_ref[continue_ref["Class"] != silence_string].copy()
-			pruned_continue_ref.rename(columns={"Class": "continue_ref"}, inplace=True)
+			continue_ref.rename(columns={"Class": "continue_ref"}, inplace=True)
 
+			pruned_continue_ref = continue_ref[continue_ref["continue_ref"] != silence_string].copy()
+			
 			if len(sub_hyp) != 0:
 				continue_hyp = change_continuous_text(sub_hyp)
+				continue_hyp.rename(columns={"Class": "continue_hyp"}, inplace=True)
+				both_ref_sys,only_sys,only_ref = calculate_coverage_outer_join("text", continue_ref, continue_hyp)
 				# Get the time series of no speech in reference
-				non_silence_point = list(continue_ref["point"][continue_ref["Class"] != silence_string])
+				non_silence_point = list(continue_ref["point"][continue_ref["continue_ref"] != silence_string])
 				# Prune system using the time series of no speech in reference
-				pruned_continue_hyp = continue_hyp[(continue_hyp["point"].isin(non_silence_point)) & (continue_hyp["Class"] != silence_string)].copy()
-				pruned_continue_hyp.rename(columns={"Class": "continue_hyp"}, inplace=True)
+				pruned_continue_hyp = continue_hyp[(continue_hyp["point"].isin(non_silence_point)) & (continue_hyp["continue_hyp"] != silence_string)].copy()
 
 				ref_hyp_continue = pd.merge(pruned_continue_ref, pruned_continue_hyp)
 				ref_dict[sub_type][file_id] = list(ref_hyp_continue["continue_ref"])
@@ -154,6 +187,7 @@ def process_ref_hyp_time_series(ref, hyp, task):
 
 				ref_hyp_continue = ref_hyp_continue[["start","end","continue_ref","file_id","continue_hyp"]]
 			else:
+				both_ref_sys,only_sys,only_ref = calculate_coverage_outer_join("text", continue_ref)
 				# If no output in hyp, add fake output 500 for valence and 1 for arousal
 				ref_hyp_continue = pruned_continue_ref.copy()
 				if task == "valence_continuous":
@@ -172,27 +206,27 @@ def process_ref_hyp_time_series(ref, hyp, task):
 
 		else:
 			continue_ref = change_continuous_non_text(sub_ref)
+			continue_ref.rename(columns={"Class": "continue_ref"}, inplace=True)
 
-			pruned_continue_ref = continue_ref[continue_ref["Class"] != silence_string].copy()
-			pruned_continue_ref.rename(columns={"Class": "continue_ref"}, inplace=True)
+			pruned_continue_ref = continue_ref[continue_ref["continue_ref"] != silence_string].copy()
 
 			if len(sub_hyp) != 0:
 				continue_hyp = change_continuous_non_text(sub_hyp)
-				# print(continue_hyp.to_string())
+				continue_hyp.rename(columns={"Class": "continue_hyp"}, inplace=True)
+				both_ref_sys,only_sys,only_ref = calculate_coverage_outer_join("audio", continue_ref, continue_hyp)
 				# Get the time series of no speech in reference
-				non_silence_df = continue_ref.loc[:,["start","end"]][continue_ref["Class"] != silence_string]
+				non_silence_df = continue_ref.loc[:,["start","end"]][continue_ref["continue_ref"] != silence_string]
 				# Prune system using the time series of no speech in reference
 				pruned_continue_hyp = non_silence_df.merge(continue_hyp)
-				pruned_continue_hyp = pruned_continue_hyp[pruned_continue_hyp["Class"] != silence_string]
-				pruned_continue_hyp.rename(columns={"Class": "continue_hyp"}, inplace=True)
-				# print(pruned_continue_ref.to_string())
+				pruned_continue_hyp = pruned_continue_hyp[pruned_continue_hyp["continue_hyp"] != silence_string]
+
 				ref_hyp_continue = pd.merge(pruned_continue_ref, pruned_continue_hyp)
-				# print(ref_hyp_continue.to_string())
 				ref_dict[sub_type][file_id] = list(ref_hyp_continue["continue_ref"])
 				hyp_dict[sub_type][file_id] = list(ref_hyp_continue["continue_hyp"])
 
 				ref_hyp_continue = ref_hyp_continue[["start","end","continue_ref","file_id","continue_hyp"]]
 			else:
+				both_ref_sys,only_sys,only_ref = calculate_coverage_outer_join("audio", continue_ref)
 				# If no output in hyp, add fake output 500 for valence and 1 for arousal
 				ref_hyp_continue = pruned_continue_ref.copy()
 				if task == "valence_continuous":
@@ -206,7 +240,11 @@ def process_ref_hyp_time_series(ref, hyp, task):
 				ref_hyp_continue = ref_hyp_continue[["start","end","continue_ref","file_id","continue_hyp"]]
 			segment_df = pd.concat([segment_df,ref_hyp_continue])
 
-	return ref_dict, hyp_dict, segment_df
+		coverage_dict[sub_type]["both_ref_sys"] = coverage_dict[sub_type]["both_ref_sys"] + both_ref_sys
+		coverage_dict[sub_type]["only_sys"] = coverage_dict[sub_type]["only_sys"] + only_sys
+		coverage_dict[sub_type]["only_ref"] = coverage_dict[sub_type]["only_ref"] + only_ref
+
+	return ref_dict, hyp_dict, segment_df, coverage_dict
 
 def apply_level_label(list, task):
 	"""
@@ -269,6 +307,13 @@ def score_genre(ref_dict, hyp_dict):
 
 	return result
 
+def score_coverage(coverage_dict):
+
+	for genre in sorted(coverage_dict.keys()):
+		coverage_dict[genre]["ref_coverage"] = coverage_dict[genre]["both_ref_sys"]/(coverage_dict[genre]["both_ref_sys"] + coverage_dict[genre]["only_ref"])
+
+	return coverage_dict
+
 def write_segment(segment_df, output_dir, task):
 	"""
   Write segment diarization result into a file
@@ -295,19 +340,20 @@ def write_segment(segment_df, output_dir, task):
 	segment_df_sorted.to_csv(os.path.join(output_dir, "segment_diarization.tab"), index = False, quoting=3, sep="\t", escapechar="\t",
                                  columns=['class', 'file_id','window','ref','sys','parameters'])
 
-def write_valence_arousal_scores(output_dir, CCC_result, task):
+def write_valence_arousal_scores(output_dir, CCC_result, coverage_result, task):
 	"""
   Write aggregate result into a file
   """
 	result_df = pd.DataFrame(columns=["task","genre","metric","value","correctness_criteria"])
-	index = 0
 	if task == "valence_continuous":
 		label = "vd"
 	if task == "arousal_continuous":
 		label = "ad"
 	for genre, value in CCC_result.items():
 		result_df.loc[len(result_df.index)] = [label, genre, "CCC", round(value,3), "{}"]
-		index = index + 1
+	for genre, result in coverage_result.items():
+		for metric, value in result.items():
+			result_df.loc[len(result_df.index)] = [label, genre, metric, round(value,3), "{}"]	
 	result_df_sorted = result_df.sort_values("genre")
 	result_df_sorted.to_csv(os.path.join(output_dir, "scores_aggregated.tab"), sep = "\t", index = None)
 
@@ -315,12 +361,12 @@ def score_valence_arousal(ref, hyp, output_dir, task):
 	"""
 	The wrapper
 	"""
-	ref_dict, hyp_dict, segment_df = process_ref_hyp_time_series(ref, hyp, task)
+	ref_dict, hyp_dict, segment_df, coverage_dict = process_ref_hyp_time_series(ref, hyp, task)
 	CCC_result = score_genre(ref_dict, hyp_dict)
-	
+	coverage_result = score_coverage(coverage_dict)
 	ensure_output_dir(output_dir)
 	write_segment(segment_df, output_dir, task)
-	write_valence_arousal_scores(output_dir, CCC_result, task)
+	write_valence_arousal_scores(output_dir, CCC_result, coverage_result, task)
 
 
 

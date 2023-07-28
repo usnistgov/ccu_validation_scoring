@@ -342,8 +342,8 @@ def preprocess_submission_file(subm_dir, ref_dir, scoring_index, task):
 	hyp = concatenate_submission_file(subm_dir, task)
 	hyp_type = add_type_column(ref_dir, hyp)
 	hyp_final = filter_hyp_use_scoring_index(hyp_type, scoring_index)
-	if task in ["valence_continuous","arousal_continuous"]:
-		hyp_final = extend_gap_segment(hyp_final, "hyp")
+	# if task in ["valence_continuous","arousal_continuous"]:
+	# 	hyp_final = extend_gap_segment(hyp_final, "hyp")
 	hyp_final['hyp_uid'] = [ "H"+str(s) for s in range(len(hyp_final['file_id'])) ] ### This is a unique HYP ID
 	hyp_final['hyp_isTruncated'] = False
 
