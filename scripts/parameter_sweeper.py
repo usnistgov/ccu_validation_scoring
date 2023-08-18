@@ -25,16 +25,17 @@ pd.set_option('display.max_columns', 1000)
 pd.set_option('display.width', 1000)
 
 def add_scorer_file(file, srid, tab):
-    t = pd.read_csv(file, sep = "\t")
-    t['srid'] = srid
+    if (os.path.exists(file)):
+        t = pd.read_csv(file, sep = "\t")
+        t['srid'] = srid
 
-    if (tab is None):
-        tab = t
-    else:
-        tab = pd.concat([tab, t])
+        if (tab is None):
+            tab = t
+        else:
+            tab = pd.concat([tab, t])
     return(tab)
 
-def load_scoring(dir, id, lab, factors, df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, df_sr_fact):
+def load_scoring(dir, id, lab, factors, df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, df_sr_fact, df_stat):
     ### Jobs table
     if (df_jobs is None):
         df_jobs = pd.DataFrame([], columns = ['jobid'])
@@ -66,7 +67,9 @@ def load_scoring(dir, id, lab, factors, df_jobs, df_sr, df_sbc, df_sa, df_sp, df
     df_sbc = add_scorer_file(os.path.join(dir, "scores_by_class.tab"), srid, df_sbc)
     df_sa = add_scorer_file(os.path.join(dir, "scores_aggregated.tab"), srid, df_sa)
     df_sp = add_scorer_file(os.path.join(dir, "scoring_parameters.tab"), srid, df_sp)
-    return(df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, df_sr_fact)
+    df_stat = add_scorer_file(os.path.join(dir, "statistics_aggregated.tab"), srid, df_stat)
+    
+    return(df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, df_sr_fact, df_stat)
 
 def run_score(code_base, command, workdir, param1):
     print("Entering run_score()")
@@ -77,7 +80,7 @@ def run_score(code_base, command, workdir, param1):
         print(f"   mkdir {workdir}")
 
     ### Initialize the scores DFs - To be None - The reader handles the initial build
-    df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, df_sr_fact = [None, None, None, None, None, None, None]
+    df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, df_sr_fact, df_stat = [None, None, None, None, None, None, None, None]
 
     for scoring_run in param1['scoring_runs']:
         lev_out = os.path.join(workdir, scoring_run['name'])
@@ -89,7 +92,7 @@ def run_score(code_base, command, workdir, param1):
 
         ######  Scorer execution ####
         if (not run):
-            print(f"   Beginning scoring_run: {scoring_run['name']}")# args: /{scoring_run['args']}/ output: {lev_out}")
+            print(f"   Using cached scoring_run: {scoring_run['name']}")# args: /{scoring_run['args']}/ output: {lev_out}")
         else:
             if (not os.path.isdir(lev_out)):
                 os.mkdir(lev_out)
@@ -107,25 +110,25 @@ def run_score(code_base, command, workdir, param1):
             print(ret, file=open(retfile, 'w'))
 
         ### Load tqbles
-        df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, df_sr_fact = load_scoring(lev_out, "sweep", scoring_run['name'], scoring_run['factors'],
-                                                                                 df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, df_sr_fact)
-    if (True):
-        print("df_jobs")
-        print(df_jobs.head())
-        print("df_sr")
-        print(df_sr.head())
-        print("df_sbc")
-        print(df_sbc.head())
-        print("df_sa")
-        print(df_sa.head())
-        print("df_sp")
-        print(df_sp.head())
-        print("df_fact")
-        print(df_fact.head())
-        print("df_sr_fact")
-        print(df_sr_fact.head())
+        df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, df_sr_fact, df_stat = load_scoring(lev_out, "sweep", scoring_run['name'], scoring_run['factors'],
+                                                                                          df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, df_sr_fact, df_stat)
+        df_sr_fact.srid = [ int(x) for x in df_sr_fact.srid ] ### avoids warnings
 
-    return(df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, df_sr_fact)
+    def ph(df, mesg):
+        print(mesg)
+        if (df is not None):
+            print(df.head())
+    if (False):
+        ph(df_jobs, "df_jobs")
+        ph(df_sr, "df_sr")
+        ph(df_sbc, "df_sbc")
+        ph(df_sa, "df_sa")
+        ph(df_sp, "df_sp")
+        ph(df_fact, "df_fact")
+        ph(df_sr_fact, "df_sr_fact")
+        ph(df_stat, "df_stat")
+
+    return(df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, df_sr_fact, df_stat)
 
 def merge_images(images, file):
     imgs = [Image.open(x) for x in images]
@@ -145,51 +148,83 @@ def merge_images(images, file):
     new_im.save(file)
     
 
-def plot_measures_agg(df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, df_sr_fact, measures, outdir):
-    images = []
-    mean_measures = [ "mean_" + m for m in measures ]
+def plot_measures_agg(df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, df_sr_fact, df_stat, measures, outdir, task):
 
-    for stat in [ 'agg', 'class' ]:
-        if (stat == 'agg' ):
+    ### Plot the file_counts using only the ref, all data
+    # st = df_stat[(df_stat['data'] == 'ref') & (df_stat['metric'] == 'file_scoring_counts')].pivot(index=['srid', 'genre'], columns=['data', 'metric'], values=['value'])
+    # st = df_stat[(df_stat['metric'] == 'file_scoring_counts')].pivot(index=['srid', 'genre'], columns=['data', 'metric'], values=['value'])
+    # st = df_stat[(df_stat['data'] == 'ref') & (df_stat['metric'] == 'file_scoring_counts')][['genre', 'metric', 'value', 'srid']]
+    # jst = pd.merge(pd.merge(df_sr, df_sr_fact.pivot(index='srid', columns='factor', values='value'), on='srid'),
+    #                st, on=['srid'])
+    # print(st)
+    # print(jst[jst['num_variates'] == 1])
+
+    #exit(0)
+    
+
+    for stat_level in [ 'agg', 'class', 'nfile' ]:
+        if (stat_level == 'agg' ):
+            if (task in ('CD')):
+                continue
             me = pd.merge(df_sa,
                           pd.merge(df_sr, df_sr_fact.pivot(index='srid', columns='factor', values='value'), on='srid'),
                           on='srid')
-            met = 'mean_' + 'average_precision'
-        else:
+            met = 'mean_' + measures[0]
+            if (task in ('AD', 'VD')):
+                met = measures[0]
+        elif (stat_level == 'class'):
+            if (task in ('AD', 'VD')):
+                continue
             me = pd.merge(df_sbc,
                           pd.merge(df_sr, df_sr_fact.pivot(index='srid', columns='factor', values='value'), on='srid'),
                           on='srid')
-            met = met
-        print(me)
-        for genre in [ 'all' ]:
-            print(f"Building {stat} {genre}")
+            met = measures[0]
+        elif (stat_level == 'nfile'):
+            st = df_stat[(df_stat['data'] == 'ref') & (df_stat['metric'] == 'file_scoring_counts')][['genre', 'metric', 'value', 'srid']]
+            me = pd.merge(pd.merge(df_sr, df_sr_fact.pivot(index='srid', columns='factor', values='value'), on='srid'),
+                   st, on=['srid'])
+            met = "file_scoring_counts"
+            
+        #print(me[me['metric'] == met].head())
+
+        for genre in [ 'all', 'video', 'audio', 'text' ]:
+            if (len(me[me['genre'] == genre].metric) == 0):
+                continue
             # #############  Univariate Plots
             fe_list = list(set(me[me['num_variates'] == 1]['factor_ensemble']))
-            print(fe_list)
+            #print(fe_list)
             if len(fe_list) > 0:
+                filename = os.path.join(outdir, f"{stat_level}_univariate_{genre}.png")
+                print(f"Building {stat_level} {genre} -> {filename}")
                 fig = make_subplots(rows=len(fe_list), cols=1, subplot_titles=fe_list)
                 r = 1
                 pdf  = me[(me['genre'] == genre) & (me['metric'] == met) & (me['num_variates'] == 1) ].copy()
                 pdf.value = [ float(x) for x in pdf.value ]
+                #print(pdf)
                 value_max = pdf.value.max() * 1.1
+                max_lev = 0
                 for fe in fe_list: 
                     print(f"   Processing Univariant {fe}")
+                    n=0
                     for lev in sorted(set(me[ (me['factor_ensemble'] == fe) ][fe])):
                         fig.add_trace(go.Box(x=pdf[pdf[fe] == lev].value), row=r, col=1) 
                         fig.data[-1].name = lev
-                        #fig.update_xaxes(title_text="mAP", range=[0.0, value_max], row=r, col=1)
+                        fig.update_xaxes(title_text=met, range=[0.0, value_max], row=r, col=1)
+                        n = n + 1
                     r = r + 1
-                        
+                    max_lev = np.max([max_lev, n])
+                    #print(max_lev)
                 fig.update_traces(showlegend = False)
-                fig.update_layout(height=120 + 120*len(fe_list), width=800, title_text=f"Univariate Factors ({met}):")
-                fig.write_image(f"/tmp/{stat}_univariate_{genre}.png") 
+                fig.update_layout(height=120 + (30 + 25*max_lev)*len(fe_list), width=800, title_text=f"Univariate Factors ({met}):")
+                fig.write_image(filename)
                 
             # #############  Bivariate Plots   
             value_max = 0.3
             fe_list = list(set(me[me['num_variates'] == 2]['factor_ensemble']))
             for fe in fe_list:
                 f1, f2 = fe.split(' ')
-                print(f"   Processing Biivariant {f1}-{f2}")
+                filename = os.path.join(outdir, f"{stat_level}_bivariate_{fe.replace(' ','_')}_{genre}.png")
+                print(f"   Processing Bivariant {f1}-{f2} -> {filename}")
                 f1_levs = sorted(list(set(me[me['factor_ensemble'] == fe][f1])))
                 f2_levs = sorted(list(set(me[me['factor_ensemble'] == fe][f2])), reverse=True)
                 pdf = me[(me['genre'] == genre) & (me['metric'] == met) & (me['num_variates'] == 2) ].copy()
@@ -197,18 +232,19 @@ def plot_measures_agg(df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, df_sr_fact,
                 value_max = pdf.value.max() * 1.1
                 fig = make_subplots(rows=len(f1_levs), cols=1, subplot_titles=[ f1 + ":" + x for x in f1_levs])
                 r = 1
-                for f1_lev in f1_levs:
-                    for f2_lev in f2_levs:
-                        fig.add_trace(go.Box(x=pdf[(pdf[f1] == f1_lev) & (pdf[f2] == f2_lev) ].value), row=r, col=1) 
-                        fig.data[-1].name = f2 + ":" + f2_lev
+                if (True):  ### For a box plot
+                    for f1_lev in f1_levs:
+                        for f2_lev in f2_levs:
+                            fig.add_trace(go.Box(x=pdf[(pdf[f1] == f1_lev) & (pdf[f2] == f2_lev) ].value), row=r, col=1) 
+                            fig.data[-1].name = f2 + ":" + f2_lev
                         fig.update_xaxes(range=[0.0, value_max], row=r, col=1)
-                    r = r + 1
+                        r = r + 1
 
                 fig.update_traces(showlegend = False)
                 h = 120 + (30 + 25*len(f2_levs))*len(f1_levs)
                 #print(h)
                 fig.update_layout(height=h, width=800, title_text=f"Bivariate Factors {met}: " + fe)
-                fig.write_image(f"/tmp/{type}_bivariate_{fe.replace(' ','_')}_{genre}.png")
+                fig.write_image(filename)
 
 
 
@@ -491,7 +527,7 @@ def main():
     
     parser.add_argument('-C', '--code_base', type=str, required=True, default='CCU_scoring', help = 'Either the Git Repo dir or "CCU_scoring" (defualt)')
     parser.add_argument('-c', '--base_command', type=str, required=True, help = 'This is the base scoring command without the executeable name')
-    parser.add_argument('-t', '--task', choices=['norm', 'emotion'], required=True, help = 'norm, emotion') ### Doesn't do anything
+    parser.add_argument('-t', '--task', choices=['ND', 'ED', 'CD', 'AD', 'VD', 'NDMAP'], required=True, help = 'norm, emotion') ### Doesn't do anything
     parser.add_argument('-w', '--workdir', type=str, required=True, help = 'The working director`y to store results')
     parser.add_argument(      '--param_file', type=str, required=True, help = 'The param def JSON')
     parser.add_argument(      '--bestdir', type=str, default = "", help = 'The directory to copy the top run to')
@@ -512,12 +548,12 @@ def main():
                     param['factors'][fact].append(lev)    
     
     #print(json.dumps(param, indent=4), file=open(args.param_file, 'w'))
-    df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, df_sr_fact = run_score(args.code_base, args.base_command, args.workdir, param)
+    df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, df_sr_fact, df_stat = run_score(args.code_base, args.base_command, args.workdir, param)
     measures = args.measures.split(" ")
-    plot_measures_agg(df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, df_sr_fact, measures, args.workdir)
+    plot_measures_agg(df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, df_sr_fact, df_stat, measures, args.workdir, args.task)
 
-    if (args.bestdir != ""):
-        copy_bestdir(df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, param, args.workdir, args.bestdir, metric='mean_f1_at_MinLLR')
+##    if (args.bestdir != ""):
+ #       copy_bestdir(df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, param, args.workdir, args.bestdir, metric='mean_f1_at_MinLLR')
     
 
 if __name__ == '__main__':
