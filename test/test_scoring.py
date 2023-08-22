@@ -53,6 +53,7 @@ def run_scorer(tmp_dir):
     
 @pytest.mark.parametrize("dataset, system_input_index, system_dir, task, opt1, opt2, opt3, score_tag",
                          [('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.VD.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'VD', '', '', '', ''),
+                          ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.VD.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'VD_gaps', '', '', '-g', ''),
                           ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.AD.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'AD', '', '', '', ''),
                           ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'ND', '', '', '', ''),
                           ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.ED.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'ED', '', '', '', ''),

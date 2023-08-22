@@ -37,6 +37,9 @@ class TestValidateSubmission(unittest.TestCase):
                 if dir == "NDMAP":
                     sys.argv[1:] = ["validate-{}".format(dir.lower()),
                                     "-s", subdir, "-n", self.hidden_norm_path]
+                elif dir == "VD_gaps":
+                    sys.argv[1:] = ["validate-{}".format(dir.lower()), "-ref", refdir,
+                                    "-s", subdir, "-g"]
                 else:
                     sys.argv[1:] = ["validate-{}".format(dir.lower()), "-ref", refdir,
                                     "-s", subdir]

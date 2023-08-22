@@ -4,4 +4,5 @@ reference_dir	/Users/yny16/Downloads/CCU_validation_scoring/test/reference/LDC_r
 scoring_index_file	/Users/yny16/Downloads/CCU_validation_scoring/test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.VD.scoring.index.tab
 output_dir	/Users/yny16/Downloads/CCU_validation_scoring/tmp
 quiet	True
+gap_allowed     False
 git.commit	b'9dd0bd3cb97af3e692f6603a1f9190f77d7fbfff--2023-07-28T12:16:24-04:00'

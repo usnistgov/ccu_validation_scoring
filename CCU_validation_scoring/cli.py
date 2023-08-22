@@ -66,12 +66,14 @@ def main():
     validate_vd_parser = subs.add_parser('validate-vd', description='Validate a valence diarization submission directory')
     validate_vd_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a valence diarization submission')
     validate_vd_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
+    validate_vd_parser.add_argument("-g", "--gap-allowed", action='store_true', default=False, help="Allow gap in system output of valence and arousal")
 
     validate_vd_parser.set_defaults(func=validate_submission.validate_vd_submission_dir_cli)
 
     validate_ad_parser = subs.add_parser('validate-ad', description='Validate an arousal diarization submission directory')
     validate_ad_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing an arousal diarization submission')
     validate_ad_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
+    validate_ad_parser.add_argument("-g", "--gap-allowed", action='store_true', default=False, help="Allow gap in system output of valence and arousal")
 
     validate_ad_parser.set_defaults(func=validate_submission.validate_ad_submission_dir_cli)
 
@@ -137,6 +139,7 @@ def main():
     score_vd_parser.add_argument('-i','--scoring-index-file', type=str, required=True, help='Use to filter file from scoring (REF)')
     score_vd_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output directory")
     score_vd_parser.add_argument("-q", "--quiet", action='store_true', default=False, help="Do not dump ther final alignment and scores to stdout.")
+    score_vd_parser.add_argument("-g", "--gap-allowed", action='store_true', default=False, help="Allow gap in system output of valence and arousal")
 
     score_vd_parser.set_defaults(func=score_submission.score_vd_submission_dir_cli)
 
@@ -146,6 +149,7 @@ def main():
     score_ad_parser.add_argument('-i','--scoring-index-file', type=str, required=True, help='Use to filter file from scoring (REF)')
     score_ad_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output directory")
     score_ad_parser.add_argument("-q", "--quiet", action='store_true', default=False, help="Do not dump ther final alignment and scores to stdout.")
+    score_ad_parser.add_argument("-g", "--gap-allowed", action='store_true', default=False, help="Allow gap in system output of valence and arousal")
 
     score_ad_parser.set_defaults(func=score_submission.score_ad_submission_dir_cli)
 

@@ -53,7 +53,7 @@ def global_file_checks(reference_dir, submission_dir):
 
 	return subm_file_dict
 
-def individual_file_check(task, type, subm_file_path, column_map, header_map, processed_label, subm_file, length, norm_list):
+def individual_file_check(task, type, subm_file_path, column_map, header_map, processed_label, subm_file, length, gap_allowed, norm_list):
 	
 	if task == "norms":
 		file_checks = (check_valid_tab(subm_file_path) and
@@ -77,17 +77,28 @@ def individual_file_check(task, type, subm_file_path, column_map, header_map, pr
 			check_start_end_timestamp_within_length(subm_file_path, task, length, type))
 
 	if task == "valence_continuous" or task == "arousal_continuous":
-		file_checks = (check_valid_tab(subm_file_path) and
-			check_column_number(subm_file_path,column_map[task]) and
-			check_valid_header(subm_file_path,list(header_map[task])) and
-			check_output_records(subm_file_path, task, processed_label) and
-			check_data_type(subm_file_path, header_map[task]) and
-			check_fileid_index_match(subm_file_path, subm_file) and
-			check_start_small_end(subm_file_path, type) and
-			check_time_no_gap(subm_file_path, type) and
-			check_duration_cover(subm_file_path, length) and
-			check_value_range(subm_file_path, task) and
-			check_start_end_timestamp_within_length(subm_file_path, task, length, type))
+		if gap_allowed:
+			file_checks = (check_valid_tab(subm_file_path) and
+				check_column_number(subm_file_path,column_map[task]) and
+				check_valid_header(subm_file_path,list(header_map[task])) and
+				check_output_records(subm_file_path, task, processed_label) and
+				check_data_type(subm_file_path, header_map[task]) and
+				check_fileid_index_match(subm_file_path, subm_file) and
+				check_start_small_end(subm_file_path, type) and
+				check_value_range(subm_file_path, task) and
+				check_start_end_timestamp_within_length(subm_file_path, task, length, type))
+		else:
+			file_checks = (check_valid_tab(subm_file_path) and
+				check_column_number(subm_file_path,column_map[task]) and
+				check_valid_header(subm_file_path,list(header_map[task])) and
+				check_output_records(subm_file_path, task, processed_label) and
+				check_data_type(subm_file_path, header_map[task]) and
+				check_fileid_index_match(subm_file_path, subm_file) and
+				check_start_small_end(subm_file_path, type) and
+				check_time_no_gap(subm_file_path, type) and
+				check_duration_cover(subm_file_path, length) and
+				check_value_range(subm_file_path, task) and
+				check_start_end_timestamp_within_length(subm_file_path, task, length, type))
 
 	if task == "changepoint":
 		file_checks = (check_valid_tab(subm_file_path) and
@@ -323,7 +334,7 @@ def check_index_get_submission_files(ref_dir, subm_dir):
 	column_map = {"index": 4}
 	header_map = {"index":{"file_id": "object","is_processed": "bool","message": "object","file_path": "object"}}
 
-	if individual_file_check("index", None, system_output_index_file_path, column_map, header_map, processed_label=None, subm_file=None, length=None, norm_list=None):
+	if individual_file_check("index", None, system_output_index_file_path, column_map, header_map, processed_label=None, subm_file=None, length=None, gap_allowed=False, norm_list=None):
 
 		system_output_index_df = pd.read_csv(system_output_index_file_path, sep='\t')
 		system_input_index_file_path = glob.glob(system_input_index_file_path)[0]
@@ -407,9 +418,8 @@ def check_value_range(file, task):
 	if df.shape[0] != 0:
 		invalid_value_range = []
 		for i in df[task]:
-			if i != "noann":
-				if not((int(i) >= 1) and (int(i) <= 1000)):
-					invalid_value_range.append(i)
+			if not((int(i) >= 1) and (int(i) <= 1000)):
+				invalid_value_range.append(i)
 
 		if len(invalid_value_range) > 0:
 			logger.error('Invalid file {}:'.format(file))
@@ -440,8 +450,8 @@ def extract_modality_info(file_type):
 	column_map = {"norms": 6, "emotions": 5, "valence_continuous": 4, "arousal_continuous": 4, "changepoint": 3}
 	header_map = {"norms":{"file_id": "object","norm": "object","start": frame_data_type,"end": frame_data_type,"status": "object","llr": "float"},
 				"emotions":{"file_id": "object","emotion": "object","start": frame_data_type,"end": frame_data_type,"llr": "float"},
-				"valence_continuous":{"file_id": "object","start": frame_data_type,"end": frame_data_type,"valence_continuous": ["int","object"]},
-				"arousal_continuous":{"file_id": "object","start": frame_data_type,"end": frame_data_type,"arousal_continuous": ["int","object"]},
+				"valence_continuous":{"file_id": "object","start": frame_data_type,"end": frame_data_type,"valence_continuous": "int"},
+				"arousal_continuous":{"file_id": "object","start": frame_data_type,"end": frame_data_type,"arousal_continuous": "int"},
 				"changepoint":{"file_id": "object","timestamp": frame_data_type,"llr": "float"}}
 
 	return column_map, header_map

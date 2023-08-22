@@ -225,7 +225,7 @@ def score_vd_submission_dir_cli(args):
 
 	check_scoring_index_out_of_scope(args.reference_dir, scoring_index, "valence_continuous")
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "valence_continuous")
-	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "valence_continuous")
+	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "valence_continuous", args.gap_allowed)
 
 	statistic(args.reference_dir, ref, args.submission_dir, hyp, args.output_dir, "valence_continuous")
 	score_valence_arousal(ref, hyp, output_dir = args.output_dir, task = "valence_continuous")
@@ -250,7 +250,7 @@ def score_ad_submission_dir_cli(args):
 
 	check_scoring_index_out_of_scope(args.reference_dir, scoring_index, "arousal_continuous")
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "arousal_continuous")
-	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "arousal_continuous")
+	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "arousal_continuous", args.gap_allowed)
 
 	statistic(args.reference_dir, ref, args.submission_dir, hyp, args.output_dir, "arousal_continuous")
 
