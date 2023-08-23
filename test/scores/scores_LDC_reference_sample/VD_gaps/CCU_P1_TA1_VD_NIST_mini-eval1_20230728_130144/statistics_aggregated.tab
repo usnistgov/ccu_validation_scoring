@@ -5,11 +5,11 @@ ref	video	mean_level	194.67
 ref	audio	stdev_level	273.01
 ref	text	stdev_level	232.67
 ref	video	stdev_level	134.52
-sys	audio	mean_level	558.9
-sys	text	mean_level	12509488750391374630935855104
-sys	video	mean_level	2000315662000200
-sys	audio	stdev_level	297.64
-sys	text	stdev_level	245.65
+sys	audio	mean_level	536.85
+sys	text	mean_level	867.43
+sys	video	mean_level	648
+sys	audio	stdev_level	287.22
+sys	text	stdev_level	260.46
 sys	video	stdev_level	482.71
 ref	all	file_counts	4
 ref	all	file_scoring_counts	3

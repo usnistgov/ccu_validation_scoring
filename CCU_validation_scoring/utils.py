@@ -344,10 +344,45 @@ def preprocess_submission_file(subm_dir, ref_dir, scoring_index, task, gap_allow
 	hyp_final = filter_hyp_use_scoring_index(hyp_type, scoring_index)
 	if task in ["valence_continuous","arousal_continuous"] and gap_allowed:
 		hyp_final = extend_gap_segment(hyp_final, "hyp")
+		hyp_final = add_start_end(hyp_final, ref_dir)
+
 	hyp_final['hyp_uid'] = [ "H"+str(s) for s in range(len(hyp_final['file_id'])) ] ### This is a unique HYP ID
 	hyp_final['hyp_isTruncated'] = False
 
 	return hyp_final
+
+def add_start_end(submission_df, ref_dir):
+
+	file_info_df = pd.read_csv(os.path.join(ref_dir,"docs","file_info.tab"), sep = "\t")
+	file_ids = get_unique_items_in_array(submission_df['file_id'])
+
+	for i in file_ids:
+		df = extract_df(submission_df, i)
+		type = list(df["type"])[0]
+		length = file_info_df["length"][file_info_df['file_uid'] == i].values[0]
+		start = min(list(df["start"]))
+		end = max(list(df["end"]))
+
+		if type in ["audio","video"]:
+			if start > 0:
+				df_add = pd.DataFrame({"file_id": i, "start": 0, "end": start, "Class": silence_string, "file_uid": i, "type": type}, index=[0])
+				submission_df = pd.concat([submission_df, df_add], ignore_index=True)
+
+			if end < length:
+				df_add = pd.DataFrame({"file_id": i, "start": end, "end": length, "Class": silence_string, "file_uid": i, "type": type}, index=[0])
+				submission_df = pd.concat([submission_df, df_add], ignore_index=True)
+			
+		if type == "text":
+			if start > 0:
+				df_add = pd.DataFrame({"file_id": i, "start": 0, "end": start - 1, "Class": silence_string, "file_uid": i, "type": type}, index=[0])
+				submission_df = pd.concat([submission_df, df_add], ignore_index=True)
+
+			if end < length:
+				df_add = pd.DataFrame({"file_id": i, "start": end + 1, "end": length, "Class": silence_string, "file_uid": i, "type": type}, index=[0])
+				submission_df = pd.concat([submission_df, df_add], ignore_index=True)			
+
+	submission_df = submission_df.sort_values(by=["file_id","start","end"]).reset_index(drop=True)
+	return submission_df
 
 def merge_sys_instance(hyp, text_gap, time_gap, llr_value, merge_label, task):
         

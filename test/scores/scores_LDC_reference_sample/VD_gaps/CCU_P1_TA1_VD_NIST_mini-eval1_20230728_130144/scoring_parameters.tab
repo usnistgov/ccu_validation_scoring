@@ -1,8 +1,8 @@
 metric	value
-submission_dir	/Users/yny16/Downloads/CCU_validation_scoring/test/pass_submissions/pass_submissions_LDC_reference_sample/VD/CCU_P1_TA1_VD_NIST_mini-eval1_20230728_130144
+submission_dir	/Users/yny16/Downloads/CCU_validation_scoring/test/pass_submissions/pass_submissions_LDC_reference_sample/VD_gaps/CCU_P1_TA1_VD_NIST_mini-eval1_20230728_130144
 reference_dir	/Users/yny16/Downloads/CCU_validation_scoring/test/reference/LDC_reference_sample
 scoring_index_file	/Users/yny16/Downloads/CCU_validation_scoring/test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.VD.scoring.index.tab
 output_dir	/Users/yny16/Downloads/CCU_validation_scoring/tmp
 quiet	True
-gap_allowed     False
-git.commit	b'9dd0bd3cb97af3e692f6603a1f9190f77d7fbfff--2023-07-28T12:16:24-04:00'
+gap_allowed	True
+git.commit	b'420f2e5f8756fe7c0857ad274b4ce12e29f23034--2023-08-22T12:00:07-04:00'
