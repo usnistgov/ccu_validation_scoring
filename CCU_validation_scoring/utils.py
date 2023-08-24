@@ -344,14 +344,14 @@ def preprocess_submission_file(subm_dir, ref_dir, scoring_index, task, gap_allow
 	hyp_final = filter_hyp_use_scoring_index(hyp_type, scoring_index)
 	if task in ["valence_continuous","arousal_continuous"] and gap_allowed:
 		hyp_final = extend_gap_segment(hyp_final, "hyp")
-		hyp_final = add_start_end(hyp_final, ref_dir)
+		hyp_final = add_start_end_sys(hyp_final, ref_dir)
 
 	hyp_final['hyp_uid'] = [ "H"+str(s) for s in range(len(hyp_final['file_id'])) ] ### This is a unique HYP ID
 	hyp_final['hyp_isTruncated'] = False
 
 	return hyp_final
 
-def add_start_end(submission_df, ref_dir):
+def add_start_end_sys(submission_df, ref_dir):
 
 	file_info_df = pd.read_csv(os.path.join(ref_dir,"docs","file_info.tab"), sep = "\t")
 	file_ids = get_unique_items_in_array(submission_df['file_id'])

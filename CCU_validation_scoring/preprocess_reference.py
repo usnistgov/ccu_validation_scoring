@@ -24,7 +24,7 @@ def make_row(arr):
         else:
                 return(pd.Series(arr[0:8], index=['file_id', 'Class', 'start', 'end', 'Class_type', 'type', 'length', 'status']))
 
-def fill_start_end(ref):
+def fill_start_end_ref(ref):
 	"""
 	Add no score region to start and end of the file in reference.
 
@@ -628,7 +628,7 @@ def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time
 		ref.drop_duplicates(inplace = True)
 		ref_inter = ref.merge(index_df)
 		if len(ref_inter) > 0:
-			ref_final = fill_start_end(ref_inter)
+			ref_final = fill_start_end_ref(ref_inter)
 			ref_final = ref_final[ref_final.Class != "none"]
 		else:
 			ref_final = ref_inter
@@ -646,7 +646,7 @@ def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time
 		ref = ref.merge(index_df)
 		ref_inter = extend_gap_segment(ref, "ref")
 		if len(ref_inter) > 0:
-			ref_final = fill_start_end(ref_inter)
+			ref_final = fill_start_end_ref(ref_inter)
 		else:
 			ref_final = ref_inter		
 
