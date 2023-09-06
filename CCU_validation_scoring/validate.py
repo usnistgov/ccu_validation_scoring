@@ -789,9 +789,11 @@ def check_valid_timestamps(file, docs_dir):
 					logger.error("Start is higher than end in text {}".format(file))
 					return False
 			elif row['file_id'] in audvid_ids:
-				if row['start'] >= row['end']:
+				if row['start'] == row['end']:
+					logger.warning("Start {} is equal to end {} in audio/video {}, we are going to drop this segment during scoring.".format(row['start'], row['end'], file))
+				if row['start'] > row['end']:
 					logger.error('Invalid file {}:'.format(file))
-					logger.error("Start {} is equal to/higher than end {} in audio/video {}".format(row['start'], row['end'], file))
+					logger.error("Start {} is higher than end {} in audio/video {}".format(row['start'], row['end'], file))
 					return False
 			else:
 				logger.error("Validation failed")

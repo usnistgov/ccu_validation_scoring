@@ -17,6 +17,7 @@ class	file_id	eval	ref	sys	llr	parameters	ref_status	hyp_status
 007	M010015BY	unmapped	{}	{start=1104.567,end=1119.567}	1.5	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
 007	M010015BY	mapped	{start=1119.568,end=1134.568}	{start=1119.568,end=1134.568}	1.5	{iou=1.000,intersection=15.000,union=15.000,shifted_start_hyp=1119.568,shifted_end_hyp=1134.568,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=15.000,type=audio}	violate	violate
 007	M010019QD	unmapped	{}	{start=45,end=60}	1.5	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
-007	M010019QD	mapped	{start=78,end=90}	{start=78,end=90}	1.5	{iou=1.000,intersection=12.000,union=12.000,shifted_start_hyp=78.000,shifted_end_hyp=90.000,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=150.000,type=text}	violate	adhere
+007	M010019QD	unmapped	{}	{start=78,end=90}	1.5	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
+007	M010019QD	unmapped	{start=78,end=78}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0}	violate	EMPTY_NA
 007	M010029SP	unmapped	{}	{start=200,end=215}	1.5	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
 007	M010029SP	mapped	{start=216,end=230}	{start=216,end=230}	1.5	{iou=1.000,intersection=14.000,union=14.000,shifted_start_hyp=216.000,shifted_end_hyp=230.000,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=150.000,type=text}	violate	violate

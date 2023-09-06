@@ -147,10 +147,10 @@ def segment_iou_v2(sys_start, sys_end, sys_uid, sys_isTrunc, refs, collar):
     cse = [ sys_end+collar if (re > sys_end + collar) else end_max for re, end_max in zip(ref_end, np.maximum(ref_end, sys_end)) ] 
 
     ### Set the min to be zero if the numerator is negative
-    scaled_pct_TP = [ 0.0 if ((np.minimum(re, ce)  - np.maximum(rs, cb)) < 0.0) else (np.minimum(re, ce)  - np.maximum(rs, cb)) / (re - rs) for rs, re, cb, ce in zip(ref_start, ref_end, csb, cse) ]
+    scaled_pct_TP = [ 0.0 if (((np.minimum(re, ce)  - np.maximum(rs, cb)) < 0.0) or (re == rs)) else (np.minimum(re, ce)  - np.maximum(rs, cb)) / (re - rs) for rs, re, cb, ce in zip(ref_start, ref_end, csb, cse) ]
 
     ### This formula will set pct_FP to be > 1.  The second command sets the max to 1
-    scaled_pct_FP = [ ( (rs-cb if (rs-cb > 0) else 0) + (ce - re if (ce-re > 0) else 0)) / (re - rs) for rs, re, cb, ce in zip(ref_start, ref_end, csb, cse) ]
+    scaled_pct_FP = [ 0.0 if (re == rs) else ((rs-cb if (rs-cb > 0) else 0) + (ce - re if (ce-re > 0) else 0)) / (re - rs) for rs, re, cb, ce in zip(ref_start, ref_end, csb, cse) ]
     scaled_pct_FP = [ 1.0 if (inter <= 0.0) else spfp for spfp, inter in zip(scaled_pct_FP, inter) ]
 
     # Segment union.

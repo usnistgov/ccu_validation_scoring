@@ -29,7 +29,6 @@ def validate_ref_submission_dir_cli(args):
 				# Retrieve paths to other index and docs directories
 				docs_dir = os.path.join(root, '..',"docs")
 				index_dir = os.path.join(root, '..',"index_files")
-				error_count += 1 if file_checks != True else 0
 				# Call file-specific checks
 				if file == "valence_arousal.tab":
 					file_checks = (global_ref_file_checks(file_path, index_dir) and 

@@ -9,5 +9,5 @@ class	file_id	eval	ref	sys	llr	parameters	ref_status	hyp_status
 002	M010029SP	unmapped	{start=200,end=215}	{}		{}	violate	EMPTY_NA
 007	M010005QD	unmapped	{start=60.201,end=75.201}	{}		{}	violate	EMPTY_NA
 007	M010015BY	unmapped	{start=1119.568,end=1134.568}	{}		{}	violate	EMPTY_NA
-007	M010019QD	unmapped	{start=78,end=90}	{}		{}	violate	EMPTY_NA
+007	M010019QD	unmapped	{start=78,end=78}	{}		{}	violate	EMPTY_NA
 007	M010029SP	unmapped	{start=216,end=230}	{}		{}	violate	EMPTY_NA

@@ -577,8 +577,8 @@ def preprocess_norm_emotion_reference_df(reference_df, class_type, text_gap, tim
 	# Convert the result dictionary into dataframe
 	result_df = convert_norm_emotion_dict_df(result, class_type)
 
-	## Dropping rows with zero duration
-	result_df = result_df.drop(result_df[result_df.start == result_df.end].index, axis=0)
+	# ## Dropping rows with zero duration
+	# result_df = result_df.drop(result_df[result_df.start == result_df.end].index, axis=0)
 
 	return result_df
 
