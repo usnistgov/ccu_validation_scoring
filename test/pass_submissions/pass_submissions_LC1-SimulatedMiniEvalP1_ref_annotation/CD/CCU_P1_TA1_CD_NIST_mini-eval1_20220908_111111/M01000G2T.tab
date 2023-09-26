@@ -1,4 +1,4 @@
-file_id	timestamp	llr
-M01000G2T	15	0.6
-M01000G2T	20	0.8
-M01000G2T	40	0.9
+file_id	timestamp	llr	direction	impact
+M01000G2T	15	0.6	positive	1
+M01000G2T	20	0.8	positive	1
+M01000G2T	40	0.9	positive	1

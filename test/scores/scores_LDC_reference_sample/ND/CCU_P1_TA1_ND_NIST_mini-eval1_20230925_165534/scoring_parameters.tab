@@ -1,0 +1,15 @@
+metric	value
+submission_dir	/Users/yny16/Downloads/CCU_validation_scoring/test/pass_submissions/pass_submissions_LDC_reference_sample/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220531_050236
+reference_dir	/Users/yny16/Downloads/CCU_validation_scoring/test/reference/LDC_reference_sample
+scoring_index_file	/Users/yny16/Downloads/CCU_validation_scoring/test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab
+mapping_submission_dir	None
+norm_list_file	None
+iou_thresholds	0.2
+output_dir	/Users/yny16/Downloads/CCU_validation_scoring/test
+merge_ref_text_gap	10
+merge_ref_time_gap	1.0
+merge_sys_text_gap	None
+merge_sys_time_gap	None
+combine_sys_llrs	None
+merge_sys_label	None
+git.commit	b'6e72e94d06757333e68cb281069a5b32abdb3207--2023-01-24T17:39:18-05:00'

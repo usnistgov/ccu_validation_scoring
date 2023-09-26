@@ -1,8 +1,8 @@
-file_id	timestamp	llr
-M010005NJ	17	0.9
-M010005NJ	25	0.6
-M010005NJ	27	0.8
-M010005NJ	35	0.9
-M010005NJ	38	0.9
-M010005NJ	40	0.7
+file_id	timestamp	llr	direction	impact
+M010005NJ	17	0.9	positive	1
+M010005NJ	25	0.6	positive	1
+M010005NJ	27	0.8	positive	1
+M010005NJ	35	0.9	positive	1
+M010005NJ	38	0.9	positive	1
+M010005NJ	40	0.7	positive	1
 

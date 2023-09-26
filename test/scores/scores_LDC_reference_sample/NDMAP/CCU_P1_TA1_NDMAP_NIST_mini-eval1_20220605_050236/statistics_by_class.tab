@@ -11,10 +11,10 @@ ref	007	video	instance_counts	1
 sys	001	audio	instance_counts	1
 sys	001	text	instance_counts	2
 sys	001	video	instance_counts	1
-sys	A1	audio	instance_counts	2
-sys	A1	text	instance_counts	2
-sys	A1	video	instance_counts	1
-sys	A2	text	instance_counts	1
-sys	A2	video	instance_counts	1
-sys	A3	text	instance_counts	2
-sys	A3	video	instance_counts	1
+sys	A01	audio	instance_counts	2
+sys	A01	text	instance_counts	2
+sys	A01	video	instance_counts	1
+sys	A02	text	instance_counts	1
+sys	A02	video	instance_counts	1
+sys	A03	text	instance_counts	2
+sys	A03	video	instance_counts	1

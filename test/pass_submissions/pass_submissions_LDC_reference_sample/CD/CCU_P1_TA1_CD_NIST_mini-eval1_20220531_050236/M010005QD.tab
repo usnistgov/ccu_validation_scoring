@@ -1,2 +1,2 @@
-file_id	timestamp	llr
-M010005QD	90.203	1.5
+file_id	timestamp	llr	direction	impact
+M010005QD	90.203	1.5	positive	1

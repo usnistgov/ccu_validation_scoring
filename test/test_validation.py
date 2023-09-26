@@ -21,6 +21,7 @@ class TestValidateSubmission(unittest.TestCase):
         self.pass_submissions_path = os.path.join(test_dir_path, 'pass_submissions')
         self.fail_submissions_path = os.path.join(test_dir_path, 'fail_submissions')
         self.reference_path = os.path.join(test_dir_path, 'reference')
+        self.known_norm_path = os.path.join(test_dir_path, 'known_norms.txt')
         self.hidden_norm_path = os.path.join(test_dir_path, 'hidden_norms.txt')
 
     def test_valid_submissions(self):
@@ -64,6 +65,9 @@ class TestValidateSubmission(unittest.TestCase):
                 if dir == "NDMAP":
                     sys.argv[1:] = ["validate-{}".format(dir.lower()),
                                     "-s", subdir, "-n", self.hidden_norm_path]
+                elif dir == "ND_norm_start_with_5":
+                    sys.argv[1:] = ["validate-{}".format(dir.lower()), "-ref", refdir,
+                                    "-s", subdir, "-n", self.known_norm_path]                    
                 else:
                     sys.argv[1:] = ["validate-{}".format(dir.lower()), "-ref", refdir,
                                     "-s", subdir]

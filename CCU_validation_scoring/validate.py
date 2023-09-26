@@ -62,6 +62,8 @@ def individual_file_check(task, type, subm_file_path, column_map, header_map, pr
 			check_output_records(subm_file_path, task, processed_label) and
 			check_data_type(subm_file_path, header_map[task]) and
 			check_fileid_index_match(subm_file_path, subm_file) and
+			solve_duplicates_except_llr_or_level(subm_file_path, task) and
+			check_norm_string(subm_file_path, norm_list) and
 			check_start_small_end(subm_file_path, type) and
 			check_start_end_timestamp_within_length(subm_file_path, task, length, type))
 	
@@ -72,6 +74,7 @@ def individual_file_check(task, type, subm_file_path, column_map, header_map, pr
 			check_output_records(subm_file_path, task, processed_label) and
 			check_data_type(subm_file_path, header_map[task]) and
 			check_fileid_index_match(subm_file_path, subm_file) and
+			solve_duplicates_except_llr_or_level(subm_file_path, task) and
 			check_emotion_id(subm_file_path) and
 			check_start_small_end(subm_file_path, type) and
 			check_start_end_timestamp_within_length(subm_file_path, task, length, type))
@@ -84,6 +87,7 @@ def individual_file_check(task, type, subm_file_path, column_map, header_map, pr
 				check_output_records(subm_file_path, task, processed_label) and
 				check_data_type(subm_file_path, header_map[task]) and
 				check_fileid_index_match(subm_file_path, subm_file) and
+				solve_duplicates_except_llr_or_level(subm_file_path, task) and
 				check_start_small_end(subm_file_path, type) and
 				check_value_range(subm_file_path, task) and
 				check_start_end_timestamp_within_length(subm_file_path, task, length, type))
@@ -94,9 +98,10 @@ def individual_file_check(task, type, subm_file_path, column_map, header_map, pr
 				check_output_records(subm_file_path, task, processed_label) and
 				check_data_type(subm_file_path, header_map[task]) and
 				check_fileid_index_match(subm_file_path, subm_file) and
+				solve_duplicates_except_llr_or_level(subm_file_path, task) and
 				check_start_small_end(subm_file_path, type) and
 				check_time_no_gap(subm_file_path, type) and
-				check_duration_cover(subm_file_path, length) and
+				check_duration_cover(subm_file_path, length, type) and
 				check_value_range(subm_file_path, task) and
 				check_start_end_timestamp_within_length(subm_file_path, task, length, type))
 
@@ -107,6 +112,9 @@ def individual_file_check(task, type, subm_file_path, column_map, header_map, pr
 			check_output_records(subm_file_path, task, processed_label) and
 			check_data_type(subm_file_path, header_map[task]) and
 			check_fileid_index_match(subm_file_path, subm_file) and
+			solve_duplicates_except_llr_or_level(subm_file_path, task) and
+			check_direction_cp(subm_file_path) and
+			check_impact_cp(subm_file_path) and
 			check_start_end_timestamp_within_length(subm_file_path, task, length, type))
 
 	if task == "index":
@@ -248,6 +256,68 @@ def check_emotion_id(file):
 			return False
 	return True
 
+def check_direction_cp(file):
+
+	df = pd.read_csv(file, sep='\t')
+	if df.shape[0] != 0:
+		invalid_direction = []
+		for i in df["direction"]:
+			if i not in ["positive","negative"]:
+				invalid_direction.append(i)
+
+		if len(invalid_direction) > 0:
+			logger.error('Invalid file {}:'.format(file))
+			logger.error("Additional direction(s) '{}'' have been found in {}".format(set(invalid_direction), file))
+			return False
+	return True
+
+def check_impact_cp(file):
+
+	df = pd.read_csv(file, sep='\t')
+	if df.shape[0] != 0:
+		invalid_impact = []
+		for i in df["impact"]:
+			if i not in [1,2,3,4]:
+				invalid_impact.append(i)
+
+		if len(invalid_impact) > 0:
+			logger.error('Invalid file {}:'.format(file))
+			logger.error("Additional impact(s) '{}'' have been found in {}".format(set(invalid_impact), file))
+			return False
+	return True
+
+def check_system_generate_norm(norm, norm_list):
+	
+	if norm in norm_list:
+		return True
+	elif norm not in norm_list and norm[0] == "5":
+		return True
+	else:
+		return False
+
+def check_norm_string(file, norm_list):
+
+	df = pd.read_csv(file, dtype={'norm': object}, sep='\t')
+	if df.shape[0] != 0:
+		invalid_norm = []
+		for i in df["norm"]:
+			if norm_list == None:
+				if len(i) == 3 and type(i) == str:
+					pass
+				else:
+					invalid_norm.append(i)
+			else:
+				if len(i) == 3 and type(i) == str and check_system_generate_norm(i, norm_list):
+					pass
+				else:
+					invalid_norm.append(i)
+
+		if len(invalid_norm) > 0:
+			logger.error('Invalid file {}:'.format(file))
+			logger.error("Invalid norm(s) '{}'' have been found in {}. Norm string must be either in LDC defined norms or system generated norms that start with 5".format(set(invalid_norm), file))
+			return False
+	return True
+
 def check_start_small_end(file, type):
 
 	df = pd.read_csv(file, dtype={'norm': object}, sep='\t')
@@ -288,14 +358,19 @@ def check_time_no_gap(file, type):
 					return False
 	return True
 
-def check_duration_cover(file, length):
+def check_duration_cover(file, length, type):
 
 	df = pd.read_csv(file, dtype={'norm': object}, sep='\t')
 	if df.shape[0] != 0:
 		start = min(list(df["start"]))
 		end = max(list(df["end"]))	
 
-		if start == 0 and end == length:
+		if type == "text":
+			limit = length + 10
+		if type == "audio" or type == "video":
+			limit = length + 1
+
+		if start == 0 and end <= limit:
 			return True
 
 		logger.error('Invalid file {}:'.format(file))
@@ -382,9 +457,13 @@ def check_start_end_timestamp_within_length(file, task, length, type):
 	if df.shape[0] != 0:
 		invalid_point = []
 
+		if type == "text":
+			limit = length + 10
+		if type == "audio" or type == "video":
+			limit = length + 1
 		if task == "changepoint":
 			for i in range(df.shape[0]):
-				if df.iloc[i]["timestamp"] > length:
+				if df.iloc[i]["timestamp"] > limit:
 					invalid_point.append(df.iloc[i]["timestamp"])
 
 			if len(invalid_point) > 0:
@@ -395,20 +474,37 @@ def check_start_end_timestamp_within_length(file, task, length, type):
 		else:
 			for i in range(df.shape[0]):
 				if type == "text":	
-					if df.iloc[i]["start"] > length:
+					if df.iloc[i]["start"] > limit:
 						invalid_point.append(df.iloc[i]["start"])
-					if df.iloc[i]["end"] > length:
+					if df.iloc[i]["end"] > limit:
 						invalid_point.append(df.iloc[i]["end"])
 				if type == "audio" or type == "video":
-					if df.iloc[i]["start"] >= length:
+					if df.iloc[i]["start"] >= limit:
 						invalid_point.append(df.iloc[i]["start"])
-					if df.iloc[i]["end"] > length:
+					if df.iloc[i]["end"] > limit:
 						invalid_point.append(df.iloc[i]["end"])
 
 			if len(invalid_point) > 0:
 				logger.error('Invalid file {}:'.format(file))
 				logger.error("The value of start/end column in {} is larger than the value of length in file_info.tab".format(file))
 				return False					
+
+	return True
+
+def solve_duplicates_except_llr_or_level(file, task):
+
+	df = pd.read_csv(file, dtype={'norm': object}, sep='\t')
+	if task == "valence_continuous" or task == "arousal_continuous":
+		column_remove = task
+	else:
+		column_remove = "llr"
+	if df.shape[0] != 0:
+		columns = list(df.columns)
+		columns.remove(column_remove)
+		if df.duplicated(subset = columns).sum() > 0:
+			logger.error('Invalid file {}:'.format(file))
+			logger.error("There are some duplicate outputs but different {} in {}".format(column_remove, file))
+			return False
 
 	return True
 
@@ -447,12 +543,12 @@ def extract_modality_info(file_type):
 	else:
 		frame_data_type = ["int", "float"]
 
-	column_map = {"norms": 6, "emotions": 5, "valence_continuous": 4, "arousal_continuous": 4, "changepoint": 3}
+	column_map = {"norms": 6, "emotions": 5, "valence_continuous": 4, "arousal_continuous": 4, "changepoint": 5}
 	header_map = {"norms":{"file_id": "object","norm": "object","start": frame_data_type,"end": frame_data_type,"status": "object","llr": "float"},
 				"emotions":{"file_id": "object","emotion": "object","start": frame_data_type,"end": frame_data_type,"llr": "float"},
 				"valence_continuous":{"file_id": "object","start": frame_data_type,"end": frame_data_type,"valence_continuous": "int"},
 				"arousal_continuous":{"file_id": "object","start": frame_data_type,"end": frame_data_type,"arousal_continuous": "int"},
-				"changepoint":{"file_id": "object","timestamp": frame_data_type,"llr": "float"}}
+				"changepoint":{"file_id": "object","timestamp": frame_data_type,"llr": "float","direction": "object","impact": "int"}}
 
 	return column_map, header_map
 

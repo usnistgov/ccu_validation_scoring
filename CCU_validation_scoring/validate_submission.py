@@ -35,7 +35,11 @@ def validate_nd_submission_dir_cli(args):
 		processed_label = subm_file_dict[subm_file]["processed"]
 		length = subm_file_dict[subm_file]["length"]
 		
-		if individual_file_check(task, type, subm_file_path, column_map, header_map, processed_label, subm_file, length, gap_allowed=False, norm_list=None):
+		if args.norm_list_file:
+			known_norm_list = load_list(args.norm_list_file)
+		else:
+			known_norm_list = None
+		if individual_file_check(task, type, subm_file_path, column_map, header_map, processed_label, subm_file, length, gap_allowed=False, norm_list=known_norm_list):
 			pass
 		else:
 			invalid_subm_file_path.append(subm_file_path)

@@ -1,0 +1,5 @@
+file_id	norm	start	end	status	llr
+M010005QD	001	45.2	60.2	adhere	1.5
+M010005QD	503	45.2	60.2	violate	1.5
+M010005QD	501	60.201	75.201	violate	1.5
+M010005QD	502	90.203	105.203	adhere	1.5
