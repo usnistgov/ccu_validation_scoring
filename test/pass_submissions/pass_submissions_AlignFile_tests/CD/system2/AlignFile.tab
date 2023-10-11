@@ -1,4 +1,4 @@
-file_id	timestamp	llr	direction	impact
+file_id	timestamp	llr	direction_impact	strength_impact
 AlignFile	12.0	0.1421410297705176	positive	1
 AlignFile	32.0	0.3984777331139617	positive	1
 AlignFile	41.0	0.1324640315225091	positive	1

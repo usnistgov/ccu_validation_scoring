@@ -1,2 +1,2 @@
-user_id	file_id	timestamp	impact_scalar	comment
-9	AlignFile	500	4	A test file
+user_id	file_id	timestamp	direction_impact	strength_impact	evidence
+9	AlignFile	500	negative	4	A test file

@@ -129,12 +129,19 @@ def test_run_score_submissions(dataset, system_input_index, system_dir, task, op
     for s in subdirs:
         print(f"SUBDIR: {s}")
     
-    if (task in ['AD', 'VD']):
+    if (task in ['AD', 'VD', 'VD_gaps']):
         assert len(subdirs) > 0        
-        for subdir in subdirs:                        
-            sys.argv[1:] = ["score-{}".format(task.lower()), "-ref", refdir,
+        for subdir in subdirs:
+            if task == "VD_gaps":
+                sys.argv[1:] = ["score-{}".format("vd"), "-ref", refdir,
+                            "-s", subdir, "-i", scoring_index_path, "-o", tmp_dir]
+            else:                       
+                sys.argv[1:] = ["score-{}".format(task.lower()), "-ref", refdir,
                             "-s", subdir, "-i", scoring_index_path, "-o", tmp_dir]
             clean_tmp_dir(tmp_dir)
+
+            if (opt3 != ''):
+                sys.argv.extend(opt3.split())
             run_scorer(tmp_dir)
 
 #            for filename in ["scores_aggregated.tab", "segment_diarization.tab"]:

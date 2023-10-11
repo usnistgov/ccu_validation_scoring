@@ -170,10 +170,10 @@ def compute_ious(row, ref, class_type, time_span_scale_collar, text_span_scale_c
     
     if len(refs) == 0:
         if (class_type == "norm"):
-            return pd.DataFrame(data=[[row.Class, class_type, row.type, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0, row.status, None, None, None, row.start, row.end, 0.0, 1.0, None, False, None, False, None]],
+            return pd.DataFrame(data=[[row.Class, class_type, row.type, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0, row.status, None, np.nan, np.nan, row.start, row.end, 0.0, 1.0, np.nan, False, None, False, None]],
                                 columns=['Class', 'Class_type', 'type', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU', 'hyp_status', 'length', 'intersection', 'union', 'shifted_sys_start', 'shifted_sys_end', 'pct_tp', 'pct_fp', 'scale_collar', 'isNSCR', 'hyp_uid', 'hyp_isTruncated', 'ref_uid'])
         else:
-            return pd.DataFrame(data=[[row.Class, class_type, row.type, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0,             None, None, None, row.start, row.end, 0.0, 1.0, None, False, None, False, None]],
+            return pd.DataFrame(data=[[row.Class, class_type, row.type, row.file_id, np.nan, np.nan, row.start, row.end, row.llr, 0.0,             None, np.nan, np.nan, row.start, row.end, 0.0, 1.0, np.nan, False, None, False, None]],
                                 columns=['Class', 'Class_type', 'type', 'file_id', 'start_ref', 'end_ref', 'start_hyp', 'end_hyp', 'llr', 'IoU', 'length', 'intersection', 'union', 'shifted_sys_start', 'shifted_sys_end', 'pct_tp', 'pct_fp', 'scale_collar', 'isNSCR', 'hyp_uid', 'hyp_isTruncated', 'ref_uid'])    
     
     else:        

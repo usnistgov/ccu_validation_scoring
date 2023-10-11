@@ -597,6 +597,22 @@ def preprocess_valence_arousal_reference_df(reference_df, class_type):
 
 	return result_df
 
+def convert_reference_zscore(df, task):
+
+	df_num = df[df[task] != "noann"].copy()
+	df_num[task] = df_num[task].astype(int)
+
+	Mean = df_num.groupby(['user_id'])[task].transform('mean')    
+	Std = df_num.groupby(['user_id'])[task].transform('std').fillna(0)
+
+	df_num["zscore"] = ((df_num[task] - Mean)/Std).fillna(0)
+	df_noann = df[df[task] == "noann"]
+	df_zscore = df_num.drop([task], axis=1)
+	df_zscore_final = df_zscore.rename(columns={"zscore":task})
+	df_zscore_final = pd.concat([df_noann, df_zscore_final]).sort_values(by = ["user_id","segment_id"])
+
+	return df_zscore_final
+
 def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time_gap = None, merge_label = None, dump_inputs = False, output_dir = None):
 	"""
 	For each task, read and merge corresponding data file, segment file and index file
@@ -636,10 +652,11 @@ def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time
 	if task == "valence_continuous" or task == "arousal_continuous":
 		data_file = os.path.join(ref_dir,"data","valence_arousal.tab")
 		data_df = read_dedupe_file(data_file)
-		data_df = data_df[~data_df.isin(['EMPTY_TBD']).any(axis=1)]  
+		data_df = data_df[~data_df.isin(['EMPTY_TBD']).any(axis=1)] 
+		new_data_df = convert_reference_zscore(data_df, task)
 		segment_file = os.path.join(ref_dir,"docs","segments.tab")
 		segment_df = read_dedupe_file(segment_file)
-		reference_df = data_df.merge(segment_df.merge(index_df))
+		reference_df = new_data_df.merge(segment_df.merge(index_df))
 		reference_prune = check_remove_start_end_same(reference_df)
 		column_name = task
 		ref = preprocess_valence_arousal_reference_df(reference_prune, column_name)
@@ -679,9 +696,9 @@ def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time
 				type_col = ref_sub.loc[ref_sub.index[0], 'type'] 
 				#print("file {} {} {} {}".format(file_id, start, end, length))
 				if (start > 0):
-								ref_final.loc[len(ref_final)] = [0, file_id, 0,   'NO_SCORE_REGION', "StartNoScore", type_col, length, 0, start]
+								ref_final.loc[len(ref_final)] = [0, file_id, 0,   'NA', 'NO_SCORE_REGION', "StartNoScore", type_col, length, 0, start]
 				if (end < length):
-								ref_final.loc[len(ref_final)] = [0, file_id, end, 'NO_SCORE_REGION', "EndNoScore", type_col, length, end, length]
+								ref_final.loc[len(ref_final)] = [0, file_id, end, 'NA', 'NO_SCORE_REGION', "EndNoScore", type_col, length, end, length]
 
 	ref_final['ref_uid'] = [ "R"+str(s) for s in range(len(ref_final['file_id'])) ] ### This is a unique REF ID to help find FN
 	ref_final['isNSCR'] = ref_final.Class.isin(['noann', 'NO_SCORE_REGION'])

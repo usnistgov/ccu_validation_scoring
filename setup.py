@@ -38,7 +38,8 @@ setup(name=PACKAGE_NAME,
         'pathlib',
         'numpy',
         'pytest',
-        'matplotlib'
+        'matplotlib',
+        'scipy'
     ],
       version=CCU_validation_scoring.__version__,
       entry_points='''

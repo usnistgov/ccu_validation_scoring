@@ -2,5 +2,7 @@ metric	value
 submission_dir	/Users/yny16/Downloads/CCU_validation_scoring/test/pass_submissions/pass_submissions_LDC_reference_sample/VD/CCU_P1_TA1_VD_NIST_mini-eval1_20220531_050236
 reference_dir	/Users/yny16/Downloads/CCU_validation_scoring/test/reference/LDC_reference_sample
 scoring_index_file	/Users/yny16/Downloads/CCU_validation_scoring/test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.VD.scoring.index.tab
-output_dir	/Users/yny16/Downloads/CCU_validation_scoring/test
-git.commit	b'6e72e94d06757333e68cb281069a5b32abdb3207--2023-01-24T17:39:18-05:00'
+output_dir	/Users/yny16/Downloads/CCU_validation_scoring/tmp
+quiet	True
+gap_allowed	False
+git.commit	b'5411282c9cc924abbf4886494af8e94b28f510ac--2023-09-26T12:07:58-04:00'

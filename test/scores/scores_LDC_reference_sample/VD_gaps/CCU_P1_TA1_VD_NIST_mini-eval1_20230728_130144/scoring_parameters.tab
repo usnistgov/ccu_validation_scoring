@@ -5,4 +5,4 @@ scoring_index_file	/Users/yny16/Downloads/CCU_validation_scoring/test/reference/
 output_dir	/Users/yny16/Downloads/CCU_validation_scoring/tmp
 quiet	True
 gap_allowed	True
-git.commit	b'420f2e5f8756fe7c0857ad274b4ce12e29f23034--2023-08-22T12:00:07-04:00'
+git.commit	b'5411282c9cc924abbf4886494af8e94b28f510ac--2023-09-26T12:07:58-04:00'

@@ -1,1 +1,1 @@
-user_id	file_id	timestamp	impact_scalar	comment
+user_id	file_id	timestamp	direction_impact	strength_impact	evidence

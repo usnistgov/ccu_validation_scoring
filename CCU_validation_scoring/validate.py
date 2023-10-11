@@ -16,9 +16,9 @@ def global_ref_file_checks(file, index_dir):
 
 	elif file != None and "changepoint.tab" in file:
 		file_type = "changepoint"
-		expected_header = ['user_id', 'file_id', 'timestamp', 'impact_scalar', 'comment']
+		expected_header = ['user_id', 'file_id', 'timestamp', 'direction_impact',	'strength_impact',	'evidence']
 		expected_column_number = len(expected_header)
-		expected_header_types = {'user_id': 'int', 'file_id': 'object', 'timestamp': ["int", "float"], 'impact_scalar':'int', 'comment': 'object'}
+		expected_header_types = {'user_id': 'int', 'file_id': 'object', 'timestamp': ["int", "float"], 'direction_impact': 'object',	'strength_impact': 'int',	'evidence': 'object'}
 
 	elif file != None and "emotions.tab" in file: # CHANGE TO emotions.tab
 		file_type = "emotions"
@@ -261,13 +261,13 @@ def check_direction_cp(file):
 	df = pd.read_csv(file, sep='\t')
 	if df.shape[0] != 0:
 		invalid_direction = []
-		for i in df["direction"]:
+		for i in df["direction_impact"]:
 			if i not in ["positive","negative"]:
 				invalid_direction.append(i)
 
 		if len(invalid_direction) > 0:
 			logger.error('Invalid file {}:'.format(file))
-			logger.error("Additional direction(s) '{}'' have been found in {}".format(set(invalid_direction), file))
+			logger.error("Additional direction_impact(s) '{}'' have been found in {}".format(set(invalid_direction), file))
 			return False
 	return True
 
@@ -276,13 +276,13 @@ def check_impact_cp(file):
 	df = pd.read_csv(file, sep='\t')
 	if df.shape[0] != 0:
 		invalid_impact = []
-		for i in df["impact"]:
+		for i in df["strength_impact"]:
 			if i not in [1,2,3,4]:
 				invalid_impact.append(i)
 
 		if len(invalid_impact) > 0:
 			logger.error('Invalid file {}:'.format(file))
-			logger.error("Additional impact(s) '{}'' have been found in {}".format(set(invalid_impact), file))
+			logger.error("Additional strength_impact(s) '{}'' have been found in {}".format(set(invalid_impact), file))
 			return False
 	return True
 
@@ -548,7 +548,7 @@ def extract_modality_info(file_type):
 				"emotions":{"file_id": "object","emotion": "object","start": frame_data_type,"end": frame_data_type,"llr": "float"},
 				"valence_continuous":{"file_id": "object","start": frame_data_type,"end": frame_data_type,"valence_continuous": "int"},
 				"arousal_continuous":{"file_id": "object","start": frame_data_type,"end": frame_data_type,"arousal_continuous": "int"},
-				"changepoint":{"file_id": "object","timestamp": frame_data_type,"llr": "float","direction": "object","impact": "int"}}
+				"changepoint":{"file_id": "object","timestamp": frame_data_type,"llr": "float","direction_impact": "object","strength_impact": "int"}}
 
 	return column_map, header_map
 

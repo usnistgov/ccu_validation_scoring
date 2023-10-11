@@ -4,6 +4,7 @@ import subprocess
 import logging
 import pandas as pd
 import numpy as np
+import scipy.stats as stats
 import re
 from matplotlib import pyplot as plt
 from .aggregate import *
@@ -136,7 +137,10 @@ def concatenate_submission_file(subm_dir, task):
 
 	submission_dfs.drop_duplicates(inplace = True)
 	submission_dfs = submission_dfs.reset_index(drop=True)
-	
+
+	if task == "valence_continuous" or task == "arousal_continuous":
+		submission_dfs[task] = stats.zscore(np.array(submission_dfs[task]))
+
 	new_submission_dfs = change_class_type(submission_dfs, convert_task_column(task))
 
 	return new_submission_dfs

@@ -1,4 +1,4 @@
-file_id	timestamp	llr	direction	impact
+file_id	timestamp	llr	direction_impact	strength_impact
 M01000H0B	20	0.8	positive	1
 M01000H0B	310	0.6	positive	1
 M01000H0B	350	0.9	positive	1

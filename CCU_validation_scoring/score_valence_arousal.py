@@ -177,9 +177,7 @@ def process_ref_hyp_time_series(ref, hyp, task):
 				non_silence_point = list(continue_ref["point"][continue_ref["continue_ref"] != silence_string])
 				# Prune system using the time series of no speech in reference
 				pruned_continue_hyp = continue_hyp[(continue_hyp["point"].isin(non_silence_point)) & (continue_hyp["continue_hyp"] != silence_string)].copy()
-
 				ref_hyp_continue = pd.merge(pruned_continue_ref, pruned_continue_hyp)
-				ref_hyp_continue["continue_hyp"] = ref_hyp_continue["continue_hyp"].astype(int)
 				ref_dict[sub_type][file_id] = list(ref_hyp_continue["continue_ref"])
 				hyp_dict[sub_type][file_id] = list(ref_hyp_continue["continue_hyp"])
 
