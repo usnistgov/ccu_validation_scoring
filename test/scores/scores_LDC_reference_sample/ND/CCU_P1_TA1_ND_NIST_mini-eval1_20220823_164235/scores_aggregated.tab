@@ -1,11 +1,11 @@
 task	genre	metric	value	correctness_criteria
 nd	all	mAP	0.5	{iou=0.2}
 nd	all	mean_average_precision	0.5	{iou=0.2}
-nd	all	mean_f1_at_MinLLR	0.6670000000000001	{iou=0.2}
+nd	all	mean_f1_at_MinLLR	0.667	{iou=0.2}
 nd	all	mean_llr_at_MinLLR	1.5	{iou=0.2}
 nd	all	mean_precision_at_MinLLR	1.0	{iou=0.2}
 nd	all	mean_recall_at_MinLLR	0.5	{iou=0.2}
-nd	all	mean_scaled_f1_at_MinLLR	0.6670000000000001	{iou=0.2}
+nd	all	mean_scaled_f1_at_MinLLR	0.667	{iou=0.2}
 nd	all	mean_scaled_precision_at_MinLLR	1.0	{iou=0.2}
 nd	all	mean_scaled_recall_at_MinLLR	0.5	{iou=0.2}
 nd	all	mean_sum_fp_at_MinLLR	0.0	{iou=0.2}

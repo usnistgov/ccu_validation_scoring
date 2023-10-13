@@ -674,6 +674,7 @@ def sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir, clas
     agg_table['metric'] = 'mean_' + agg_table['metric']
     agg_table.loc[agg_table.metric == 'mean_AP', ['metric']] = [ 'mAP' ]      ## Rename AP to mAP
     agg_table['task'] = 'nd' if (class_type == 'norm') else 'ed'
+    agg_table['value'] = agg_table['value'].round(3)
     agg_table[["task", "genre", "metric", "value", "correctness_criteria"]].to_csv(os.path.join(output_dir, "scores_aggregated.tab"), sep = "\t", index = None)
 
 def write_type_level_scores(output_dir, results, delta_cp_text_thresholds, delta_cp_time_thresholds):
