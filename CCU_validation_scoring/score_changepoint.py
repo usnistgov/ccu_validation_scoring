@@ -22,8 +22,8 @@ def generate_zero_scores_changepoint(ref, delta_cp_text_thresholds, delta_cp_tim
                     y_text.append( ["cp", act, 0.0, [0.0], [0.0], [0.0] ])
                 else:
                     y_time.append( ["cp", act, 0.0, [0.0], [0.0], [0.0] ])
-            df_text = pd.DataFrame(y_text, columns=['Class', 'type', 'ap', 'precision', 'recall'])
-            df_time = pd.DataFrame(y_time, columns=['Class', 'type', 'ap', 'precision', 'recall'])
+            df_text = pd.DataFrame(y_text, columns=['Class', 'type', 'ap', 'precision', 'recall', 'llr'])
+            df_time = pd.DataFrame(y_time, columns=['Class', 'type', 'ap', 'precision', 'recall', 'llr'])
             pr_iou_scores = {}
             for iout in delta_cp_text_thresholds:
                 pr_iou_scores[iout] = df_text
@@ -34,7 +34,7 @@ def generate_zero_scores_changepoint(ref, delta_cp_text_thresholds, delta_cp_tim
             y = []
             logger.error("No matching Types found in system output.")
             y.append( [ "cp", 'no_macthing_Type', 0.0, [0.0], [0.0], [0.0] ])
-            df_whole = pd.DataFrame(y, columns=['Class', 'type', 'ap', 'precision', 'recall'])
+            df_whole = pd.DataFrame(y, columns=['Class', 'type', 'ap', 'precision', 'recall', 'llr'])
             pr_iou_scores = {}
             for iout in delta_cp_text_thresholds + delta_cp_time_thresholds:
                 pr_iou_scores[iout] = df_whole
