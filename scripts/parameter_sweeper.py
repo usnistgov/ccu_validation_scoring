@@ -203,7 +203,7 @@ def plot_measures_agg(df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, df_sr_fact,
                 #print(pdf)
                 value_max = pdf.value.max() * 1.1
                 max_lev = 0
-                for fe in fe_list: 
+                for fe in sorted(fe_list): 
                     print(f"   Processing Univariant {fe}")
                     n=0
                     for lev in sorted(set(me[ (me['factor_ensemble'] == fe) ][fe])):
@@ -221,7 +221,7 @@ def plot_measures_agg(df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, df_sr_fact,
             # #############  Bivariate Plots   
             value_max = 0.3
             fe_list = list(set(me[me['num_variates'] == 2]['factor_ensemble']))
-            for fe in fe_list:
+            for fe in sorted(fe_list):
                 f1, f2 = fe.split(' ')
                 filename = os.path.join(outdir, f"{stat_level}_bivariate_{fe.replace(' ','_')}_{genre}.png")
                 print(f"   Processing Bivariant {f1}-{f2} -> {filename}")
@@ -233,8 +233,8 @@ def plot_measures_agg(df_jobs, df_sr, df_sbc, df_sa, df_sp, df_fact, df_sr_fact,
                 fig = make_subplots(rows=len(f1_levs), cols=1, subplot_titles=[ f1 + ":" + x for x in f1_levs])
                 r = 1
                 if (True):  ### For a box plot
-                    for f1_lev in f1_levs:
-                        for f2_lev in f2_levs:
+                    for f1_lev in sorted(f1_levs):
+                        for f2_lev in sorted(f2_levs):
                             fig.add_trace(go.Box(x=pdf[(pdf[f1] == f1_lev) & (pdf[f2] == f2_lev) ].value), row=r, col=1) 
                             fig.data[-1].name = f2 + ":" + f2_lev
                         fig.update_xaxes(range=[0.0, value_max], row=r, col=1)
