@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 
 ## Upcoming changes
-- Add the scaled IoU values and a histogram in instance_alignment_grqphs.png
+- Add the scaled IoU values and a histogram in instance_alignment_graphs.png
 
 ## [1.3.0] - 2023-04-26
 - Modified the handling of pre/post annotation NoScore regions.  The old code would drop system instances that span the entire file.
@@ -28,7 +28,7 @@ All notable changes to this project will be documented in this file.
   - The scaled F1 measures were added.
   - The --iou_thresholds option value was generalized to support 'greater than' operations for checks.
   - Added --time_span_scale_collar and --text_span_scale_collar options for setting the scaled F1 measures.
-  - Added a new output graph 'instance_alignment_grqphs.png' that plots the distribution of LLRs and IoUs.
+  - Added a new output graph 'instance_alignment_graphs.png' that plots the distribution of LLRs and IoUs.
   - Added a new output graph 'instance_alignment_status_confusion.tab' that reports norm 'status' confusions.
   - The instant_alingment.tab parameter column has additional values for the scaled F1 calculations. 
   - Added the -d option for ND and ED scorers to dump the input ref and sys dataframes and the converted ref and sys
@@ -60,7 +60,7 @@ All notable changes to this project will be documented in this file.
 - Matplotlib is a required package
 - Added Instance_alignment.tab derivative outputs for ND, ED, and CD:
   - Instance counts for instance_alignment_class_stats.tab
-  - Histograms of instance IoU, Collar-Based IoU, and LLRs. See 'instance_alignment_grqphs.png'
+  - Histograms of instance IoU, Collar-Based IoU, and LLRs. See 'instance_alignment_graphs.png'
   - A confusion count matrics for norm status.  See 'instance_alignment_status_confusion.tab'
 - Added Precision/Recall Curves for the ND, ED, and CD scorer.  See output files 'pr_*png'.'
 - Changed the ND reference merge algorithm to ignore or use the norm status via the -vR option.

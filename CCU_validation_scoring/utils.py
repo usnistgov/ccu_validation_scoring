@@ -596,7 +596,7 @@ def generate_alignment_statistics(ali, task, output_dir, info_dict = None):
         ax[ax_id].set_xlabel("LLR")
 
         # Show plot
-        out = os.path.join(output_dir, "instance_alignment_grqphs.png")
+        out = os.path.join(output_dir, "instance_alignment_graphs.png")
         fig.savefig(out)
         if (info_dict is not None):
                 info_dict.append({ 'task': task, 'graph_type': 'instance_alignment', 'graph_factor': 'overall', 'graph_factor_value': 'all', 'correctness_constraint': "n/a", 'filename': out})
