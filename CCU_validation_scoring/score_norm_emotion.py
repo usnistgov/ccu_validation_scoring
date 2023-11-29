@@ -110,7 +110,7 @@ def segment_iou_v1(ref_start, ref_end, tgts):
     return tIoU, inter, union, cb_inter, cb_inter/union
 
 
-def segment_iou_v2(sys_start, sys_end, sys_uid, sys_isTrunc, refs, collar):
+def segment_iou_v2(sys_start, sys_end, sys_uid, sys_isTrunc, refs, collar, type):
     """
     Compute __Temporal__ Intersection over Union (__IoU__) as defined in 
     [1], Eq.(1) given start and endpoints of intervals __g__ and __p__.    
@@ -137,25 +137,43 @@ def segment_iou_v2(sys_start, sys_end, sys_uid, sys_isTrunc, refs, collar):
     ### Unpack for computation
     ref_start, ref_end = [refs[0], refs[1]]
     
+    def cal_metric(value, input_type=type):
+
+        if value < 0:
+            new_value = 0
+        else:
+            if type == "text":
+                new_value = value + 1
+            else:
+                new_value = value
+        
+        return new_value
+
     ### normal IoU intersection
     tt1 = np.maximum(ref_start, sys_start)
-    tt2 = np.minimum(ref_end, sys_end)    
-    inter = (tt2 - tt1).clip(0)    # Segment intersection including Non-negative overlap score
-
+    tt2 = np.minimum(ref_end, sys_end)
+    inter = (tt2 - tt1).apply(cal_metric) # Segment intersection including Non-negative overlap score
+    union = [ cal_metric(np.maximum(re, sys_end) - np.minimum(rb, sys_start)) for rb, re in zip(ref_start, ref_end) ]
+    
     csb = [ sys_start-collar if (rs < sys_start - collar) else beg_min  for rs, beg_min in zip(ref_start, np.minimum(ref_start, sys_start)) ]
     
     cse = [ sys_end+collar if (re > sys_end + collar) else end_max for re, end_max in zip(ref_end, np.maximum(ref_end, sys_end)) ] 
 
     ### Set the min to be zero if the numerator is negative
-    scaled_pct_TP = [ 0.0 if (((np.minimum(re, ce)  - np.maximum(rs, cb)) < 0.0) or (re == rs)) else (np.minimum(re, ce)  - np.maximum(rs, cb)) / (re - rs) for rs, re, cb, ce in zip(ref_start, ref_end, csb, cse) ]
+    if type == "text":
+        scaled_pct_TP = [ 0.0 if (((np.minimum(re, ce)  - np.maximum(rs, cb)) < 0.0) or (re == rs)) else (np.minimum(re, ce)  - np.maximum(rs, cb) + 1) / (re - rs + 1) for rs, re, cb, ce in zip(ref_start, ref_end, csb, cse) ]
 
-    ### This formula will set pct_FP to be > 1.  The second command sets the max to 1
-    scaled_pct_FP = [ 0.0 if (re == rs) else ((rs-cb if (rs-cb > 0) else 0) + (ce - re if (ce-re > 0) else 0)) / (re - rs) for rs, re, cb, ce in zip(ref_start, ref_end, csb, cse) ]
-    scaled_pct_FP = [ 1.0 if (inter <= 0.0) else spfp for spfp, inter in zip(scaled_pct_FP, inter) ]
+        ### This formula will set pct_FP to be > 1.  The second command sets the max to 1
+        scaled_pct_FP = [ 0.0 if (re == rs) else ((rs - 1 - cb + 1 if (rs-cb > 0) else 0) + (ce - 1 - re + 1 if (ce-re > 0) else 0)) / (re - rs + 1) for rs, re, cb, ce in zip(ref_start, ref_end, csb, cse) ]
+        scaled_pct_FP = [ 1.0 if (inter <= 0.0) else spfp for spfp, inter in zip(scaled_pct_FP, inter) ]
+    else:
+        scaled_pct_TP = [ 0.0 if (((np.minimum(re, ce)  - np.maximum(rs, cb)) < 0.0) or (re == rs)) else (np.minimum(re, ce)  - np.maximum(rs, cb)) / (re - rs) for rs, re, cb, ce in zip(ref_start, ref_end, csb, cse) ]
 
-    # Segment union.
-    union = [ np.maximum(re, sys_end) - np.minimum(rb, sys_start) for rb, re in zip(ref_start, ref_end) ]
+        ### This formula will set pct_FP to be > 1.  The second command sets the max to 1
+        scaled_pct_FP = [ 0.0 if (re == rs) else ((rs-cb if (rs-cb > 0) else 0) + (ce - re if (ce-re > 0) else 0)) / (re - rs) for rs, re, cb, ce in zip(ref_start, ref_end, csb, cse) ]
+        scaled_pct_FP = [ 1.0 if (inter <= 0.0) else spfp for spfp, inter in zip(scaled_pct_FP, inter) ]
 
+    # print(scaled_pct_TP, scaled_pct_FP)
     tIoU = inter.astype(float) / union
     sys_uids = [ sys_uid for x in tIoU ]  ### make the sys_uid array
     sys_isTruncs = [ sys_isTrunc for x in tIoU ]  ### make the sys_uid array
@@ -182,7 +200,7 @@ def compute_ious(row, ref, class_type, time_span_scale_collar, text_span_scale_c
         assert len(types)==1, f"Internal Error: compute_ious() give a reference list with multiple source types: {types}"
         collar = text_span_scale_collar if (list(types)[0] == 'text') else time_span_scale_collar
 
-        refs['IoU'], refs['intersection'], refs['union'], refs['shifted_sys_start'], refs['shifted_sys_end'], refs['pct_tp'],  refs['pct_fp'], refs['scale_collar'], refs['hyp_uid'], refs['hyp_isTruncated'] = segment_iou_v2(row.start, row.end, row.hyp_uid, row.hyp_isTruncated, [refs.start, refs.end], collar)  #####  ROW is the hyp #######
+        refs['IoU'], refs['intersection'], refs['union'], refs['shifted_sys_start'], refs['shifted_sys_end'], refs['pct_tp'],  refs['pct_fp'], refs['scale_collar'], refs['hyp_uid'], refs['hyp_isTruncated'] = segment_iou_v2(row.start, row.end, row.hyp_uid, row.hyp_isTruncated, [refs.start, refs.end], collar, row.type)  #####  ROW is the hyp #######
         if (align_hacks == ""):
             #print("One to One")
             if (len(refs.loc[refs.IoU > 0]) > 1) & ("NO_SCORE_REGION" in refs.loc[refs.IoU == refs.IoU.max()].Class.values):
@@ -213,7 +231,7 @@ def compute_ious(row, ref, class_type, time_span_scale_collar, text_span_scale_c
                 for index, ro_ in rout.iterrows():
                     o = {}
                     single_df = rout[rout.index == index]  ### segment_iou_v2 uses the ref times from as dataframe column 
-                    o['IoU'], o['intersection'], o['union'], o['shifted_sys_start'], o['shifted_sys_end'], o['pct_tp'],  o['pct_fp'], o['scale_collar'], o['hyp_uid'], o['hyp_isTruncated'] = segment_iou_v2(ro_['new_hyp_start'], ro_['new_hyp_end'], row.hyp_uid, row.hyp_isTruncated, [single_df.start, single_df.end], collar)
+                    o['IoU'], o['intersection'], o['union'], o['shifted_sys_start'], o['shifted_sys_end'], o['pct_tp'],  o['pct_fp'], o['scale_collar'], o['hyp_uid'], o['hyp_isTruncated'] = segment_iou_v2(ro_['new_hyp_start'], ro_['new_hyp_end'], row.hyp_uid, row.hyp_isTruncated, [single_df.start, single_df.end], collar, row.type)
                     for v in ['IoU', 'intersection', 'scale_collar']:
                         rout.at[index,v] = o[v]
                     for s in ['union', 'shifted_sys_start', 'shifted_sys_end','pct_tp', 'pct_fp', 'hyp_uid', 'hyp_isTruncated']:
@@ -355,6 +373,8 @@ def generate_align_cal_measure_by_type(ihyp, ref, iou_thresholds, Class, task):
             ### pct_fp is complicated.  It's two parts: (1) if it's labeled as FP, default to 1, (2) Sum of the pct_fp for TPs
             sum_scaled_fp = 1.0 * len(ihyp[ihyp.fp == 1].pct_fp) + ihyp[ihyp.tp == 1].pct_fp.sum()
             scaled_recall =    sum_scaled_tp / npos
+            # print(sum_scaled_tp)
+            # print(sum_scaled_fp)
             scaled_precision = sum_scaled_tp / (sum_scaled_tp + sum_scaled_fp)  
             
             measures['AP'] = ap_interp(prec, rec)

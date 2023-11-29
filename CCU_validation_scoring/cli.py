@@ -6,7 +6,7 @@ from . import score_submission
 def print_package_version(args):
     print(__import__(__package__).__version__)
 
-def check_valid_argument_pair(args):
+def check_valid_argument_pair_merge_sys(args):
 
     if "score_nd" in str(vars(args)['func']):
         if not args.merge_sys_text_gap and not args.merge_sys_time_gap and not args.combine_sys_llrs and not args.merge_sys_label:
@@ -28,6 +28,23 @@ def check_valid_argument_pair(args):
         elif args.merge_sys_text_gap and not args.merge_sys_time_gap and args.combine_sys_llrs and args.merge_sys_label:
             return True
         elif not args.merge_sys_text_gap and args.merge_sys_time_gap and args.combine_sys_llrs and args.merge_sys_label:
+            return True
+        else:
+            return False
+
+    else:
+        return True
+    
+def check_valid_argument_pair_merge_ref(args):
+
+    if "score_nd" in str(vars(args)['func']):
+        if not args.merge_ref_text_gap and not args.merge_ref_time_gap and not args.merge_ref_label:
+            return True
+        elif args.merge_ref_text_gap and args.merge_ref_time_gap and args.merge_ref_label:
+            return True
+        elif args.merge_ref_text_gap and not args.merge_ref_time_gap and args.merge_ref_label:
+            return True
+        elif not args.merge_ref_text_gap and args.merge_ref_time_gap and args.merge_ref_label:
             return True
         else:
             return False
@@ -168,11 +185,15 @@ def main():
 
     args = parser.parse_args()
 
-    if not check_valid_argument_pair(args):
+    if not check_valid_argument_pair_merge_sys(args):
         if "score_nd" in str(vars(args)['func']):
             score_nd_parser.error('The -xS or -aS argument requires the -lS and -vS')
         if "score_ed" in str(vars(args)['func']):
             score_ed_parser.error('The -xS or -aS argument requires the -lS and -vS')
+
+    if not check_valid_argument_pair_merge_ref(args):
+        if "score_nd" in str(vars(args)['func']):
+            score_nd_parser.error('The -xR or -aR argument requires the -vR')
             
     if "score_nd" in str(vars(args)['func']) or "score_ed" in str(vars(args)['func']):
         ### This is to make sure the argument is parsable before anything is done.  The result is ignored for now.  The command throws an assertion error to exit

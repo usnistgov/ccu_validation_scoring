@@ -156,9 +156,13 @@ def test_run_score_submissions(dataset, system_input_index, system_dir, task, op
     if (task in ["ND", "ED"]):
         assert len(subdirs) > 0
         
-        for subdir in subdirs:            
-            sys.argv[1:] = ["score-{}".format(task.lower()), "-ref", refdir,
-                            "-s", subdir, "-i", scoring_index_path, "-o", tmp_dir, "-aR", "1.0", "-xR", "10"]
+        for subdir in subdirs:
+            if task == "ED":            
+                sys.argv[1:] = ["score-{}".format(task.lower()), "-ref", refdir,
+                                "-s", subdir, "-i", scoring_index_path, "-o", tmp_dir, "-aR", "1.0", "-xR", "10"]
+            if task == "ND":
+                sys.argv[1:] = ["score-{}".format(task.lower()), "-ref", refdir,
+                                "-s", subdir, "-i", scoring_index_path, "-o", tmp_dir, "-aR", "1.0", "-xR", "10", "-vR", "class"]                
             clean_tmp_dir(tmp_dir)
             ### Add opt2 if there
             if (opt2 != ''):
@@ -185,7 +189,7 @@ def test_run_score_submissions(dataset, system_input_index, system_dir, task, op
             assert (len(orig_system) == 1), "Error:  NDMAP system is not uniq"
                     
             sys.argv[1:] = ["score-nd", "-ref", refdir, "-s", orig_system[0],
-                            "-m", subdir, "-i", scoring_index_path, "-o", tmp_dir, "-aR", "1.0", "-xR", "10"]
+                            "-m", subdir, "-i", scoring_index_path, "-o", tmp_dir, "-aR", "1.0", "-xR", "10", "-vR", "class"]
             ### Add opt2 if there
             if (opt2 != ''):
                 sys.argv.append("-n")
