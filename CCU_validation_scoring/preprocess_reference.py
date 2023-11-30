@@ -58,7 +58,7 @@ def fill_start_end_ref(ref):
 		length = list(sub_ref["length"])[0]
 		start = min(list(sub_ref["start"]))
 		end = max(list(sub_ref["end"]))
-		status = list(sub_ref["status"])[0] if (has_status) else None
+		status = "noann" if (has_status) else None
                 
 		if type == "text":
 			if start > 0:
@@ -90,15 +90,6 @@ def check_remove_start_end_same(ref):
 	ref.drop(labels=label_lists, inplace = True)
 
 	return ref
-
-def read_dedupe_file(path):
-	"""
-	Read file and remove duplicate records 
-	"""
-	df = pd.read_csv(path, dtype={'norm': object}, sep = "\t")
-	df.drop_duplicates(inplace = True)
-
-	return df
 
 def get_raw_file_id_dict(file_ids, data_frame, class_type, text_gap, time_gap, merge_label):
 	"""

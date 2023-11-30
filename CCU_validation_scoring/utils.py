@@ -20,6 +20,15 @@ def is_float(value):
 		return True
 	except ValueError:
 		return False
+	
+def read_dedupe_file(path):
+	"""
+	Read file and remove duplicate records 
+	"""
+	df = pd.read_csv(path, dtype={'norm': object}, sep = "\t")
+	df.drop_duplicates(inplace = True)
+
+	return df
 		
 def tad_add_noscore_region(ref,hyp):
 	""" 
@@ -140,6 +149,38 @@ def concatenate_submission_file(subm_dir, task):
 
 	if task == "valence_continuous" or task == "arousal_continuous":
 		submission_dfs[task] = stats.zscore(np.array(submission_dfs[task]))
+
+	new_submission_dfs = change_class_type(submission_dfs, convert_task_column(task))
+
+	return new_submission_dfs
+
+def concatenate_openccu_submission_file(subm_dir, ref_dir, task):
+	"""
+	read all submission files in submission dir and concat into a global dataframe
+	"""
+	segment_file = os.path.join(ref_dir,"docs","segments.tab")
+	segment_df = read_dedupe_file(segment_file)
+	index_file_path = os.path.join(subm_dir, "system_output.index.tab")
+	index_df = pd.read_csv(index_file_path, dtype={'message': object}, sep='\t')
+	subm_file_paths = index_df["file_path"][index_df["is_processed"] == True]
+	
+	submission_dfs = pd.DataFrame()
+
+	for subm_file_path in subm_file_paths:
+		if "{}/".format(subm_dir) in subm_file_path:
+			submission_df = pd.read_csv(subm_file_path, dtype={'norm': object}, sep='\t')
+		else:
+			submission_df = pd.read_csv(os.path.join(subm_dir,subm_file_path), dtype={'norm': object}, sep='\t')
+		
+		if submission_df.shape[0] > 0:
+			submission_merged_df = submission_df.merge(segment_df, on = ["file_id","segment_id"])
+			submission_merged_df = submission_merged_df.drop('segment_id', axis=1)
+
+			submission_df_sorted = submission_merged_df.sort_values(by=['start','end'])
+			submission_dfs = pd.concat([submission_dfs, submission_df_sorted])
+
+	submission_dfs.drop_duplicates(inplace = True)
+	submission_dfs = submission_dfs.reset_index(drop=True)
 
 	new_submission_dfs = change_class_type(submission_dfs, convert_task_column(task))
 
@@ -341,9 +382,13 @@ def convert_merge_dict_df(file_id, results_array, merge_label, task):
                 
 	return result_df
 
-def preprocess_submission_file(subm_dir, ref_dir, scoring_index, task, gap_allowed = False):
+def preprocess_submission_file(subm_dir, ref_dir, scoring_index, task, submission_format = None, gap_allowed = False):
 
-	hyp = concatenate_submission_file(subm_dir, task)
+	if submission_format == "open":
+		hyp = concatenate_openccu_submission_file(subm_dir, ref_dir, task)
+	else:
+		hyp = concatenate_submission_file(subm_dir, task)
+
 	hyp_type = add_type_column(ref_dir, hyp)
 	hyp_final = filter_hyp_use_scoring_index(hyp_type, scoring_index)
 	if task in ["valence_continuous","arousal_continuous"] and gap_allowed:

@@ -58,6 +58,7 @@ def run_scorer(tmp_dir):
                           ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'ND', '', '', '', ''),
                           ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.ED.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'ED', '', '', '', ''),
                           ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.CD.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'CD', '', '', '', ''),
+                          ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'ND_open', '', '', '-sf open', ''),
                           ('LDC_reference_sample', 'LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab', 'pass_submissions_LDC_reference_sample', 'NDMAP', 'CCU_P1_TA1_ND_NIST_mini-eval1_20220531_050236', '', '', ''),
                           
                           ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'ND', '', 'known_norms_LC1.txt', '', ''),

@@ -109,6 +109,7 @@ def main():
 
     score_nd_parser = subs.add_parser('score-nd', description='Score a norm discovery submission directory')
     score_nd_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a norm detection submission')
+    score_nd_parser.add_argument('-sf','--submission-format', type=str, default="regular", choices=['regular','open'], help='choose submission format, regular is for CCU evaluation while open is for OpenCCU')
     score_nd_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
     score_nd_parser.add_argument('-i','--scoring-index-file', type=str, required=True, help='Use to filter file from scoring (REF)')
     score_nd_parser.add_argument('-m','--mapping-submission-dir', type=str, help='Directory containing a norm mapping submission')
