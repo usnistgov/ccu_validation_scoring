@@ -23,7 +23,10 @@ logger.addHandler(h2)
 def validate_nd_submission_dir_cli(args):
 
 	#Please run validation of reference firstly to make sure reference is valid
-	task = "norms"
+	if args.submission_format == "regular":
+		task = "norms"
+	if args.submission_format == "open":
+		task = "norms_open"
 	subm_file_dict = global_file_checks(args.reference_dir, args.submission_dir)
 
 	invalid_subm_file_path = []
@@ -39,10 +42,20 @@ def validate_nd_submission_dir_cli(args):
 			known_norm_list = load_list(args.norm_list_file)
 		else:
 			known_norm_list = None
-		if individual_file_check(task, type, subm_file_path, column_map, header_map, processed_label, subm_file, length, gap_allowed=False, norm_list=known_norm_list):
-			pass
-		else:
-			invalid_subm_file_path.append(subm_file_path)
+
+		if task == "norms":
+			if individual_file_check(task, type, subm_file_path, column_map, header_map, processed_label, subm_file, length, gap_allowed=False, norm_list=known_norm_list, segment_file=None):
+				pass
+			else:
+				invalid_subm_file_path.append(subm_file_path)
+
+		if task == "norms_open":
+			segment_file = os.path.join(args.reference_dir,"docs","segments.tab")
+			if individual_file_check(task, type, subm_file_path, column_map, header_map, processed_label, subm_file, length, gap_allowed=False, norm_list=known_norm_list, segment_file=segment_file):
+				pass
+			else:
+				invalid_subm_file_path.append(subm_file_path)
+		
 
 	if len(invalid_subm_file_path) > 0:
 		logger.error('Validation failed')
@@ -65,7 +78,7 @@ def validate_ed_submission_dir_cli(args):
 		processed_label = subm_file_dict[subm_file]["processed"]
 		length = subm_file_dict[subm_file]["length"]
 
-		if individual_file_check(task, type, subm_file_path, column_map, header_map, processed_label, subm_file, length, gap_allowed=False, norm_list=None):
+		if individual_file_check(task, type, subm_file_path, column_map, header_map, processed_label, subm_file, length, gap_allowed=False, norm_list=None, segment_file=None):
 			pass
 		else:
 			invalid_subm_file_path.append(subm_file_path)
@@ -90,7 +103,7 @@ def validate_vd_submission_dir_cli(args):
 		processed_label = subm_file_dict[subm_file]["processed"]
 		length = subm_file_dict[subm_file]["length"]
 
-		if individual_file_check(task, type, subm_file_path, column_map, header_map, processed_label, subm_file, length, args.gap_allowed, norm_list=None):
+		if individual_file_check(task, type, subm_file_path, column_map, header_map, processed_label, subm_file, length, args.gap_allowed, norm_list=None, segment_file=None):
 			pass
 		else:
 			invalid_subm_file_path.append(subm_file_path)
@@ -115,7 +128,7 @@ def validate_ad_submission_dir_cli(args):
 		processed_label = subm_file_dict[subm_file]["processed"]
 		length = subm_file_dict[subm_file]["length"]
 
-		if individual_file_check(task, type, subm_file_path, column_map, header_map, processed_label, subm_file, length, args.gap_allowed, norm_list=None):
+		if individual_file_check(task, type, subm_file_path, column_map, header_map, processed_label, subm_file, length, args.gap_allowed, norm_list=None, segment_file=None):
 			pass
 		else:
 			invalid_subm_file_path.append(subm_file_path)
@@ -140,7 +153,7 @@ def validate_cd_submission_dir_cli(args):
 		processed_label = subm_file_dict[subm_file]["processed"]
 		length = subm_file_dict[subm_file]["length"]
 
-		if individual_file_check(task, type, subm_file_path, column_map, header_map, processed_label, subm_file, length, gap_allowed=False, norm_list=None):
+		if individual_file_check(task, type, subm_file_path, column_map, header_map, processed_label, subm_file, length, gap_allowed=False, norm_list=None, segment_file=None):
 			pass
 		else:
 			invalid_subm_file_path.append(subm_file_path)
@@ -161,7 +174,7 @@ def validate_ndmap_submission_dir_cli(args):
 	header_map = {"ndmap":{"sys_norm": "object","ref_norm": "object","sub_id": "object"}}
 	
 	hidden_norm_list = load_list(args.hidden_norm_list_file)
-	if individual_file_check("ndmap", None, mapping_file, column_map, header_map, processed_label=None, subm_file=None, length=None, gap_allowed=False, norm_list=hidden_norm_list):
+	if individual_file_check("ndmap", None, mapping_file, column_map, header_map, processed_label=None, subm_file=None, length=None, gap_allowed=False, norm_list=hidden_norm_list, segment_file=None):
 		logger.info('Validation succeeded')
 	else:
 		logger.error('Validation failed')

@@ -41,6 +41,9 @@ class TestValidateSubmission(unittest.TestCase):
                 elif dir == "VD_gaps":
                     sys.argv[1:] = ["validate-{}".format(dir.lower()), "-ref", refdir,
                                     "-s", subdir, "-g"]
+                elif dir == "ND_open":
+                    sys.argv[1:] = ["validate-{}".format(dir.lower()), "-ref", refdir,
+                                    "-s", subdir, "-g", "-sf", "open"]
                 else:
                     sys.argv[1:] = ["validate-{}".format(dir.lower()), "-ref", refdir,
                                     "-s", subdir]

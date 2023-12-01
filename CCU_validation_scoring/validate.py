@@ -53,7 +53,7 @@ def global_file_checks(reference_dir, submission_dir):
 
 	return subm_file_dict
 
-def individual_file_check(task, type, subm_file_path, column_map, header_map, processed_label, subm_file, length, gap_allowed, norm_list):
+def individual_file_check(task, type, subm_file_path, column_map, header_map, processed_label, subm_file, length, gap_allowed, norm_list, segment_file):
 	
 	if task == "norms":
 		file_checks = (check_valid_tab(subm_file_path) and
@@ -66,6 +66,17 @@ def individual_file_check(task, type, subm_file_path, column_map, header_map, pr
 			check_norm_string(subm_file_path, norm_list) and
 			check_start_small_end(subm_file_path, type) and
 			check_start_end_timestamp_within_length(subm_file_path, task, length, type))
+		
+	if task == "norms_open":
+		file_checks = (check_valid_tab(subm_file_path) and
+			check_column_number(subm_file_path,column_map[task]) and
+			check_valid_header(subm_file_path,list(header_map[task])) and
+			check_output_records(subm_file_path, task, processed_label) and
+			check_data_type(subm_file_path, header_map[task]) and
+			check_fileid_index_match(subm_file_path, subm_file) and
+			solve_duplicates_except_llr_or_level(subm_file_path, task) and
+			check_norm_string(subm_file_path, norm_list) and
+			check_segment_id(subm_file_path, segment_file))
 	
 	if task == "emotions":
 		file_checks = (check_valid_tab(subm_file_path) and
@@ -409,7 +420,7 @@ def check_index_get_submission_files(ref_dir, subm_dir):
 	column_map = {"index": 4}
 	header_map = {"index":{"file_id": "object","is_processed": "bool","message": "object","file_path": "object"}}
 
-	if individual_file_check("index", None, system_output_index_file_path, column_map, header_map, processed_label=None, subm_file=None, length=None, gap_allowed=False, norm_list=None):
+	if individual_file_check("index", None, system_output_index_file_path, column_map, header_map, processed_label=None, subm_file=None, length=None, gap_allowed=False, norm_list=None, segment_file=None):
 
 		system_output_index_df = pd.read_csv(system_output_index_file_path, sep='\t')
 		system_input_index_file_path = glob.glob(system_input_index_file_path)[0]
@@ -491,6 +502,24 @@ def check_start_end_timestamp_within_length(file, task, length, type):
 
 	return True
 
+def check_segment_id(file, segment_file):
+
+	df = pd.read_csv(file, dtype={'norm': object}, sep='\t')
+	if df.shape[0] != 0:
+		segment_df = pd.read_csv(segment_file, sep='\t')
+
+		segment_id_list = segment_df.loc[segment_df["file_id"] == list(df["file_id"])[0], "segment_id"].values
+		invalid_segment_id_list = []
+		for i in df["segment_id"]:
+			if i not in segment_id_list:
+				invalid_segment_id_list.append(i)
+
+		if len(invalid_segment_id_list) > 0:
+			logger.error("Segment ID(s) {} in {} is not found in {}".format(invalid_segment_id_list, file, segment_file))
+			return False
+	
+	return True
+
 def solve_duplicates_except_llr_or_level(file, task):
 
 	df = pd.read_csv(file, dtype={'norm': object}, sep='\t')
@@ -543,8 +572,9 @@ def extract_modality_info(file_type):
 	else:
 		frame_data_type = ["int", "float"]
 
-	column_map = {"norms": 6, "emotions": 5, "valence_continuous": 4, "arousal_continuous": 4, "changepoint": 5}
+	column_map = {"norms": 6, "norms_open": 5, "emotions": 5, "valence_continuous": 4, "arousal_continuous": 4, "changepoint": 5}
 	header_map = {"norms":{"file_id": "object","norm": "object","start": frame_data_type,"end": frame_data_type,"status": "object","llr": "float"},
+				"norms_open":{"file_id": "object","segment_id": "object","norm": "object","status": "object","llr": "float"},
 				"emotions":{"file_id": "object","emotion": "object","start": frame_data_type,"end": frame_data_type,"llr": "float"},
 				"valence_continuous":{"file_id": "object","start": frame_data_type,"end": frame_data_type,"valence_continuous": "int"},
 				"arousal_continuous":{"file_id": "object","start": frame_data_type,"end": frame_data_type,"arousal_continuous": "int"},

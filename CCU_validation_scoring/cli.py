@@ -70,6 +70,7 @@ def main():
     
     validate_nd_parser = subs.add_parser('validate-nd', description='Validate a norm discovery submission directory')
     validate_nd_parser.add_argument('-s','--submission-dir', type=str, required=True, help='Directory containing a norm detection submission')
+    validate_nd_parser.add_argument('-sf','--submission-format', type=str, default="regular", choices=['regular','open'], help='choose submission format, regular is for CCU evaluation while open is for OpenCCU')
     validate_nd_parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
     validate_nd_parser.add_argument('-n', '--norm_list_file', type=str, required=False, help="Use to validate norm string duration evaluation")
 
