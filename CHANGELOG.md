@@ -1,10 +1,20 @@
 # CHANGELOG
 All notable changes to this project will be documented in this file.
 
-## Upcoming changes
-- Add the scaled IoU values and a histogram in instance_alignment_graphs.png
+## [1.3.2] - 2023-12-14
+- Important: Add a new requirement for norm validation. Norm string must be either in LDC defined norms or system generated norms that start with 5
+- Update the format of changepoint reference and system output in validation and scoring
+- Add zscore normalization to valence/aroual reference and system output before scoring
+- Fix duration calculation in text format for norm/emotion scoring
 
-## [1.3.0] - 2023-04-26
+## [1.3.1] - 2023-09-06
+- Optimize the process of generating alignment for norm/emotion scoring
+- Add a optional parameter to allow gap in sys for valence/aroual validation. This change was for TA2 logs
+- Add no score region to sys if there are gaps in sys for valence/aroual scoring. This change was for TA2 logs
+- Add coverage metric to valence/aroual result
+- Add a warning and remove the reference segment in scoring if start is the same as end in audio/video format
+
+## [1.3.0] - 2023-05-26
 - Modified the handling of pre/post annotation NoScore regions.  The old code would drop system instances that span the entire file.
 - Added the  --align_hacks ManyRef:OneHyp option for ND and ED.
 - minor fixes to handle scoring Eval1-LC1.
