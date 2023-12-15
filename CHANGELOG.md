@@ -1,18 +1,23 @@
 # CHANGELOG
 All notable changes to this project will be documented in this file.
 
+## [1.3.3] - 2023-12-15
+- Updated data type in function sumup_tad_class_level_scores to be compatible with pandas 2.1.3 version
+- Fixed syntax error in function call in function generate_zero_scores_norm_emotion
+- Updated minimum pandas version requirement to 2.0.3 to remove deprecation warning for pytest
+
 ## [1.3.2] - 2023-12-14
-- Important: Add a new requirement for norm validation. Norm string must be either in LDC defined norms or system generated norms that start with 5
-- Update the format of changepoint reference and system output in validation and scoring
-- Add zscore normalization to valence/aroual reference and system output before scoring
-- Fix duration calculation in text format for norm/emotion scoring
+- Important: Added a new requirement for norm validation. Norm string must be either in LDC defined norms or system generated norms that start with 5
+- Updated the format of changepoint reference and system output in validation and scoring
+- Added zscore normalization to valence/aroual reference and system output before scoring
+- Fixed duration calculation in text format for norm/emotion scoring
 
 ## [1.3.1] - 2023-09-06
-- Optimize the process of generating alignment for norm/emotion scoring
-- Add a optional parameter to allow gap in sys for valence/aroual validation. This change was for TA2 logs
-- Add no score region to sys if there are gaps in sys for valence/aroual scoring. This change was for TA2 logs
-- Add coverage metric to valence/aroual result
-- Add a warning and remove the reference segment in scoring if start is the same as end in audio/video format
+- Optimized the process of generating alignment for norm/emotion scoring
+- Added a optional parameter to allow gap in sys for valence/aroual validation. This change was for TA2 logs
+- Added no score region to sys if there are gaps in sys for valence/aroual scoring. This change was for TA2 logs
+- Added coverage metric to valence/aroual result
+- Added a warning and remove the reference segment in scoring if start is the same as end in audio/video format
 
 ## [1.3.0] - 2023-05-26
 - Modified the handling of pre/post annotation NoScore regions.  The old code would drop system instances that span the entire file.
@@ -82,10 +87,10 @@ All notable changes to this project will be documented in this file.
 
 ## [1.1.0] - 2023-02-15
 ### Added
-- Add four arguments to ND and ED scoring for reference and system merging
-- Add more test cases to test the reference and system merging
-- Add scoring_parameters.tab to output directory
-- Add two statistic results (statistic_aggregated.tab and statistic_by_class.tab) to output directory
+- Added four arguments to ND and ED scoring for reference and system merging
+- Added more test cases to test the reference and system merging
+- Added scoring_parameters.tab to output directory
+- Added two statistic results (statistic_aggregated.tab and statistic_by_class.tab) to output directory
 
 ### Updated
 - Fixed the calculation of AP when system have duplicate llrs.  This is a minor score changes and affects systems with high frequency common LLRs.
@@ -94,12 +99,12 @@ All notable changes to this project will be documented in this file.
 
 ## [1.0.1] - 2022-11-10
 ### Added
-- Add a script to compute basic statistics on the reference data for norms or emotions task.
-- Add a script to generate a random submission for norms or emotions task.
-- Fix a bug of the scorer when all system output of specific norm/emotion were mapping to NO_SCORE_REGION of reference
-- Remove scoring index option of validation command
-- Use system_input index/file_info rather than reference to validate submission
-- Fix the testcases based on the new validation rule
-- Remove EMPTY_TBD string from annotation
-- Update REAMDE
-- Add CHANGELOG
+- Added a script to compute basic statistics on the reference data for norms or emotions task.
+- Added a script to generate a random submission for norms or emotions task.
+- Fixed a bug of the scorer when all system output of specific norm/emotion were mapping to NO_SCORE_REGION of reference
+- Removed scoring index option of validation command
+- Used system_input index/file_info rather than reference to validate submission
+- Fixed the testcases based on the new validation rule
+- Removed EMPTY_TBD string from annotation
+- Updated REAMDE
+- Added CHANGELOG
