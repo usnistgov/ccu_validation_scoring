@@ -289,10 +289,9 @@ class EmotionDetectionTests(unittest.TestCase):
                 self.assertIsInstance(value, list)
 
             # Create expected data frame
-            expected_df = pd.read_csv(expected_file_path)
- 
+            expected_df = pd.read_csv(expected_file_path, keep_default_na=False)
             # Loop over each column and change strings to dicts
-            for (column_name, column_data) in expected_df.iteritems():
+            for (column_name, column_data) in expected_df.items():
                 if column_name != "Emotion":
                     # Convert data to a dict
                     for i in range(0, len(expected_df[column_name])):

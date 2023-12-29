@@ -64,10 +64,10 @@ def generate_zero_scores_norm_emotion(ref):
                 y.append(t)
         else:
             logger.error("No matching Classes and types found in system output.")
-            y.append(empty.copy)
+            y.append(empty.copy())
     else:
         logger.error("No reference to score")
-        y.append(empty.copy)
+        y.append(empty.copy())
     return(y)
 
 def segment_iou_v1(ref_start, ref_end, tgts):
@@ -691,6 +691,7 @@ def sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir, clas
 
     ### Build the aggregated table from table_df
     agg_table = table_df[table_df.metric != 'PRCurve_json'].groupby(['genre', "metric", "correctness_criteria"])['value'].mean().reset_index()
+    agg_table['value'] = agg_table['value'].astype(float)
     agg_table['metric'] = 'mean_' + agg_table['metric']
     agg_table.loc[agg_table.metric == 'mean_AP', ['metric']] = [ 'mAP' ]      ## Rename AP to mAP
     agg_table['task'] = 'nd' if (class_type == 'norm') else 'ed'

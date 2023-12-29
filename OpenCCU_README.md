@@ -2,7 +2,7 @@
 
 **Version:** 1.0.0
 
-**Date:** Dec 11, 2023
+**Date:** December 11, 2023
 
 
 ## Table of Content
@@ -44,7 +44,7 @@ The tools mentioned above are included as a Python package. They can be run unde
 ### <a name="prerequisites">Prerequisites</a>
 
 - [Python >= 3.8.6](https://www.python.org/downloads/)
-- [Pandas >= 1.4.2](https://pandas.pydata.org/pandas-docs/stable/getting_started/install.html)
+- [Pandas >= 2.0.3](https://pandas.pydata.org/pandas-docs/stable/getting_started/install.html)
 - [Pathlib >= 1.0.1](https://pypi.org/project/pathlib/)
 - [Numpy >= 1.22.3](https://numpy.org/install/)
 - [Pytest >= 7.1.3](https://docs.pytest.org/en/7.1.x/getting-started.html)
