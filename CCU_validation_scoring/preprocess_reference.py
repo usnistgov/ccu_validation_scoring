@@ -663,6 +663,14 @@ def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time
 		data_file = os.path.join(ref_dir,"data","{}.tab".format(task))
 		data_df = read_dedupe_file(data_file)
 		data_df = data_df[~data_df.isin(['EMPTY_TBD']).any(axis=1)]  
+
+		if "direction_impact" in list(data_df.columns):
+			data_df = data_df.drop("direction_impact", axis=1)
+		if "strength_impact" in list(data_df.columns):
+			data_df.rename(columns={'strength_impact':'impact'}, inplace=True)
+		if "impact_scalar" in list(data_df.columns):
+			data_df.rename(columns={'impact_scalar':'impact'}, inplace=True)		
+
 		ref = data_df.merge(index_df)
 		ref = ref[ref.timestamp != "none"]
 		ref['start'] = ref['timestamp']  ### Add the timestamp to handle noscore segments with duration
@@ -687,9 +695,9 @@ def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time
 				type_col = ref_sub.loc[ref_sub.index[0], 'type'] 
 				#print("file {} {} {} {}".format(file_id, start, end, length))
 				if (start > 0):
-								ref_final.loc[len(ref_final)] = [0, file_id, 0,   'NA', 'NO_SCORE_REGION', "StartNoScore", type_col, length, 0, start]
+								ref_final.loc[len(ref_final)] = [0, file_id, 0,   'NO_SCORE_REGION', "StartNoScore", type_col, length, 0,   start]
 				if (end < length):
-								ref_final.loc[len(ref_final)] = [0, file_id, end, 'NA', 'NO_SCORE_REGION', "EndNoScore", type_col, length, end, length]
+								ref_final.loc[len(ref_final)] = [0, file_id, end, 'NO_SCORE_REGION', "EndNoScore",   type_col, length, end, length]
 
 	ref_final['ref_uid'] = [ "R"+str(s) for s in range(len(ref_final['file_id'])) ] ### This is a unique REF ID to help find FN
 	ref_final['isNSCR'] = ref_final.Class.isin(['noann', 'NO_SCORE_REGION'])

@@ -220,8 +220,8 @@ def compute_multiclass_cp_pr(ref, hyp, delta_cp_text_thresholds = 100, delta_cp_
     scores = defaultdict(list)
 
     ### Capture the noscores for later use
-    ref_noscore = ref.loc[ref.strength_impact == 'NO_SCORE_REGION']
-    ref = ref.loc[ref.strength_impact != 'NO_SCORE_REGION']
+    ref_noscore = ref.loc[ref.impact == 'NO_SCORE_REGION']
+    ref = ref.loc[ref.impact != 'NO_SCORE_REGION']
     
     ### Remove system detects in the NOSCORES
     for index, row in ref_noscore.iterrows():
