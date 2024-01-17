@@ -31,8 +31,8 @@ This README file describes reference annotation validation tool, system output v
  - Reference Annotation Validation Tool: confirms that a reference annotation set follows the LDC OpenCCU annotation package directory structure.
  - System Output Validation Tool: confirms that a submission of system output follows the rules set in the OpenCCU Evaluation Plan.
  - Scoring Tool: scores a system output submission against a reference with a scoring index file.
- - Reference Statistics Computing Tool: computes basic statistics on the reference data for the ND or ED task.
- - Random Submission Generation Tool: generates a random submission for the ND or ED task.
+ - Reference Statistics Computing Tool: computes basic statistics on the reference data for the ND task.
+ - Random Submission Generation Tool: generates a random submission for the ND task.
 
 
 ## <a name="setup">Setup</a>
@@ -71,9 +71,6 @@ The `reference directory` mentioned validation and scoring sections must follow 
 <reference_directory>/
      ./data/
           norms.tab
-          emotions.tab
-          valence_arousal.tab
-          changepoint.tab
      ./docs/
           segments.tab
           file_info.tab
@@ -102,7 +99,7 @@ ccu_validation_scoring/test/reference/LDC_reference_sample/index_files/LC1-Simul
 An example of a `system output index file` can be found in the sample submissions:
 ```bash
 ccu_validation_scoring/test/pass_submissions/pass_submissions_LDC_
-reference_sample/ED/CCU_P1_TA1_ED_NIST_mini-eval1_20220816_050236/system_output.index.tab
+reference_sample/ND/CCU_P1_TA1_ND_NIST_mini-eval1_20220531_050236/system_output.index.tab
 ```
 
 ## <a name="usage">Usage</a>
@@ -228,7 +225,7 @@ python3 scripts/ccu_ref_analysis.py -r <reference_directory> -t <task_string> -i
 **Required Arguments**
 
  * `-r`: reference directory
- * `-t`: norms or emotions
+ * `-t norms`: task
  * `-i`: file containing the file id of scoring datasets
  * `-o`: file where the statistics will be output
 
