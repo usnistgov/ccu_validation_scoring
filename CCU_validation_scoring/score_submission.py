@@ -2,7 +2,6 @@ import os
 import pandas as pd
 import logging
 import re
-import pprint
 from .preprocess_reference import *
 from .utils import *
 from .build_statistic import *
@@ -134,6 +133,7 @@ def score_nd_submission_dir_cli(args):
 
 	thresholds = parse_thresholds(args.iou_thresholds)
 
+	ensure_output_dir(args.output_dir)
 	statistic(args.reference_dir, ref, args.submission_dir, merged_hyp, args.output_dir, "norms")
 
 	if (args.dump_inputs):
@@ -196,6 +196,7 @@ def score_ed_submission_dir_cli(args):
 
 	thresholds = parse_thresholds(args.iou_thresholds)
 
+	ensure_output_dir(args.output_dir)
 	statistic(args.reference_dir, ref, args.submission_dir, merged_hyp, args.output_dir, "emotions")
 	if (args.dump_inputs):
 		ref.to_csv(os.path.join(args.output_dir, "inputs.ref.scored.tab"), sep = "\t", index = None)
@@ -227,6 +228,7 @@ def score_vd_submission_dir_cli(args):
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "valence_continuous")
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "valence_continuous", gap_allowed = args.gap_allowed)
 
+	ensure_output_dir(args.output_dir)
 	statistic(args.reference_dir, ref, args.submission_dir, hyp, args.output_dir, "valence_continuous")
 	score_valence_arousal(ref, hyp, output_dir = args.output_dir, task = "valence_continuous")
 	generate_scoring_parameter_file(args)	
@@ -252,6 +254,7 @@ def score_ad_submission_dir_cli(args):
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "arousal_continuous")
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "arousal_continuous", gap_allowed = args.gap_allowed)
 
+	ensure_output_dir(args.output_dir)
 	statistic(args.reference_dir, ref, args.submission_dir, hyp, args.output_dir, "arousal_continuous")
 
 	score_valence_arousal(ref, hyp, output_dir = args.output_dir, task = "arousal_continuous")
@@ -280,6 +283,7 @@ def score_cd_submission_dir_cli(args):
 	text_thresholds = [int(i) for i in args.delta_cp_text_thresholds.split(',')]
 	time_thresholds = [float(i) for i in args.delta_cp_time_thresholds.split(',')]
 
+	ensure_output_dir(args.output_dir)
 	statistic(args.reference_dir, ref, args.submission_dir, hyp, args.output_dir, "changepoint")
 
 	score_cp(ref, hyp, delta_cp_text_thresholds=text_thresholds, delta_cp_time_thresholds=time_thresholds, output_dir=args.output_dir)

@@ -58,6 +58,9 @@ def generate_perfect_submission(task, reference_dir, scoring_index_file, output_
 	ref = preprocess_reference_dir(reference_dir, scoring_index, task, text_gap, time_gap, merge_label)
 	ref.loc[ref["status"] == "adhere,violate", "status"] = "adhere"
 
+	segment_file = os.path.join(reference_dir,"docs","segments.tab")
+	segment_df = pd.read_csv(segment_file, sep = "\t")
+
 	output_submission = generate_submission_dir(output_dir, task)
 
 	index_df = pd.DataFrame(columns=["file_id", "is_processed", "message", "file_path"])
@@ -72,8 +75,11 @@ def generate_perfect_submission(task, reference_dir, scoring_index_file, output_
 		sub_ref = ref.loc[ref["file_id"] == i]
 		sub_ref_ann = sub_ref.loc[sub_ref["Class"] != "noann"]
 		filter_sub_ref_ann = sub_ref_ann[["file_id","Class","start","end","status"]]
-		rename_filter_sub_ref_ann = filter_sub_ref_ann.rename(columns = {"Class": task_column})
-		rename_filter_sub_ref_ann["llr"] = 0.5  
+		final_df = filter_sub_ref_ann.merge(segment_df, on=["file_id","start","end"])
+		final_df = final_df[["file_id","segment_id","Class","status"]]
+		rename_filter_sub_ref_ann = final_df.rename(columns = {"Class": task_column})
+		rename_filter_sub_ref_ann["llr"] = 0.5
+
 		index_df = generate_submission_file(i, rename_filter_sub_ref_ann, output_submission, index_df, "True")
 	index_df.to_csv(os.path.join(output_submission, "system_output.index.tab"), sep = "\t", index = None)
 

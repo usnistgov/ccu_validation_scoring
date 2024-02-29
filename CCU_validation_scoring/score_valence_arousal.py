@@ -363,7 +363,6 @@ def score_valence_arousal(ref, hyp, output_dir, task):
 	ref_dict, hyp_dict, segment_df, coverage_dict = process_ref_hyp_time_series(ref, hyp, task)
 	CCC_result = score_genre(ref_dict, hyp_dict)
 	coverage_result = score_coverage(coverage_dict)
-	ensure_output_dir(output_dir)
 	write_segment(segment_df, output_dir, task)
 	write_valence_arousal_scores(output_dir, CCC_result, coverage_result, task)
 
