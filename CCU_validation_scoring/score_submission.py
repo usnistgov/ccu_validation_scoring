@@ -98,7 +98,8 @@ def score_nd_submission_dir_cli(args):
 		merge_ref_time_gap = float(args.merge_ref_time_gap)
 	else:
 		merge_ref_time_gap = None
-        
+
+	ensure_output_dir(args.output_dir)
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "norms", text_gap = merge_ref_text_gap, time_gap = merge_ref_time_gap, merge_label = args.merge_ref_label, dump_inputs=args.dump_inputs, output_dir=args.output_dir)
 
 	if args.norm_list_file:
@@ -133,7 +134,6 @@ def score_nd_submission_dir_cli(args):
 
 	thresholds = parse_thresholds(args.iou_thresholds)
 
-	ensure_output_dir(args.output_dir)
 	statistic(args.reference_dir, ref, args.submission_dir, merged_hyp, args.output_dir, "norms")
 
 	if (args.dump_inputs):
@@ -174,6 +174,7 @@ def score_ed_submission_dir_cli(args):
 	else:
 		merge_ref_time_gap = None
 
+	ensure_output_dir(args.output_dir)
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "emotions", text_gap = merge_ref_text_gap, time_gap = merge_ref_time_gap, dump_inputs=args.dump_inputs, output_dir=args.output_dir)
 	if args.emotion_list_file:
 		ref = process_subset_norm_emotion(args.emotion_list_file, ref)
@@ -196,7 +197,6 @@ def score_ed_submission_dir_cli(args):
 
 	thresholds = parse_thresholds(args.iou_thresholds)
 
-	ensure_output_dir(args.output_dir)
 	statistic(args.reference_dir, ref, args.submission_dir, merged_hyp, args.output_dir, "emotions")
 	if (args.dump_inputs):
 		ref.to_csv(os.path.join(args.output_dir, "inputs.ref.scored.tab"), sep = "\t", index = None)
