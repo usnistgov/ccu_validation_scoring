@@ -78,7 +78,7 @@ def write_submission_record(stats, genre, length, i, j, task_column):
 
 	return submission_record
 
-def generate_random_submission(task, reference_dir, scoring_index_file, output_dir, text_gap, time_gap):
+def generate_random_submission(task, reference_dir, scoring_index_file, output_dir, text_gap, time_gap, merge_label, fix_ref_status_conflict = None):
 
 	try:
 		scoring_index = pd.read_csv(scoring_index_file, usecols = ['file_id'], sep = "\t")
@@ -86,7 +86,7 @@ def generate_random_submission(task, reference_dir, scoring_index_file, output_d
 		logger.error('ERROR:GENERATING:{} is not a valid scoring index file'.format(scoring_index_file))
 		exit(1)
 
-	ref = preprocess_reference_dir(reference_dir, scoring_index, task, text_gap, time_gap)
+	ref = preprocess_reference_dir(reference_dir, scoring_index, task, text_gap, time_gap, merge_label, fix_ref_status_conflict_label=fix_ref_status_conflict)
 	stats = ccu_ref_analysis.compute_stats(ref)
 	stats_pruned = stats[["class","genre","mean","stdev"]]
 	stats_pruned = stats_pruned.loc[stats_pruned["class"] != silence_string]
@@ -106,12 +106,12 @@ def generate_random_submission(task, reference_dir, scoring_index_file, output_d
 		task_column = task.replace("s","")
 		if task_column == "norm":
 			submission_df = pd.DataFrame(columns=["file_id",task_column,"start","end","status","llr"])
-			norm_info_df = pd.read_csv(os.path.join(reference_dir, "docs", "norm_info.tab"), sep = "\t")
+			norm_info_df = pd.read_csv(os.path.join(reference_dir, "docs", "norm_info.tab"), dtype={'norm': object}, sep = "\t")
 			Class = list(norm_info_df.loc[norm_info_df["current_type"] == "known", "norm"])
 
 		if task_column == "emotion":
 			submission_df = pd.DataFrame(columns=["file_id",task_column,"start","end","llr"])
-			Class = ["joy", "trust", "fear", "surprise", "sadness", "disgust", "anger", "anticipation"]
+			Class = stats.loc[stats["class"] != "noann", "class"]
 		
 		genre = file_info_df.loc[file_info_df["file_uid"] == i, "type"].values[0]
 		length = file_info_df.loc[file_info_df["file_uid"] == i, "length"].values[0]
@@ -131,6 +131,8 @@ def main():
 	parser.add_argument('-ref','--reference-dir', type=str, required=True, help='Reference directory')
 	parser.add_argument("-xR", "--merge_ref_text_gap", type=str, required=False, help="merge reference text gap character")
 	parser.add_argument("-aR", "--merge_ref_time_gap", type=str, required=False, help="merge reference time gap second")
+	parser.add_argument("-vR", "--merge_ref_label", type=str, choices=['class', 'class-status'], required=False, help="choose class or class-status to define how to handle the adhere/violate labels for the reference norm instances merging. class is to use the class label only (ignoring status) to merge and class-status is to use the class and status label to merge")
+	parser.add_argument("-f", "--fix_ref_status_conflict", action='store_true', help="set reference annotation to noann when there are the same annotations but different status")
 	parser.add_argument('-i','--scoring-index-file', type=str, required=True, help='Use to filter file from scoring (REF)')
 	parser.add_argument("-o", "--output_dir", type=str, required=True, help="Output directory")
 
@@ -146,7 +148,7 @@ def main():
 	else:
 		merge_ref_time_gap = None
 
-	generate_random_submission(args.task, args.reference_dir, args.scoring_index_file, args.output_dir, merge_ref_text_gap, merge_ref_time_gap)
+	generate_random_submission(args.task, args.reference_dir, args.scoring_index_file, args.output_dir, merge_ref_text_gap, merge_ref_time_gap, args.merge_ref_label, args.fix_ref_status_conflict)
 
 if __name__ == '__main__':
 	main()

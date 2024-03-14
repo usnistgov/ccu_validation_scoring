@@ -43,6 +43,7 @@ def main():
     parser.add_argument("-xR", "--merge_ref_text_gap", type=str, required=False, help="merge reference text gap character")
     parser.add_argument("-aR", "--merge_ref_time_gap", type=str, required=False, help="merge reference time gap second")
     parser.add_argument("-vR", "--merge_ref_label", type=str, choices=['class', 'class-status'], required=False, help="choose class or class-status to define how to handle the adhere/violate labels for the reference norm instances merging.")
+    parser.add_argument("-f", "--fix_ref_status_conflict", action='store_true', help="Change reference annotation to noann when there are the same annotations but different status")
     parser.add_argument('-t', '--task', choices=['norms', 'emotions'], required=True, help = 'norms, emotions')
     parser.add_argument('-i', '--scoring-index-file', type=str, required=True, help='use to filter file from scoring (REF)')
     parser.add_argument('-o', '--output-file', type=str, required=True, help='file where the statistics will be output')    
@@ -66,7 +67,7 @@ def main():
         merge_ref_time_gap = None
 
     if args.task == "norms":
-        ref = preprocess_reference_dir(args.ref_dir, scoring_index, args.task, merge_ref_text_gap, merge_ref_time_gap, args.merge_ref_label, False, None)
+        ref = preprocess_reference_dir(args.ref_dir, scoring_index, args.task, merge_ref_text_gap, merge_ref_time_gap, args.merge_ref_label, False, None, args.fix_ref_status_conflict)
     else:
         ref = preprocess_reference_dir(args.ref_dir, scoring_index, args.task, merge_ref_text_gap, merge_ref_time_gap, None, False, None)
 

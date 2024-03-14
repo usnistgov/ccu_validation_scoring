@@ -1,6 +1,12 @@
 # CHANGELOG
 All notable changes to this project will be documented in this file.
 
+## [1.3.4] - 2024-03-14
+- Add OpenCCU testcase and readme
+- Update the format of changepoint to let it will be compatible with the previous CCU evaluation
+- Update the script that generate perfect submission to include OpenCCU format
+- Add a optional argument to ND scoring command to fix reference status conflict
+
 ## [1.3.3] - 2023-12-15
 - Updated data type in function sumup_tad_class_level_scores to be compatible with pandas 2.1.3 version
 - Fixed syntax error in function call in function generate_zero_scores_norm_emotion

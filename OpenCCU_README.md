@@ -1,8 +1,8 @@
 # Computational Cultural Understanding Open Evaluation (OpenCCU) Validation and Scoring Toolkit
 
-**Version:** 1.0.0
+**Version:** 1.3.4
 
-**Date:** December 11, 2023
+**Date:** March 14, 2024
 
 
 ## Table of Content
@@ -26,13 +26,13 @@
 
 This package contains the tools to validate and score the ND (norm detection) tasks. Please refer to the OpenCCU Evaluation Plan for more information about OpenCCU, the evaluation tasks, and the file formats.
 
-This README file describes reference annotation validation tool, system output validation tool, scoring tool, reference statistics computing tool and random submission generation tool.
+This README file describes reference annotation validation tool, system output validation tool, scoring tool, reference statistics computing tool and perfect submission generation tool.
 
  - Reference Annotation Validation Tool: confirms that a reference annotation set follows the LDC OpenCCU annotation package directory structure.
  - System Output Validation Tool: confirms that a submission of system output follows the rules set in the OpenCCU Evaluation Plan.
  - Scoring Tool: scores a system output submission against a reference with a scoring index file.
  - Reference Statistics Computing Tool: computes basic statistics on the reference data for the ND task.
- - Random Submission Generation Tool: generates a random submission for the ND task.
+ - Perfect Submission Generation Tool: generates a perfect submission for the ND task.
 
 
 ## <a name="setup">Setup</a>
@@ -159,7 +159,7 @@ CCU_scoring validate-nd -sf open -s <submission_directory> -ref <reference_direc
 # an example of submission validation
 CCU_scoring validate-nd \
 -sf open \
--s /test/pass_submissions/pass_submissions_LDC_reference_sample/ND_open/CCU_P1_TA1_ND_NIST_mini-eval1_20231130_164235 \
+-s test/pass_submissions/pass_submissions_LDC_reference_sample/ND_open/CCU_P1_TA1_ND_NIST_mini-eval1_20231130_164235 \
 -ref test/reference/LDC_reference_sample
 ```
 
@@ -170,7 +170,7 @@ CCU_scoring validate-nd \
 Use the command below to **score an ND submission directory** against a `reference directory` with a `scoring index file`. The `submission directory` must include a `system output index file`. 
 
 ```bash
-CCU_scoring score-nd -sf open -s <norm_submission_directory> -ref <reference_directory> -i <scoring_index_file>
+CCU_scoring score-nd -sf open -s <norm_submission_directory> -ref <reference_directory> -i <scoring_index_file> -f
 ```
 
 **Required Arguments**
@@ -183,9 +183,9 @@ CCU_scoring score-nd -sf open -s <norm_submission_directory> -ref <reference_dir
 
  * `-i`: file containing the file id of scoring datasets
 
-**Optional Arguments**
+ * `-f`: change reference annotation to noann when there are the same annotations but different status
 
- * `-m`: norm mapping submission directory
+**Optional Arguments**
 
  * `-n`: file containing the norm to filter norm from scoring
 
@@ -193,25 +193,14 @@ CCU_scoring score-nd -sf open -s <norm_submission_directory> -ref <reference_dir
 
  * `-o`: output directory containing the score and alignment file
 
- * `-xR`: character gap for the text reference instances merging
-
- * `-aR`: second gap for the time reference instances merging
-
- * `-xS`: character gap for the text system instances merging
-
- * `-aS`: second gap for the time system instances merging
-
- * `-lS`: choose min_llr or max_llr to combine system llrs for the system instances merging
-
- * `-vS`: choose class or class-status to define how to handle the adhere/violate labels for the system instances merging. class is to use the class label only to merge and class-status is to use the class and status label to merge
-
 ```bash
 # an example of norm scoring
 CCU_scoring score-nd \
 -sf open \
--s /test/pass_submissions/pass_submissions_LDC_reference_sample/ND_open/CCU_P1_TA1_ND_NIST_mini-eval1_20231130_164235 \
+-s test/pass_submissions/pass_submissions_LDC_reference_sample/ND_open/CCU_P1_TA1_ND_NIST_mini-eval1_20231130_164235 \
 -ref test/reference/LDC_reference_sample \
--i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab
+-i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab \
+-f
 ```
 
 ### Reference Statistics Computing Tool
@@ -219,45 +208,67 @@ CCU_scoring score-nd \
 The following command should be run within the `CCU_validation_scoring-x.x.x/` directory.
 
 ```bash
-python3 scripts/ccu_ref_analysis.py -r <reference_directory> -t <task_string> -i <scoring_index_file> -o <output_file>
+python3 scripts/ccu_ref_analysis.py -r <reference_directory> -t <task_string> -i <scoring_index_file> -o <output_file> -f
 ```
 
 **Required Arguments**
 
  * `-r`: reference directory
+
  * `-t norms`: task
+
  * `-i`: file containing the file id of scoring datasets
+
  * `-o`: file where the statistics will be output
+
+ * `-f`: change reference annotation to noann when there are the same annotations but different status
+
+ **Optional Arguments**
+
+ * `-xR`: character gap for the text reference instances merging
+
+ * `-aR`: second gap for the time reference instances merging
+
+ * `-vR`: define how to handle the adhere/violate labels for the reference norm instances merging. class is to use the class label only (ignoring status) to merge and class-status is to use the class and status label to merge
 
 ```bash
 # an example of statistics computing
 python3 scripts/ccu_ref_analysis.py -r test/reference/LDC_reference_sample \
 -t norms \
 -i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab \
--o tmp.tab
+-o tmp.tab \
+-f
 ```
 
-### Random Submission Generation Tool
+### Perfect Submission Generation Tool
 
 The following command should be run within the `CCU_validation_scoring-x.x.x/` directory.
 
 ```bash
-python3 scripts/generate_random_submission.py -ref <reference_directory> -t norms -i <scoring_index_file> -o <output_directory>
+python3 scripts/generate_perfect_submission.py -sf open -ref <reference_directory> -t norms -i <scoring_index_file> -o <output_directory> -f
 ```
 
 **Required Arguments**
 
+ * `-sf open`: submission format of OpenCCU
+
  * `-ref`: reference directory
+
  * `-t norms`: task
+
  * `-i`: file containing the file id of scoring datasets
- * `-o`: output directory containing a random submission
+
+ * `-o`: output directory containing a perfect submission
+
+ * `-f`: change reference annotation to noann when there are the same annotations but different status
 
 ```bash
-# an example of statistics computing
-python3 scripts/generate_random_submission.py -ref test/reference/LDC_reference_sample \
+# an example of perfect submission generation
+python3 scripts/generate_perfect_submission.py -sf open -ref test/reference/LDC_reference_sample \
 -t norms \
 -i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab \
--o tmp
+-o tmp \
+-f
 ```
 
 ## <a name="contacts">Report a Bug</a>

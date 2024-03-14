@@ -1,8 +1,8 @@
 # Computational Cultural Understanding (CCU) Evaluation Validation and Scoring Toolkit
 
-**Version:** 1.3.3
+**Version:** 1.3.4
 
-**Date:** December 15, 2023
+**Date:** March 14, 2024
 
 
 ## Table of Content
@@ -144,14 +144,12 @@ CCU_scoring validate-ref -ref test/reference/LDC_reference_sample
 
 ### Submission Validation Subcommands
 
-Each evaluation task has a subcommand to validate a system output file.  The evaluation tasks include Norm Discovery (ND), Emotion Detection (ED), Valence Diarization (VD), Arousal Diarization (AD), and Change Detection (CD).  Use the subcommands below to **validate the format of a ND/ED/VD/AD/CD submission directory** against a `reference directory`. The `submission directory` must include a `system output index file`. 
+**Norm Discovery (ND) Validation Subcommand**
 
+Use the command below to **score an ND submission directory** against a `reference directory`. The `submission directory` must include a `system output index file`.
+ 
 ```bash
 CCU_scoring validate-nd -s <submission_directory> -ref <reference_directory>
-CCU_scoring validate-ed -s <submission_directory> -ref <reference_directory> 
-CCU_scoring validate-vd -s <submission_directory> -ref <reference_directory>
-CCU_scoring validate-ad -s <submission_directory> -ref <reference_directory>
-CCU_scoring validate-cd -s <submission_directory> -ref <reference_directory>
 ```
 
 **Required Arguments**
@@ -159,6 +157,11 @@ CCU_scoring validate-cd -s <submission_directory> -ref <reference_directory>
  * `-s`: submission directory
 
  * `-ref`: reference directory
+
+**Optional Arguments**
+
+ * `-sf`: string to define the submission format. Default "regular" is for CCU evaluation while "open" is for OpenCCU.
+ * `-n`: file containing the known norm to validate if norms are either known norms or team define norms.
 
 ```bash
 # an example of submission validation
@@ -186,6 +189,64 @@ CCU_scoring validate-ndmap -s <submission_directory> -n <hidden_norm_list_file>
 CCU_scoring validate-ndmap \
 -s test/pass_submissions/pass_submissions_LDC_reference_sample/NDMAP/CCU_P1_TA1_NDMAP_NIST_mini-eval1_20220605_050236 \
 -n test/hidden_norms.txt 
+```
+
+**Emotion Detection (ED) and Change Detection (CD) Validation Subcommands**
+
+Use the command below to **validate an ED or CD submission directory** against a `reference directory`. The `submission directory` must include a `system output index file`.
+ 
+```bash
+CCU_scoring validate-ed -s <submission_directory> -ref <reference_directory>
+CU_scoring validate-cd -s <submission_directory> -ref <reference_directory>
+```
+
+**Required Arguments**
+
+ * `-s`: submission directory
+
+ * `-ref`: reference directory
+
+```bash
+# an example of ed submission validation
+CCU_scoring validate-ed \
+-s test/pass_submissions/pass_submissions_LDC_reference_sample/ED/CCU_P1_TA1_ED_NIST_mini-eval1_20220531_050236 \
+-ref test/reference/LDC_reference_sample
+
+# an example of cd submission validation
+CCU_scoring validate-cd \
+-s test/pass_submissions/pass_submissions_LDC_reference_sample/CD/CCU_P1_TA1_CD_NIST_mini-eval1_20220531_050236 \
+-ref test/reference/LDC_reference_sample
+```
+
+**Valence Detection (VD) and Arousal Detection (AD) Validation Subcommands**
+
+Use the command below to **validate an VD or AD submission directory** against a `reference directory`. The `submission directory` must include a `system output index file`.
+ 
+```bash
+CCU_scoring validate-vd -s <submission_directory> -ref <reference_directory>
+CU_scoring validate-ad -s <submission_directory> -ref <reference_directory>
+```
+
+**Required Arguments**
+
+ * `-s`: submission directory
+
+ * `-ref`: reference directory
+
+**Optional Arguments**
+
+ * `-g`: allow gap in system output of valence and arousal
+
+```bash
+# an example of ed submission validation
+CCU_scoring validate-vd \
+-s test/pass_submissions/pass_submissions_LDC_reference_sample/VD/CCU_P1_TA1_VD_NIST_mini-eval1_20220531_050236 \
+-ref test/reference/LDC_reference_sample
+
+# an example of cd submission validation
+CCU_scoring validate-ad \
+-s test/pass_submissions/pass_submissions_LDC_reference_sample/AD/CCU_P1_TA1_AD_NIST_mini-eval1_20220531_050236 \
+-ref test/reference/LDC_reference_sample
 ```
 
 ### Submission Scoring Subcommands
@@ -216,6 +277,8 @@ CCU_scoring score-nd -s <norm_submission_directory> -m <norm_mapping_submission_
 
 **Optional Arguments**
 
+ * `-sf`: string to define the submission format. Default "regular" is for CCU evaluation while "open" is for OpenCCU.
+
  * `-m`: norm mapping submission directory
 
  * `-n`: file containing the norm to filter norm from scoring
@@ -224,9 +287,15 @@ CCU_scoring score-nd -s <norm_submission_directory> -m <norm_mapping_submission_
 
  * `-o`: output directory containing the score and alignment file
 
+ * `-aC`: the duration of TP and FP Scaling collar for time
+
+ * `-xC`: the duration of TP and FP Scaling collar for text
+
  * `-xR`: character gap for the text reference instances merging
 
  * `-aR`: second gap for the time reference instances merging
+
+ * `-vR`: define how to handle the adhere/violate labels for the reference norm instances merging. class is to use the class label only (ignoring status) to merge and class-status is to use the class and status label to merge
 
  * `-xS`: character gap for the text system instances merging
 
@@ -235,6 +304,12 @@ CCU_scoring score-nd -s <norm_submission_directory> -m <norm_mapping_submission_
  * `-lS`: choose min_llr or max_llr to combine system llrs for the system instances merging
 
  * `-vS`: choose class or class-status to define how to handle the adhere/violate labels for the system instances merging. class is to use the class label only to merge and class-status is to use the class and status label to merge
+
+ * `-f`: change reference annotation to noann when there are the same annotations but different status
+
+ * `-d`: dump reference and system inputs as they are processed during scoring.
+
+ * `-q`: do not dump ther final alignment and scores to stdout.
 
 ```bash
 # an example of norm scoring
@@ -275,6 +350,10 @@ CCU_scoring score-ed -s <emotion_submission_directory> -ref <reference_directory
 
  * `-o`: output directory containing the score and alignment file
 
+ * `-aC`: the duration of TP and FP Scaling collar for time
+
+ * `-xC`: the duration of TP and FP Scaling collar for text
+
  * `-xR`: character gap for the text reference instances merging
 
  * `-aR`: second gap for the time reference instances merging
@@ -285,7 +364,9 @@ CCU_scoring score-ed -s <emotion_submission_directory> -ref <reference_directory
 
  * `-lS`: choose min_llr or max_llr to combine system llrs for the system instances merging
 
- * `-vS`: choose class or class-status to define how to handle the adhere/violate labels for the system instances merging. class is to use the class label only to merge and class-status is to use the class and status label to merge
+ * `-d`: dump reference and system inputs as they are processed during scoring
+
+ * `-q`: do not dump ther final alignment and scores to stdout
 
 ```bash
 # an example of ed scoring
@@ -315,6 +396,10 @@ CCU_scoring score-ad -s <arousal_submission_directory> -ref <reference_directory
 **Optional Arguments**
 
  * `-o`: output directory containing the score and diarization file
+
+ * `-q`: do not dump ther final alignment and scores to stdout
+
+ * `-g`: allow gap in system output of valence and arousal
 
 ```bash
 # an example of vd scoring
@@ -354,6 +439,8 @@ CCU_scoring score-cd -s <change_submission_directory> -ref <reference_directory>
 
  * `-o`: output directory containing the score and alignment file
 
+ * `-q`: do not dump ther final alignment and scores to stdout
+
 ```bash
 # an example of cd scoring
 CCU_scoring score-cd \
@@ -372,9 +459,22 @@ python3 scripts/ccu_ref_analysis.py -r <reference_directory> -t <task_string> -i
 **Required Arguments**
 
  * `-r`: reference directory
+
  * `-t`: norms or emotions
+
  * `-i`: file containing the file id of scoring datasets
+
  * `-o`: file where the statistics will be output
+
+ **Optional Arguments**
+
+ * `-xR`: character gap for the text reference instances merging
+
+ * `-aR`: second gap for the time reference instances merging
+
+ * `-vR`: define how to handle the adhere/violate labels for the reference norm instances merging. class is to use the class label only (ignoring status) to merge and class-status is to use the class and status label to merge
+
+ * `-f`: change reference annotation to noann when there are the same annotations but different status
 
 ```bash
 # an example of statistics computing
@@ -389,19 +489,32 @@ python3 scripts/ccu_ref_analysis.py -r test/reference/LDC_reference_sample \
 The following command should be run within the `CCU_validation_scoring-x.x.x/` directory.
 
 ```bash
-python3 scripts/generate_random_submission.py -ref <reference_directory> -t <task_string> -i <scoring_index_file> -o <output_directory>
+python3 scripts/generate_ccu_random_submission.py -ref <reference_directory> -t <task_string> -i <scoring_index_file> -o <output_directory>
 ```
 
 **Required Arguments**
 
  * `-ref`: reference directory
+
  * `-t`: norms or emotions
+
  * `-i`: file containing the file id of scoring datasets
+
  * `-o`: output directory containing a random submission
 
+ **Optional Arguments**
+
+ * `-xR`: character gap for the text reference instances merging
+
+ * `-aR`: second gap for the time reference instances merging
+
+ * `-vR`: define how to handle the adhere/violate labels for the reference norm instances merging. class is to use the class label only (ignoring status) to merge and class-status is to use the class and status label to merge
+
+ * `-f`: change reference annotation to noann when there are the same annotations but different status
+
 ```bash
-# an example of statistics computing
-python3 scripts/generate_random_submission.py -ref test/reference/LDC_reference_sample \
+# an example of random submission generation
+python3 scripts/generate_ccu_random_submission.py -ref test/reference/LDC_reference_sample \
 -t norms \
 -i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab \
 -o tmp

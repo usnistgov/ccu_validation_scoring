@@ -604,7 +604,19 @@ def convert_reference_zscore(df, task):
 
 	return df_zscore_final
 
-def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time_gap = None, merge_label = None, dump_inputs = False, output_dir = None):
+def fix_ref_status_conflict(df):
+
+	df_nonone = df.loc[df["norm"] != "none"]
+	status_counts = df_nonone.groupby(["user_id","file_id","segment_id","norm"]).size().reset_index(name='counts')
+	status_counts_filtered = status_counts.loc[status_counts["counts"] > 1]
+
+	for index, row in status_counts_filtered.iterrows():
+		df.loc[(df["user_id"] == row["user_id"]) & (df["file_id"] == row["file_id"]) & (df["segment_id"] == row["segment_id"]), "status"] = "noann"
+		df.loc[(df["user_id"] == row["user_id"]) & (df["file_id"] == row["file_id"]) & (df["segment_id"] == row["segment_id"]), "norm"] = "noann"
+
+	return df
+
+def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time_gap = None, merge_label = None, dump_inputs = False, output_dir = None, fix_ref_status_conflict_label = None):
 	"""
 	For each task, read and merge corresponding data file, segment file and index file
 	and then preprocess the merged data frame
@@ -619,7 +631,9 @@ def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time
 	if task == "norms" or task == "emotions":
 		data_file = os.path.join(ref_dir,"data","{}.tab".format(task))
 		data_df = read_dedupe_file(data_file)
-		data_df = data_df[~data_df.isin(['EMPTY_TBD']).any(axis=1)]  
+		data_df = data_df[~data_df.isin(['EMPTY_TBD']).any(axis=1)]
+		if (fix_ref_status_conflict_label) and (task == 'norms'):
+			data_df = fix_ref_status_conflict(data_df)
 		segment_file = os.path.join(ref_dir,"docs","segments.tab")
 		segment_df = read_dedupe_file(segment_file)
 		reference_df = data_df.merge(segment_df.merge(index_df))
