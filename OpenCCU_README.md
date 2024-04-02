@@ -24,11 +24,11 @@
 ## <a name="overview">Overview</a>
 
 
-This package contains the tools to validate and score the ND (norm detection) tasks. Please refer to the OpenCCU Evaluation Plan for more information about OpenCCU, the evaluation tasks, and the file formats.
+This package contains the tools to validate and score the ND (norm detection) task. Please refer to the OpenCCU Evaluation Plan for more information about OpenCCU evaluation including the task, and file format.
 
 This README file describes reference annotation validation tool, system output validation tool, scoring tool, reference statistics computing tool and perfect submission generation tool.
 
- - Reference Annotation Validation Tool: confirms that a reference annotation set follows the LDC OpenCCU annotation package directory structure.
+ - Reference Annotation Validation Tool: confirms that a reference annotation set follows the LDC (Linguistic Data Consortium) OpenCCU annotation package directory structure.
  - System Output Validation Tool: confirms that a submission of system output follows the rules set in the OpenCCU Evaluation Plan.
  - Scoring Tool: scores a system output submission against a reference with a scoring index file.
  - Reference Statistics Computing Tool: computes basic statistics on the reference data for the ND task.
@@ -229,7 +229,7 @@ python3 scripts/ccu_ref_analysis.py -r <reference_directory> -t <task_string> -i
 
  * `-aR`: second gap for the time reference instances merging
 
- * `-vR`: define how to handle the adhere/violate labels for the reference norm instances merging. class is to use the class label only (ignoring status) to merge and class-status is to use the class and status label to merge
+ * `-vR`: define how to handle the adhere/violate labels for the reference norm instances merging. "class" is to use the class label only (ignoring status) to merge and "class-status" is to use the class and status label to merge
 
 ```bash
 # an example of statistics computing

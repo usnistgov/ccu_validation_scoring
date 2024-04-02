@@ -26,9 +26,9 @@
 
 This package contains the tools to validate and score the TA1 evaluation tasks: ND (norm discovery), ED (emotion detection), VD (valence diarization), AD (arousal diarization), CD (change detection) and scoring tools for the Hidden Norms (NDMAP). Please refer to the CCU Evaluation Plan for more information about CCU, the evaluation tasks, and the file formats.
 
-This README file describes the reference annotation validation tool, system output validation tool, scoring tool, reference statistics computing tool and random submission generation tool. For the README of OpenCCU, please click and read [this](OpenCCU_README.md) document.
+This README file describes the reference annotation validation tool, system output validation tool, scoring tool, reference statistics computing tool and random submission generation tool. OpenCCU evaluation uses a subset of these tools and has its own [README](OpenCCU_README.md).
 
- - Reference Validation Tool: confirms that a reference annotation set follows the LDC CCU annotation package directory structure.
+ - Reference Validation Tool: confirms that a reference annotation set follows the LDC (Linguistic Data Consortium) CCU annotation package directory structure.
  - System Output Validation Tool: confirms that a submission of system output follows the rules set in the CCU Evaluation Plan.
  - Scoring Tool: scores a system output submission against a reference with a scoring index file.
  - Reference Statistics Computing Tool: computes basic statistics on the reference data for the ND or ED task.
@@ -146,7 +146,7 @@ CCU_scoring validate-ref -ref test/reference/LDC_reference_sample
 
 **Norm Discovery (ND) Validation Subcommand**
 
-Use the command below to **score an ND submission directory** against a `reference directory`. The `submission directory` must include a `system output index file`.
+Use the command below to **validate an ND submission directory** against a `reference directory`. The `submission directory` must include a `system output index file`.
  
 ```bash
 CCU_scoring validate-nd -s <submission_directory> -ref <reference_directory>
@@ -170,7 +170,7 @@ CCU_scoring validate-nd \
 -ref test/reference/LDC_reference_sample
 ```
 
-**Norm Discovery Mapping Validation**
+**Norm Discovery Mapping Validation Subcommand**
 
 Use the command below to **validate the format of an NDMAP submission directory** with a `hidden norm list`.  This validation only applies to the mapping file, not the original system. The `hidden norm list` has one column (no header) containing norm IDs, one per row.
 
@@ -218,7 +218,7 @@ CCU_scoring validate-cd \
 -ref test/reference/LDC_reference_sample
 ```
 
-**Valence Detection (VD) and Arousal Detection (AD) Validation Subcommands**
+**Valence Diarization (VD) and Arousal Diarization (AD) Validation Subcommands**
 
 Use the command below to **validate an VD or AD submission directory** against a `reference directory`. The `submission directory` must include a `system output index file`.
  
@@ -287,25 +287,25 @@ CCU_scoring score-nd -s <norm_submission_directory> -m <norm_mapping_submission_
 
  * `-o`: output directory containing the score and alignment file
 
- * `-aC`: the duration of TP and FP Scaling collar for time
+ * `-aC`: forgiveness collar (in seconds) to determine true positive or false positive in scale metric alignment
 
- * `-xC`: the duration of TP and FP Scaling collar for text
+ * `-xC`: forgiveness collar (in characters) to determine true positive or false positive in scale metric alignment
 
- * `-xR`: character gap for the text reference instances merging
+ * `-xR`: gap (in characters) for the text reference instances merging
 
- * `-aR`: second gap for the time reference instances merging
+ * `-aR`: gap (in seconds) for the audio/video reference instances merging
 
- * `-vR`: define how to handle the adhere/violate labels for the reference norm instances merging. class is to use the class label only (ignoring status) to merge and class-status is to use the class and status label to merge
+ * `-vR`: define how to handle the adhere/violate labels for the reference norm instances merging. "class" is to use the class label only (ignoring status) to merge and "class-status" is to use the class and status label to merge
 
- * `-xS`: character gap for the text system instances merging
+ * `-xS`: gap (in characters) for the text system instances merging
 
- * `-aS`: second gap for the time system instances merging
+ * `-aS`: gap (in seconds) for the audio/video system instances merging
 
- * `-lS`: choose min_llr or max_llr to combine system llrs for the system instances merging
+ * `-lS`: choose "min_llr" or "max_llr" to combine system llrs for the system instances merging
 
- * `-vS`: choose class or class-status to define how to handle the adhere/violate labels for the system instances merging. class is to use the class label only to merge and class-status is to use the class and status label to merge
+ * `-vS`: choose "class" or "class-status" to define how to handle the adhere/violate labels for the system instances merging. class is to use the class label only to merge and class-status is to use the class and status label to merge
 
- * `-f`: change reference annotation to noann when there are the same annotations but different status
+ * `-f`: change reference annotation to "noann" when there are the same annotations but different status
 
  * `-d`: dump reference and system inputs as they are processed during scoring.
 
@@ -350,19 +350,19 @@ CCU_scoring score-ed -s <emotion_submission_directory> -ref <reference_directory
 
  * `-o`: output directory containing the score and alignment file
 
- * `-aC`: the duration of TP and FP Scaling collar for time
+ * `-aC`: forgiveness collar (in seconds) to determine true positive or false positive in scale metric alignment
 
- * `-xC`: the duration of TP and FP Scaling collar for text
+ * `-xC`: forgiveness collar (in characters) to determine true positive or false positive in scale metric alignment
 
- * `-xR`: character gap for the text reference instances merging
+ * `-xR`: gap (in characters) for the text reference instances merging
 
- * `-aR`: second gap for the time reference instances merging
+ * `-aR`: gap (in seconds) for the audio/video reference instances merging
 
- * `-xS`: character gap for the text system instances merging
+ * `-xS`: gap (in characters) for the text system instances merging
 
- * `-aS`: second gap for the time system instances merging
+ * `-aS`: gap (in seconds) for the audio/video system instances merging
 
- * `-lS`: choose min_llr or max_llr to combine system llrs for the system instances merging
+ * `-lS`: choose "min_llr" or "max_llr" to combine system llrs for the system instances merging
 
  * `-d`: dump reference and system inputs as they are processed during scoring
 
@@ -376,7 +376,7 @@ CCU_scoring score-ed \
 -i test/reference/LDC_reference_sample/index_files/LC1-SimulatedMiniEvalP1.20220909.ED.scoring.index.tab
 ```
 
-**Valence Detection (VD) and Arousal Detection (AD) Scoring Subcommands**
+**Valence Diarization (VD) and Arousal Diarization (AD) Scoring Subcommands**
 
 Use the commands below to **score an VD or AD submission directory** against a `reference directory` with a `scoring index file`. The `submission directory` must include a `system output index file`. 
 
@@ -433,9 +433,9 @@ CCU_scoring score-cd -s <change_submission_directory> -ref <reference_directory>
 
 **Optional Arguments**
 
- * `-e`: comma separated list of delta CP text thresholds
+ * `-e`: comma separated list of delta CP (change point) text thresholds
 
- * `-m`: comma separated list of delta CP time thresholds
+ * `-m`: comma separated list of delta CP (change point) time thresholds
 
  * `-o`: output directory containing the score and alignment file
 
@@ -468,13 +468,13 @@ python3 scripts/ccu_ref_analysis.py -r <reference_directory> -t <task_string> -i
 
  **Optional Arguments**
 
- * `-xR`: character gap for the text reference instances merging
+ * `-xR`: gap (in characters) for the text reference instances merging
 
- * `-aR`: second gap for the time reference instances merging
+ * `-aR`: gap (in seconds) for the audio/video reference instances merging
 
- * `-vR`: define how to handle the adhere/violate labels for the reference norm instances merging. class is to use the class label only (ignoring status) to merge and class-status is to use the class and status label to merge
+ * `-vR`: define how to handle the adhere/violate labels for the reference norm instances merging. "class" is to use the class label only (ignoring status) to merge and "class-status" is to use the class and status label to merge
 
- * `-f`: change reference annotation to noann when there are the same annotations but different status
+ * `-f`: change reference annotation to "noann" when there are the same annotations but different status
 
 ```bash
 # an example of statistics computing
@@ -504,13 +504,13 @@ python3 scripts/generate_ccu_random_submission.py -ref <reference_directory> -t 
 
  **Optional Arguments**
 
- * `-xR`: character gap for the text reference instances merging
+ * `-xR`: gap (in characters) for the text reference instances merging
 
- * `-aR`: second gap for the time reference instances merging
+ * `-aR`: gap (in seconds) for the audio/video reference instances merging
 
- * `-vR`: define how to handle the adhere/violate labels for the reference norm instances merging. class is to use the class label only (ignoring status) to merge and class-status is to use the class and status label to merge
+ * `-vR`: define how to handle the adhere/violate labels for the reference norm instances merging. "class" is to use the class label only (ignoring status) to merge and "class-status" is to use the class and status label to merge
 
- * `-f`: change reference annotation to noann when there are the same annotations but different status
+ * `-f`: change reference annotation to "noann" when there are the same annotations but different status
 
 ```bash
 # an example of random submission generation
