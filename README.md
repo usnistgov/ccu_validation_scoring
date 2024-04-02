@@ -2,7 +2,7 @@
 
 **Version:** 1.3.4
 
-**Date:** March 14, 2024
+**Date:** April 1, 2024
 
 
 ## Table of Content
@@ -303,7 +303,7 @@ CCU_scoring score-nd -s <norm_submission_directory> -m <norm_mapping_submission_
 
  * `-lS`: choose "min_llr" or "max_llr" to combine system llrs for the system instances merging
 
- * `-vS`: choose "class" or "class-status" to define how to handle the adhere/violate labels for the system instances merging. class is to use the class label only to merge and class-status is to use the class and status label to merge
+ * `-vS`: choose "class" or "class-status" to define how to handle the adhere/violate labels for the system instances merging. "class" is to use the class label only to merge and "class-status" is to use the class and status label to merge
 
  * `-f`: change reference annotation to "noann" when there are the same annotations but different status
 
