@@ -278,11 +278,11 @@ def generate_align_cal_measure_by_type(ihyp, ref, iou_thresholds, Class, task):
 
     ### Exclude NOSCORE aligned to hyp_isTruncated
     
-    if ihyp.empty:
-        for iout in iou_thresholds:
-            output[iout] = generate_zero_scores_norm_emotion(None) # 0.0, [0.0], [0.0], [0.0]
-        alignment_df = generate_all_fn_alignment_file(ref, task)
-        return output,alignment_df
+    # if ihyp.empty:
+    #     for iout in iou_thresholds:
+    #         output[iout] = generate_zero_scores_norm_emotion(None) # 0.0, [0.0], [0.0], [0.0]
+    #     alignment_df = generate_all_fn_alignment_file(ref, task)
+    #     return output,alignment_df
 
     ref_fn = ref.loc[~(ref["ref_uid"].isin(ihyp["ref_uid"])) & (ref.Class.str.contains('NO_SCORE_REGION') == False)]
     ref_fn = ref_fn.rename(columns={'start': 'start_ref', 'end': 'end_ref'})
