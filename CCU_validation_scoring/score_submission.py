@@ -285,6 +285,9 @@ def score_cd_submission_dir_cli(args):
 
 	ensure_output_dir(args.output_dir)
 	statistic(args.reference_dir, ref, args.submission_dir, hyp, args.output_dir, "changepoint")
+	if (args.dump_inputs):
+		ref.to_csv(os.path.join(args.output_dir, "inputs.ref.scored.tab"), sep = "\t", index = None)
+		hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.scored.tab"), sep = "\t", index = None)
 
 	score_cp(ref, hyp, delta_cp_text_thresholds=text_thresholds, delta_cp_time_thresholds=time_thresholds, output_dir=args.output_dir)
 	generate_scoring_parameter_file(args)
