@@ -45,6 +45,7 @@ def fill_start_end_ref(ref):
 	Returns
 	-------
 	ref_sorted: data frame after adding the no score region
+	annot_segments: dictionary of the start and end of the annotation
 
 	"""
 	
@@ -52,6 +53,7 @@ def fill_start_end_ref(ref):
 	file_ids = get_unique_items_in_array(ref['file_id'])
 	### Check if there is a status field.  If so, then the adjust the array to have an empyt status
 	has_status = ('status' in ref.columns)
+	annot_segments = {}
 	for i in file_ids:
 		sub_ref = extract_df(ref, i)
 		type = list(sub_ref["type"])[0]
@@ -59,21 +61,71 @@ def fill_start_end_ref(ref):
 		start = min(list(sub_ref["start"]))
 		end = max(list(sub_ref["end"]))
 		status = "noann" if (has_status) else None
+		annot_segments[i] = {'start': start, 'end': end}
                 
 		if type == "text":
 			if start > 0:
-				ref.loc[len(ref.index)] = make_row([i, silence_string, 0, start - 1, class_type, type, length, status])
+				ref.loc[len(ref.index)] = make_row([i, silence_string+":seg", 0, start - 1, class_type, type, length, status])
 			if end < length:
-				ref.loc[len(ref.index)] = make_row([i, silence_string, end + 1, length, class_type, type, length, status])
+				ref.loc[len(ref.index)] = make_row([i, silence_string+":seg", end + 1, length, class_type, type, length, status])
 
 		if type in ["audio","video"]:
 			if start > 0:
-				ref.loc[len(ref.index)] = make_row([i, silence_string, 0, start, class_type, type, length, status])
+				ref.loc[len(ref.index)] = make_row([i, silence_string+":seg", 0, start, class_type, type, length, status])
 			if end < length:
-				ref.loc[len(ref.index)] = make_row([i, silence_string, end, length, class_type, type, length, status])
+				ref.loc[len(ref.index)] = make_row([i, silence_string+":seg", end, length, class_type, type, length, status])
 	
 	ref_sorted = ref.sort_values(by=["file_id","start","end"]).reset_index(drop=True)
-	return ref_sorted
+	return(ref_sorted, annot_segments)
+
+def file_based_merge(ref, annot_segments, text_gap, time_gap):
+	"""
+	Merge to the full extent of the annotated region.
+
+	Parameters
+	----------
+	ref
+        text_gap
+        time_gap
+
+	Returns
+	-------
+	ref data frame after merging to file-based scoring
+
+	"""
+	
+	class_type = list(ref["Class_type"])[0]
+	file_ids = get_unique_items_in_array(ref['file_id'])
+	print(annot_segments)
+	print(f"gaps: time={time_gap}  text={text_gap}")
+
+	### Check if there is a status field.  If so, then the adjust the array to have an empyt status
+	has_status = ('status' in ref.columns)
+	for i in file_ids:
+                ftype = ref[ref['file_id'] == i]['type'].iloc[0]
+                if ((ftype in ['audio', 'video'] and time_gap == 9999999999) or
+                    (ftype in ['text']           and text_gap == 9999999999)):
+                        st = annot_segments[i]['start']
+                        en = annot_segments[i]['end']
+                        #print(f"filtering file {i} type {ftype} annot[{st},{en}]")
+                        #print(ref[ref['file_id'] == i])
+
+                        #print("drop internal noann")
+                        ref = ref.drop(ref[(ref['file_id'] == i) & (ref['Class'] == 'noann')].index)
+                        #print(ref[ref['file_id'] == i])
+                        
+                        #print("drop duplicate classes")
+                        sub = ref[(ref['file_id'] == i) & (ref['Class'] != 'noann:seg')]
+                        keep = sub.drop_duplicates(subset=['Class'], keep='first')
+                        ref = ref.drop(set(sub.index) - set(keep.index))
+                        #print(ref[ref['file_id'] == i])
+                        
+                        #print("Set the full extent")
+                        ref.loc[(ref['file_id'] == i) & (ref['Class'] != 'noann:seg'), 'start'] = st
+                        ref.loc[(ref['file_id'] == i) & (ref['Class'] != 'noann:seg'), 'end'] = en
+                        #print(ref)
+                        
+	return(ref)
 
 def check_remove_start_end_same(ref):
 	"""
@@ -616,6 +668,7 @@ def fix_ref_status_conflict(df):
 
 	return df
 
+### If text_gap or time_gap is 9999999999, then it is a file-based mergeing for ND and ED!!!
 def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time_gap = None, merge_label = None, dump_inputs = False, output_dir = None, fix_ref_status_conflict_label = None):
 	"""
 	For each task, read and merge corresponding data file, segment file and index file
@@ -649,10 +702,16 @@ def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time
 		ref.drop_duplicates(inplace = True)
 		ref_inter = ref.merge(index_df)
 		if len(ref_inter) > 0:
-			ref_final = fill_start_end_ref(ref_inter)
+			ref_final, annot_segments = fill_start_end_ref(ref_inter)   ### This adds the beginning and ending noann segments
 			ref_final = ref_final[ref_final.Class != "none"]
+			# handle the file-based merge
+			ref_final = file_based_merge(ref_final, annot_segments, text_gap, time_gap)
+			ref_final.loc[ref_final['Class'] == 'noann:seg', 'Class'] = 'noann'  ### Reset the un-annnotated segment tag
+
 		else:
 			ref_final = ref_inter
+
+		#print(ref_final[ref_final['file_id'] == 'M010005QD'])
 
 	if task == "valence_continuous" or task == "arousal_continuous":
 		data_file = os.path.join(ref_dir,"data","valence_arousal.tab")
@@ -668,7 +727,8 @@ def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time
 		ref = ref.merge(index_df)
 		ref_inter = extend_gap_segment(ref, "ref")
 		if len(ref_inter) > 0:
-			ref_final = fill_start_end_ref(ref_inter)
+			ref_final, annot_segmemnts = fill_start_end_ref(ref_inter)
+			ref_final.loc[ref_final['Class'] == 'noann:seg', 'Class'] = 'noann'  ### Reset the un-annnotated segment tag
 		else:
 			ref_final = ref_inter		
 

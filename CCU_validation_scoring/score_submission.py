@@ -79,6 +79,24 @@ def pre_filter_system_in_noann_region(hyp, ref):
         #exit(0)
         return(hyp)
 
+def set_text_gap(arg):
+    if (arg):
+        if (arg == "file"):
+            return(9999999999)
+        else:
+            return(int(arg))
+    else:
+        return(None)
+
+def set_time_gap(arg):
+    if (arg):
+        if (arg == "file"):
+            return(9999999999)
+        else:
+            return(float(arg))
+    else:
+        return(None)
+    
 def score_nd_submission_dir_cli(args):
 
 	try:
@@ -152,8 +170,7 @@ def score_nd_submission_dir_cli(args):
 		print("Aggregated Scores")
 		print("-------------")
 		print(open(os.path.join(args.output_dir, 'scores_aggregated.tab')).read())
-
-
+    
 def score_ed_submission_dir_cli(args):
 
 	try:
@@ -164,15 +181,8 @@ def score_ed_submission_dir_cli(args):
 
 	check_scoring_index_out_of_scope(args.reference_dir, scoring_index, "emotions")
 	
-	if args.merge_ref_text_gap:
-		merge_ref_text_gap = int(args.merge_ref_text_gap)
-	else:
-		merge_ref_text_gap = None
-
-	if args.merge_ref_time_gap:
-		merge_ref_time_gap = float(args.merge_ref_time_gap)
-	else:
-		merge_ref_time_gap = None
+	merge_ref_text_gap = set_text_gap(args.merge_ref_text_gap)
+	merge_ref_time_gap = set_time_gap(args.merge_ref_time_gap)
 
 	ensure_output_dir(args.output_dir)
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "emotions", text_gap = merge_ref_text_gap, time_gap = merge_ref_time_gap, dump_inputs=args.dump_inputs, output_dir=args.output_dir)
@@ -182,15 +192,9 @@ def score_ed_submission_dir_cli(args):
 	if (args.dump_inputs):
 		hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.read.tab"), sep = "\t", index = None)
 
-	if args.merge_sys_text_gap:
-		merge_sys_text_gap = int(args.merge_sys_text_gap)
-	else:
-		merge_sys_text_gap = None
+	merge_sys_text_gap = set_text_gap(args.merge_sys_text_gap)
+	merge_sys_time_gap = set_time_gap(args.merge_sys_time_gap)
 
-	if args.merge_sys_time_gap:
-		merge_sys_time_gap = float(args.merge_sys_time_gap)
-	else:
-		merge_sys_time_gap = None
 	hyp = pre_filter_system_in_noann_region(hyp, ref)
 
 	merged_hyp = merge_sys_instance(hyp, merge_sys_text_gap, merge_sys_time_gap, args.combine_sys_llrs, args.merge_sys_label, "emotions")
