@@ -96,8 +96,8 @@ def file_based_merge(ref, annot_segments, text_gap, time_gap):
 	
 	class_type = list(ref["Class_type"])[0]
 	file_ids = get_unique_items_in_array(ref['file_id'])
-	print(annot_segments)
-	print(f"gaps: time={time_gap}  text={text_gap}")
+	#print(annot_segments)
+	#print(f"gaps: time={time_gap}  text={text_gap}")
 
 	### Check if there is a status field.  If so, then the adjust the array to have an empyt status
 	has_status = ('status' in ref.columns)

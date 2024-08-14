@@ -107,15 +107,8 @@ def score_nd_submission_dir_cli(args):
 
 	check_scoring_index_out_of_scope(args.reference_dir, scoring_index, "norms")
 
-	if args.merge_ref_text_gap:
-		merge_ref_text_gap = int(args.merge_ref_text_gap)
-	else:
-		merge_ref_text_gap = None
-
-	if args.merge_ref_time_gap:
-		merge_ref_time_gap = float(args.merge_ref_time_gap)
-	else:
-		merge_ref_time_gap = None
+	merge_ref_text_gap = set_text_gap(args.merge_ref_text_gap)
+	merge_ref_time_gap = set_time_gap(args.merge_ref_time_gap)
 
 	ensure_output_dir(args.output_dir)
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "norms", text_gap = merge_ref_text_gap, time_gap = merge_ref_time_gap, merge_label = args.merge_ref_label, dump_inputs=args.dump_inputs, output_dir=args.output_dir, fix_ref_status_conflict_label=args.fix_ref_status_conflict)
@@ -192,8 +185,16 @@ def score_ed_submission_dir_cli(args):
 	if (args.dump_inputs):
 		hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.read.tab"), sep = "\t", index = None)
 
-	merge_sys_text_gap = set_text_gap(args.merge_sys_text_gap)
-	merge_sys_time_gap = set_time_gap(args.merge_sys_time_gap)
+	if args.merge_sys_text_gap:
+		merge_sys_text_gap = int(args.merge_sys_text_gap)
+	else:
+		merge_sys_text_gap = None
+
+	if args.merge_sys_time_gap:
+		merge_sys_time_gap = float(args.merge_sys_time_gap)
+	else:
+		merge_sys_time_gap = None
+
 
 	hyp = pre_filter_system_in_noann_region(hyp, ref)
 
