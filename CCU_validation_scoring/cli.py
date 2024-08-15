@@ -130,6 +130,7 @@ def main():
     score_nd_parser.add_argument("-d", "--dump_inputs", action='store_true', help="Dump reference and system inputs as they are processed during scoring.")
     score_nd_parser.add_argument("-q", "--quiet", action='store_true', default=False, help="Do not dump ther final alignment and scores to stdout.")
     score_nd_parser.add_argument(      "--align_hacks", type=str, default="", help="NIST Field for undocumented experiments.")
+    score_nd_parser.add_argument("-lf", "--llr_filter", type=str, default="", help="Filter system output by LLRs. The option requires the form <ORDER>:by_value:<VALUE>.  <ORDER> is one of: 'after_read|after_transforms'.  <VALUE> is the floating point threshold to retain detections with values >= <VALUE>")
 
     score_nd_parser.set_defaults(func=score_submission.score_nd_submission_dir_cli)
 
@@ -152,6 +153,7 @@ def main():
     score_ed_parser.add_argument("-d", "--dump_inputs", action='store_true', help="Dump reference and system inputs as they are processed during scoring.")
     score_ed_parser.add_argument("-q", "--quiet", action='store_true', default=False, help="Do not dump ther final alignment and scores to stdout.")
     score_ed_parser.add_argument(      "--align_hacks", type=str, default="", help="NIST Field for undocumented experiments.")
+    score_ed_parser.add_argument("-lf", "--llr_filter", type=str, default="", help="Filter system output by LLRs.  The option requires the form <ORDER>:by_value:<VALUE>.  <ORDER> is one of: 'after_read|after_transforms'.  <VALUE> is the floating point threshold to retain detections with values >= <VALUE>")
 
     score_ed_parser.set_defaults(func=score_submission.score_ed_submission_dir_cli)
 
@@ -184,6 +186,7 @@ def main():
     score_cd_parser.add_argument("-o", "--output_dir", type=str, nargs='?', default="tmp", help="Output directory")
     score_cd_parser.add_argument("-d", "--dump_inputs", action='store_true', help="Dump reference and system inputs as they are processed during scoring.")
     score_cd_parser.add_argument("-q", "--quiet", action='store_true', default=False, help="Do not dump ther final alignment and scores to stdout.")
+    score_cd_parser.add_argument("-lf", "--llr_filter", type=str, default="", help="Filter system output by LLRs.  The option requires the form <ORDER>:by_value:<VALUE>.  <ORDER> is one of: 'after_read|after_transforms'.  <VALUE> is the floating point threshold to retain detections with values >= <VALUE>")
 
     score_cd_parser.set_defaults(func=score_submission.score_cd_submission_dir_cli)
 
@@ -203,7 +206,11 @@ def main():
     if "score_nd" in str(vars(args)['func']) or "score_ed" in str(vars(args)['func']):
         ### This is to make sure the argument is parsable before anything is done.  The result is ignored for now.  The command throws an assertion error to exit
         o = (score_submission.parse_thresholds(args.iou_thresholds))
-            
+
+    if "score_nd" in str(vars(args)['func']) or "score_ed" in str(vars(args)['func']) or "score_x\d" in str(vars(args)['func']):
+        ### This is to make sure the argument is parsable before anything is done.  The result is ignored for now.  The command throws an assertion error to exit
+        o = (score_submission.parse_llr_filter(args.llr_filter))
+        
     if hasattr(args, 'func') and args.func:    
         args.func(args)
     else:

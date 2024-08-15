@@ -1,0 +1,15 @@
+class	file_id	eval	ref	sys	llr	parameters
+cp	M010005NJ	mapped	{timestamp=18}	{timestamp=17}	0.9	{delta_cp=1.0}
+cp	M010005NJ	unmapped	{}	{timestamp=25}	0.6	{}
+cp	M010005NJ	mapped	{timestamp=26}	{timestamp=27}	0.8	{delta_cp=1.0}
+cp	M010005NJ	mapped	{timestamp=32}	{timestamp=35}	0.9	{delta_cp=3.0}
+cp	M010005NJ	mapped	{timestamp=40}	{timestamp=38}	0.9	{delta_cp=2.0}
+cp	M010005NJ	unmapped	{}	{timestamp=40}	0.7	{}
+cp	M01000G2T	unmapped	{}	{timestamp=15}	0.6	{}
+cp	M01000G2T	mapped	{timestamp=10}	{timestamp=20}	0.8	{delta_cp=10.0}
+cp	M01000G2T	mapped	{timestamp=31}	{timestamp=40}	0.9	{delta_cp=9.0}
+cp	M01000G2T	unmapped	{timestamp=30}	{}		{}
+cp	M01000H0B	unmapped	{}	{timestamp=20}	0.8	{}
+cp	M01000H0B	unmapped	{}	{timestamp=310}	0.6	{}
+cp	M01000H0B	mapped	{timestamp=270}	{timestamp=350}	0.9	{delta_cp=80.0}
+cp	M01000H0B	unmapped	{timestamp=130}	{}		{}

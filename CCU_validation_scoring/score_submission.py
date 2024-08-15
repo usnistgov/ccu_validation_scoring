@@ -35,6 +35,22 @@ def parse_thresholds(arg):
     assert succeed, "Parse thresholds failed"
     return(dic)
 
+def parse_llr_filter(arg):
+    ''' Returns the parsed llr_filter
+    '''
+    
+    dic = { 'filter_order': None, 'filter_def': None, 'filter_threshold': None}
+    succeed = True
+    if (arg != ""):
+        match = re.match('^(after_read|after_transforms):(by_value):([\\d]*\\.[\\d]+|[\\d]+|[\\d]+\\.)$', arg)
+        if (match is not None):
+            dic['filter_order'] = match.group(1)
+            dic['filter_method'] = match.group(2)
+            dic['filter_threshold'] = match.group(3)
+        else:
+            assert False, f"Parse thresholds failed /{arg}/"
+    return(dic)
+
 def get_contained_index(ref_row, hyp):
         if (ref_row['Class'] != "noann"):
                 return([])
@@ -105,6 +121,8 @@ def score_nd_submission_dir_cli(args):
 		logger.error('ERROR:SCORING:{} is not a valid scoring index file'.format(args.scoring_index_file))
 		exit(1)
 
+	llr_filter = parse_llr_filter(args.llr_filter)
+
 	check_scoring_index_out_of_scope(args.reference_dir, scoring_index, "norms")
 
 	merge_ref_text_gap = set_text_gap(args.merge_ref_text_gap)
@@ -121,6 +139,10 @@ def score_nd_submission_dir_cli(args):
 	if (args.dump_inputs):
 		hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.read.tab"), sep = "\t", index = None)
 
+	if (llr_filter['filter_order'] is not None and llr_filter['filter_order'] == 'after_read'):
+		## only by_value :)
+		hyp = hyp.drop(hyp[ hyp['llr'] < float(llr_filter['filter_threshold']) ].index)
+                
 	if args.mapping_submission_dir:
 		mapping_file = os.path.join(args.mapping_submission_dir, "nd.map.tab")
 		mapping_df = pd.read_csv(mapping_file, dtype="object", sep = "\t")
@@ -147,6 +169,9 @@ def score_nd_submission_dir_cli(args):
 
 	statistic(args.reference_dir, ref, args.submission_dir, merged_hyp, args.output_dir, "norms")
 
+	if (llr_filter['filter_order'] is not None and llr_filter['filter_order'] == 'after_transforms'):
+		merged_hyp = merged_hyp.drop(hyp[ hyp['llr'] < float(llr_filter['filter_threshold']) ].index)
+
 	if (args.dump_inputs):
 		ref.to_csv(os.path.join(args.output_dir, "inputs.ref.scored.tab"), sep = "\t", index = None)
 		merged_hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.scored.tab"), sep = "\t", index = None)
@@ -172,6 +197,8 @@ def score_ed_submission_dir_cli(args):
 		logger.error('ERROR:SCORING:{} is not a valid scoring index file'.format(args.scoring_index_file))
 		exit(1)
 
+	llr_filter = parse_llr_filter(args.llr_filter)
+
 	check_scoring_index_out_of_scope(args.reference_dir, scoring_index, "emotions")
 	
 	merge_ref_text_gap = set_text_gap(args.merge_ref_text_gap)
@@ -184,6 +211,10 @@ def score_ed_submission_dir_cli(args):
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "emotions")
 	if (args.dump_inputs):
 		hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.read.tab"), sep = "\t", index = None)
+
+	if (llr_filter['filter_order'] is not None and llr_filter['filter_order'] == 'after_read'):
+		## only by_value :)
+		hyp = hyp.drop(hyp[ hyp['llr'] < float(llr_filter['filter_threshold']) ].index)
 
 	if args.merge_sys_text_gap:
 		merge_sys_text_gap = int(args.merge_sys_text_gap)
@@ -201,6 +232,9 @@ def score_ed_submission_dir_cli(args):
 	merged_hyp = merge_sys_instance(hyp, merge_sys_text_gap, merge_sys_time_gap, args.combine_sys_llrs, args.merge_sys_label, "emotions")
 
 	thresholds = parse_thresholds(args.iou_thresholds)
+
+	if (llr_filter['filter_order'] is not None and llr_filter['filter_order'] == 'after_transforms'):
+		merged_hyp = merged_hyp.drop(hyp[ hyp['llr'] < float(llr_filter['filter_threshold']) ].index)
 
 	statistic(args.reference_dir, ref, args.submission_dir, merged_hyp, args.output_dir, "emotions")
 	if (args.dump_inputs):
@@ -275,6 +309,8 @@ def score_ad_submission_dir_cli(args):
 
 def score_cd_submission_dir_cli(args):
 
+	llr_filter = parse_llr_filter(args.llr_filter)
+
 	try:
 		scoring_index = pd.read_csv(args.scoring_index_file, usecols = ['file_id'], sep = "\t")
 	except Exception as e:
@@ -285,9 +321,19 @@ def score_cd_submission_dir_cli(args):
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "changepoint")
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "changepoint")
 
+	if (args.dump_inputs):
+		hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.read.tab"), sep = "\t", index = None)
+
+	if (llr_filter['filter_order'] is not None and llr_filter['filter_order'] == 'after_read'):
+		## only by_value :)
+		hyp = hyp.drop(hyp[ hyp['llr'] < float(llr_filter['filter_threshold']) ].index)
+
 	text_thresholds = [int(i) for i in args.delta_cp_text_thresholds.split(',')]
 	time_thresholds = [float(i) for i in args.delta_cp_time_thresholds.split(',')]
 
+	if (llr_filter['filter_order'] is not None and llr_filter['filter_order'] == 'after_transforms'):
+		hyp = hyp.drop(hyp[ hyp['llr'] < float(llr_filter['filter_threshold']) ].index)
+        
 	ensure_output_dir(args.output_dir)
 	statistic(args.reference_dir, ref, args.submission_dir, hyp, args.output_dir, "changepoint")
 	if (args.dump_inputs):

@@ -68,6 +68,13 @@ def run_scorer(tmp_dir):
                           ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.AD.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'AD', '', '', '', ''),
                           ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'NDMAP', 'CCU_P1_TA1_ND_NIST_mini-eval1_20220908_111111', 'hidden_norms_LC1.txt', '', ''),
 
+                          ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'ND', '', 'known_norms_LC1.txt', '-lf after_read:by_value:0.74',       'llrfilt_after_read'),
+                          ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.CD.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'CD', '', '',                    '-lf after_read:by_value:0.74',       'llrfilt_after_read'),
+                          ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.ED.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'ED', '', '',                    '-lf after_read:by_value:0.74',       'llrfilt_after_read'),
+                          ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'ND', '', 'known_norms_LC1.txt', '-lf after_transforms:by_value:0.74', 'llrfilt_after_transforms'),
+                          ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.CD.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'CD', '', '',                    '-lf after_transforms:by_value:0.74', 'llrfilt_after_transforms'),
+                          ('LC1-SimulatedMiniEvalP1_ref_annotation', 'LC1-SimulatedMiniEvalP1.20220909.ED.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation', 'ED', '', '',                    '-lf after_transforms:by_value:0.74', 'llrfilt_after_transforms'),
+
                           ('ActEV-SmoothCurve', 'ActEV-SmoothCurve.ND.scoring.index.tab', 'pass_submissions_ActEV-SmoothCurve', 'ND', '', '', '', ''),
 
                           ('LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'ND', '', 'known_norms_LC1.txt', '',                                                                   'nomerge'),
