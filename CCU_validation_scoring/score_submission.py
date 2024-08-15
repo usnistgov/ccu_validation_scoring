@@ -111,7 +111,7 @@ def score_nd_submission_dir_cli(args):
 	merge_ref_time_gap = set_time_gap(args.merge_ref_time_gap)
 
 	ensure_output_dir(args.output_dir)
-	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "norms", text_gap = merge_ref_text_gap, time_gap = merge_ref_time_gap, merge_label = args.merge_ref_label, dump_inputs=args.dump_inputs, output_dir=args.output_dir, fix_ref_status_conflict_label=args.fix_ref_status_conflict)
+	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "norms", text_gap = merge_ref_text_gap, time_gap = merge_ref_time_gap, merge_label = args.merge_ref_label, dump_inputs=args.dump_inputs, output_dir=args.output_dir, fix_ref_status_conflict_label=args.fix_ref_status_conflict, minimum_vote_agreement=None)
 
 	if args.norm_list_file:
 		ref = process_subset_norm_emotion(args.norm_list_file, ref)
@@ -178,7 +178,7 @@ def score_ed_submission_dir_cli(args):
 	merge_ref_time_gap = set_time_gap(args.merge_ref_time_gap)
 
 	ensure_output_dir(args.output_dir)
-	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "emotions", text_gap = merge_ref_text_gap, time_gap = merge_ref_time_gap, dump_inputs=args.dump_inputs, output_dir=args.output_dir)
+	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "emotions", text_gap = merge_ref_text_gap, time_gap = merge_ref_time_gap, dump_inputs=args.dump_inputs, output_dir=args.output_dir, minimum_vote_agreement=args.minimum_vote_agreement)
 	if args.emotion_list_file:
 		ref = process_subset_norm_emotion(args.emotion_list_file, ref)
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "emotions")

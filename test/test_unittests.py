@@ -275,9 +275,9 @@ class EmotionDetectionTests(unittest.TestCase):
                         last_segment_id = current_segment_id
 
             if is_emotion == False:
-                emo_dict = get_highest_vote_based_on_time(input_df, "norm")
+                emo_dict = get_highest_vote_based_on_time(input_df, "norm", None)
             else:
-                emo_dict = get_highest_vote_based_on_time(input_df, "emotion")
+                emo_dict = get_highest_vote_based_on_time(input_df, "emotion", 2)
 
             # Test that emo_dict is a dict w/ strings as keys & list as values
             self.assertIsInstance(emo_dict, dict)        

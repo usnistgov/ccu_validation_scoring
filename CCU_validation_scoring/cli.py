@@ -148,6 +148,7 @@ def main():
     score_ed_parser.add_argument("-aS", "--merge_sys_time_gap", type=str, required=False, help="Merge system time gap second")
     score_ed_parser.add_argument("-lS", "--combine_sys_llrs", type=str, choices=['min_llr', 'max_llr'], required=False, help="Choose min_llr or max_llr to combine system llrs for the system instances merging")
     score_ed_parser.add_argument("-vS", "--merge_sys_label", type=str, choices=['class'], required=False, help="Provide class only to define how to handle the status labels for the system instances merging. class is to use the class label only to merge")
+    score_ed_parser.add_argument("-mv", "--minimum_vote_agreement", type=int, default=2, required=False, help="Set the mimimum agreement for voting between annotators. Default is 2 agreeing annotators per segment.")
     score_ed_parser.add_argument("-d", "--dump_inputs", action='store_true', help="Dump reference and system inputs as they are processed during scoring.")
     score_ed_parser.add_argument("-q", "--quiet", action='store_true', default=False, help="Do not dump ther final alignment and scores to stdout.")
     score_ed_parser.add_argument(      "--align_hacks", type=str, default="", help="NIST Field for undocumented experiments.")

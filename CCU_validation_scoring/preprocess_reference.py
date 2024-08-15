@@ -143,7 +143,7 @@ def check_remove_start_end_same(ref):
 
 	return ref
 
-def get_raw_file_id_dict(file_ids, data_frame, class_type, text_gap, time_gap, merge_label):
+def get_raw_file_id_dict(file_ids, data_frame, class_type, text_gap, time_gap, merge_label, minimum_vote_agreement):
 	"""
 		Generate a dictionary based on file_id
 		
@@ -153,6 +153,7 @@ def get_raw_file_id_dict(file_ids, data_frame, class_type, text_gap, time_gap, m
 		data_frame: raw data frame
 		class_type: norm or emotion
 		norm_status: norm's status.  Omitted for emotions
+                minimum_vote_agreement : integer The mimimum agreement between annotators
  
 		Returns
 		-------
@@ -162,7 +163,16 @@ def get_raw_file_id_dict(file_ids, data_frame, class_type, text_gap, time_gap, m
 	result_dict = {}
 	for file_id in file_ids:
 		sorted_df = extract_df(data_frame, file_id)
-		class_count_vote_dict = get_highest_vote_based_on_time(sorted_df, class_type)
+		class_count_vote_dict = get_highest_vote_based_on_time(sorted_df, class_type, minimum_vote_agreement)
+		#print("sorted_df")
+		#print(sorted_df)                
+		#print("class_count_vote_dict")
+		#print(class_count_vote_dict)
+		#for i in class_count_vote_dict:
+		#	print(i)
+		#	for x in class_count_vote_dict[i]:
+		#	        print(x)
+
                 
 		# Check file type to determine the gap of merging
 		if list(sorted_df["type"])[0] == "text" and text_gap is not None:
@@ -175,24 +185,26 @@ def get_raw_file_id_dict(file_ids, data_frame, class_type, text_gap, time_gap, m
 			vote_array_per_file = merge_vote_time_periods(class_count_vote_dict, class_type, merge_label=merge_label)		
                                         
 		result_dict[file_id] = vote_array_per_file
+		#print(vote_array_per_file)                
+
 	return result_dict  
 		
-def get_highest_class_vote(class_dict):
+def get_highest_class_vote(class_dict, minimum_vote_agreement):
 	"""
 		Filter out highest voted class/classes with given class dictionary
 	 
 		Parameters
 		----------
 		class_dict : dictionary
+                minimum_vote_agreement : integer The mimimum agreement between annotators
  
 		Returns
 		-------
 		result_array: list
 	"""
 	result_array=[]
-	high_bar = 2
 	for key in class_dict:
-		if class_dict[key] >= high_bar:
+		if class_dict[key] >= minimum_vote_agreement:
 			result_array.append(key)
 	if len(result_array) == 0:
 		result_array.append('none')
@@ -297,7 +309,7 @@ def get_highest_vote_based_on_time_orig(data_frame, class_type):
 
 	return emo_dict  
 
-def get_highest_vote_based_on_time(data_frame, class_type):
+def get_highest_vote_based_on_time(data_frame, class_type, minimum_vote_agreement):
 	"""
 		Reference Norm/Emotion Instances (after applying Judgment Collapsing by Majority Voting)
 		This function should combine class vote in column of "class" in passed in data frame.
@@ -354,8 +366,9 @@ def get_highest_vote_based_on_time(data_frame, class_type):
 				pre_value = time_dict[pre_key]
 				if voter_count > 1:
 					# More than one voter, need to get highest voted class
-					highest_vote_class = get_highest_class_vote(pre_value['Class'])
+					highest_vote_class = get_highest_class_vote(pre_value['Class'], minimum_vote_agreement)
 				elif voter_count == 1:
+                                        #### JON's NOTE - Why are these going to noann
 					if class_type == "emotion":
 						# Only one voter, translate into noann
 						highest_vote_class = [silence_string]
@@ -391,8 +404,9 @@ def get_highest_vote_based_on_time(data_frame, class_type):
 			cur_value = time_dict[time_key]
 			if voter_count > 1:
 				# More than one voter, need to get highest voted class
-				highest_vote_class = get_highest_class_vote(cur_value['Class'])
+				highest_vote_class = get_highest_class_vote(cur_value['Class'], minimum_vote_agreement)
 			elif voter_count == 1:
+                                #### JON's NOTE - Why are these going to noann
 				if class_type == "emotion":
 					# Only one voter, translate into noann
 					highest_vote_class = [silence_string]
@@ -606,19 +620,26 @@ def convert_valence_arousal_dict_df(result_dict, class_type):
 		result_df["Class_type"] = class_type
 		return result_df
 
-def preprocess_norm_emotion_reference_df(reference_df, class_type, text_gap, time_gap, merge_label):
+def preprocess_norm_emotion_reference_df(reference_df, class_type, text_gap, time_gap, merge_label, minimum_vote_agreement):
 	"""
 	The wrapper of preprocess for norm/emotion dataframe 
-	"""
+
+        minimum_vote_agreement : integer The mimimum agreement between annotators
+
+        """
 
 	new_reference_df = change_class_type(reference_df, class_type)
 	# Split input_file into parts based on file_id column
 	file_ids = get_unique_items_in_array(new_reference_df['file_id'])
 	# Generate file_id map for vote processing
-	result = get_raw_file_id_dict(file_ids, new_reference_df, class_type, text_gap, time_gap, merge_label)
-
+	result = get_raw_file_id_dict(file_ids, new_reference_df, class_type, text_gap, time_gap, merge_label, minimum_vote_agreement)        
+	#print("Before")
+	#print(result)
+        
 	# Convert the result dictionary into dataframe
 	result_df = convert_norm_emotion_dict_df(result, class_type)
+	#print("After")
+	#print(result_df)
 
 	# ## Dropping rows with zero duration
 	# result_df = result_df.drop(result_df[result_df.start == result_df.end].index, axis=0)
@@ -669,7 +690,7 @@ def fix_ref_status_conflict(df):
 	return df
 
 ### If text_gap or time_gap is 9999999999, then it is a file-based mergeing for ND and ED!!!
-def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time_gap = None, merge_label = None, dump_inputs = False, output_dir = None, fix_ref_status_conflict_label = None):
+def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time_gap = None, merge_label = None, dump_inputs = False, output_dir = None, fix_ref_status_conflict_label = None, minimum_vote_agreement= None):
 	"""
 	For each task, read and merge corresponding data file, segment file and index file
 	and then preprocess the merged data frame
@@ -690,15 +711,21 @@ def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time
 		segment_file = os.path.join(ref_dir,"docs","segments.tab")
 		segment_df = read_dedupe_file(segment_file)
 		reference_df = data_df.merge(segment_df.merge(index_df))
+
 		if (dump_inputs):
 			reference_df.to_csv(os.path.join(output_dir, "inputs.ref.read.tab"), sep = "\t", index = None)
 		reference_prune = check_remove_start_end_same(reference_df)
 		column_name = task.replace("s","")
+
 		if (task == 'norms'):
 			reference_prune['norm_status'] = [ n + "::" + s for n,s in zip(reference_prune['norm'], reference_prune['status']) ]
 			#Begin to keep the status here.  Stopping for now
-		ref = preprocess_norm_emotion_reference_df(reference_prune, column_name, text_gap, time_gap, merge_label)
-
+		#print(reference_prune) 
+		ref = preprocess_norm_emotion_reference_df(reference_prune, column_name, text_gap, time_gap, merge_label, minimum_vote_agreement)
+		#print('-----------------=')
+		#print(minimum_vote_agreement)
+		#print(ref)
+                
 		ref.drop_duplicates(inplace = True)
 		ref_inter = ref.merge(index_df)
 		if len(ref_inter) > 0:
