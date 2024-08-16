@@ -438,6 +438,9 @@ def merge_sys_instance(hyp, text_gap, time_gap, llr_value, merge_label, task):
 	#print(f"Merging hyp {text_gap} {time_gap} {llr_value} {merge_label} {task}")
 	if text_gap is None and time_gap is None:
 		return hyp
+	if (len(hyp) == 0):  ### make an enpty structure
+		return hyp
+
 	# Split input_file into parts based on file_id column
 	file_ids = get_unique_items_in_array(hyp['file_id'])
 	# Generate file_id map for vote processing
