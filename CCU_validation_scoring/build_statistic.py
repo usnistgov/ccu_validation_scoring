@@ -22,14 +22,15 @@ def generate_diff(row):
 
 def class_type_instance_count(df, data):
 
-	class_type_instance_count = df.groupby(['Class', 'type']).size().reset_index(name='value')
-	class_type_instance_count.rename(columns = {"Class": "class", "type": "genre"}, inplace = True)
-	class_type_instance_count["metric"] = "instance_counts"
-	class_type_instance_count["data"] = data
+	if df.shape[0] > 0:
+		class_type_instance_count = df.groupby(['Class', 'type']).size().reset_index(name='value')
+		class_type_instance_count.rename(columns = {"Class": "class", "type": "genre"}, inplace = True)
+		class_type_instance_count["metric"] = "instance_counts"
+		class_type_instance_count["data"] = data
 
-	class_type_instance_count = class_type_instance_count[["data","class","genre","metric","value"]]
+		class_type_instance_count = class_type_instance_count[["data","class","genre","metric","value"]]
 
-	return class_type_instance_count
+		return class_type_instance_count
 
 def type_instance_count(df, data):
 
@@ -83,9 +84,10 @@ def type_class_std(df, data):
 
 def unique_file_count(df):
 
-	file_id = df.file_id.unique()
-
-	return len(file_id)
+	if df.shape[0] > 0:
+		return len(df.file_id.unique())
+	else:
+		return 0
 
 def combine_result(*arguments):
 

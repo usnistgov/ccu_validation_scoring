@@ -40,13 +40,14 @@ def tad_add_noscore_region(ref,hyp):
 		# logger.warning("Reference contains {} no-score regions.".format(gtnanl))
 		ref.loc[ref.Class == silence_string, "Class"]= "NO_SCORE_REGION"
 
-	prednan = hyp[hyp.Class == silence_string]
-	prednanl = len(prednan)
-	if prednanl > 0:
-		logger = logging.getLogger('SCORING')
-		logger.warning("Invalid or NaN Class in system-output detected. Dropping {} entries".format(prednanl))
-		hyp.drop(hyp[hyp['Class'] == silence_string].index, inplace = True)
-		hyp.drop(hyp[hyp.Class.isna()].index, inplace = True)
+	if hyp.shape[0] > 0:
+		prednan = hyp[hyp.Class == silence_string]
+		prednanl = len(prednan)
+		if prednanl > 0:
+			logger = logging.getLogger('SCORING')
+			logger.warning("Invalid or NaN Class in system-output detected. Dropping {} entries".format(prednanl))
+			hyp.drop(hyp[hyp['Class'] == silence_string].index, inplace = True)
+			hyp.drop(hyp[hyp.Class.isna()].index, inplace = True)
 
 def ap_interp(prec, rec):
 	"""Interpolated AP - Based on VOCdevkit from VOC 2011.
@@ -136,13 +137,16 @@ def concatenate_submission_file(subm_dir, task):
 
 		if task == "norms" or task == "emotions":
 			submission_df_sorted = submission_df.sort_values(by=['start','end'])
-			submission_dfs = pd.concat([submission_dfs, submission_df_sorted])
+			if submission_df_sorted.shape[0] > 0:
+				submission_dfs = pd.concat([submission_dfs, submission_df_sorted])
 		if task == "valence_continuous" or task == "arousal_continuous":
 			submission_df_sorted = submission_df.sort_values(by=['start','end'])
 			submission_df_filled = fill_epsilon_submission(submission_df_sorted, 0.02)
-			submission_dfs = pd.concat([submission_dfs, submission_df_filled])
+			if submission_df_filled.shape[0] > 0:
+				submission_dfs = pd.concat([submission_dfs, submission_df_filled])
 		if task == "changepoint":
-			submission_dfs = pd.concat([submission_dfs, submission_df])
+			if submission_df.shape[0] > 0:
+				submission_dfs = pd.concat([submission_dfs, submission_df])
 
 	submission_dfs.drop_duplicates(inplace = True)
 	submission_dfs = submission_dfs.reset_index(drop=True)
@@ -389,14 +393,19 @@ def preprocess_submission_file(subm_dir, ref_dir, scoring_index, task, submissio
 	else:
 		hyp = concatenate_submission_file(subm_dir, task)
 
-	hyp_type = add_type_column(ref_dir, hyp)
-	hyp_final = filter_hyp_use_scoring_index(hyp_type, scoring_index)
+	if hyp.shape[0] > 0:
+		hyp_type = add_type_column(ref_dir, hyp)
+		hyp_final = filter_hyp_use_scoring_index(hyp_type, scoring_index)
+	else:
+		hyp_final = hyp
+
 	if task in ["valence_continuous","arousal_continuous"] and gap_allowed:
 		hyp_final = extend_gap_segment(hyp_final, "hyp")
 		hyp_final = add_start_end_sys(hyp_final, ref_dir)
 
-	hyp_final['hyp_uid'] = [ "H"+str(s) for s in range(len(hyp_final['file_id'])) ] ### This is a unique HYP ID
-	hyp_final['hyp_isTruncated'] = False
+	if hyp_final.shape[0] > 0:
+		hyp_final['hyp_uid'] = [ "H"+str(s) for s in range(len(hyp_final['file_id'])) ] ### This is a unique HYP ID
+		hyp_final['hyp_isTruncated'] = False
 
 	return hyp_final
 

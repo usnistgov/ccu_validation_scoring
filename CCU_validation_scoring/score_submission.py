@@ -159,7 +159,9 @@ def score_nd_submission_dir_cli(args):
 	else:
 		merge_sys_time_gap = None
 
-	hyp = pre_filter_system_in_noann_region(hyp, ref)
+	if hyp.shape[0] > 0:
+		hyp = pre_filter_system_in_noann_region(hyp, ref)
+		
 	merged_hyp = merge_sys_instance(hyp, merge_sys_text_gap, merge_sys_time_gap, args.combine_sys_llrs, args.merge_sys_label, "norms")
 	#print("Post merge hyp")
 	#print(merged_hyp[merged_hyp.Class == "108"])
@@ -226,8 +228,8 @@ def score_ed_submission_dir_cli(args):
 	else:
 		merge_sys_time_gap = None
 
-
-	hyp = pre_filter_system_in_noann_region(hyp, ref)
+	if hyp.shape[0] > 0:
+		hyp = pre_filter_system_in_noann_region(hyp, ref)
 
 	merged_hyp = merge_sys_instance(hyp, merge_sys_text_gap, merge_sys_time_gap, args.combine_sys_llrs, args.merge_sys_label, "emotions")
 

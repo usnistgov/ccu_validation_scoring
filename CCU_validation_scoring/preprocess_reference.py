@@ -96,34 +96,35 @@ def file_based_merge(ref, annot_segments, text_gap, time_gap):
 	
 	class_type = list(ref["Class_type"])[0]
 	file_ids = get_unique_items_in_array(ref['file_id'])
-	#print(annot_segments)
+	# print(annot_segments)
 	#print(f"gaps: time={time_gap}  text={text_gap}")
 
 	### Check if there is a status field.  If so, then the adjust the array to have an empyt status
 	has_status = ('status' in ref.columns)
+	# print(ref)
 	for i in file_ids:
-                ftype = ref[ref['file_id'] == i]['type'].iloc[0]
-                if ((ftype in ['audio', 'video'] and time_gap == 9999999999) or
-                    (ftype in ['text']           and text_gap == 9999999999)):
-                        st = annot_segments[i]['start']
-                        en = annot_segments[i]['end']
-                        #print(f"filtering file {i} type {ftype} annot[{st},{en}]")
-                        #print(ref[ref['file_id'] == i])
+		# print(i)
+		ftype = ref[ref['file_id'] == i]['type'].iloc[0]
+		if ((ftype in ['audio', 'video'] and time_gap == 9999999999) or
+			(ftype in ['text']           and text_gap == 9999999999)):
+				st = annot_segments[i]['start']
+				en = annot_segments[i]['end']
+				#print(f"filtering file {i} type {ftype} annot[{st},{en}]")
+				#print(ref[ref['file_id'] == i])
 
-                        #print("drop internal noann")
-                        ref = ref.drop(ref[(ref['file_id'] == i) & (ref['Class'] == 'noann')].index)
-                        #print(ref[ref['file_id'] == i])
-                        
-                        #print("drop duplicate classes")
-                        sub = ref[(ref['file_id'] == i) & (ref['Class'] != 'noann:seg')]
-                        keep = sub.drop_duplicates(subset=['Class'], keep='first')
-                        ref = ref.drop(set(sub.index) - set(keep.index))
-                        #print(ref[ref['file_id'] == i])
-                        
-                        #print("Set the full extent")
-                        ref.loc[(ref['file_id'] == i) & (ref['Class'] != 'noann:seg'), 'start'] = st
-                        ref.loc[(ref['file_id'] == i) & (ref['Class'] != 'noann:seg'), 'end'] = en
-                        #print(ref)
+				#print("drop internal noann")
+				ref = ref.drop(ref[(ref['file_id'] == i) & (ref['Class'] == 'noann')].index)
+				#print(ref[ref['file_id'] == i])
+				#print("drop duplicate classes")
+				sub = ref[(ref['file_id'] == i) & (ref['Class'] != 'noann:seg')]
+				keep = sub.drop_duplicates(subset=['Class'], keep='first')
+				ref = ref.drop(set(sub.index) - set(keep.index))
+				#print(ref[ref['file_id'] == i])
+				
+				#print("Set the full extent")
+				ref.loc[(ref['file_id'] == i) & (ref['Class'] != 'noann:seg'), 'start'] = st
+				ref.loc[(ref['file_id'] == i) & (ref['Class'] != 'noann:seg'), 'end'] = en
+				#print(ref)
                         
 	return(ref)
 
@@ -209,105 +210,6 @@ def get_highest_class_vote(class_dict, minimum_vote_agreement):
 	if len(result_array) == 0:
 		result_array.append('none')
 	return result_array    
-
-def get_highest_vote_based_on_time_orig(data_frame, class_type):
-	"""
-		Reference Norm/Emotion Instances (after applying Judgment Collapsing by Majority Voting)
-		This function should combine class vote in column of "class" in passed in data frame.
-		On one particular time frame, this function would count all voted classes and select class/classes get hightest voted.
-		e.g.
-		From
-		Seg1 11s–15s sad,   happy+sad, happy+sad  => 3-sad,   2-happy
-		Seg2 16s–18s angry, angry+joy, angry+joy  => 3-angry, 2-joy
-		Seg3 19s-23s none,  angry,     joy        => 1-angry, 1-joy
-		Seg4 24s-33s joy,   joy,       joy        => 3-joy 
-		To result
-		Seg1 11s–15s sad+happy 
-		Seg2 16s–18s angry+joy 
-		Seg3 19s-23s none
-		Seg4 24s-33s joy
-		
-		Parameters
-		----------
-		data_frame: raw data frame
-		class_type: norm or emotion
- 
-		Returns
-		-------
-		emo_dict: dictionary which key is norm/emotion and value is start and end time
-	"""  
-	time_dict = {}
-	emo_dict = {}
-	pre_key = ''
-	voter_count = 0
-	counted_items = 0
-	for  index,row in data_frame.iterrows():
-		# If the start time exists in dictionary, keep voting
-		time_key = str(row['start']) + ' - ' + str(row['end']) 
-		counted_items = counted_items + 1
-		if time_key in time_dict:
-			# Keep counting classes
-			value = time_dict[time_key]
-			if row['user_id'] != value['user_id']:
-				voter_count = voter_count + 1
-			cur_classes = row['Class'].replace(" ", "").split(",")
-			for e in cur_classes:
-				if e in value['Class']:
-					value['Class'][e] += 1
-				else:
-					value['Class'][e] = 1
-			time_dict[time_key]=value
-		else:
-			# Finish previous counted vote, only leave the majority counted class for all time periods except the last one
-			if pre_key in time_dict:
-				pre_value = time_dict[pre_key]
-				if voter_count > 1:
-					# More than one voter, need to get highest voted class
-					highest_vote_class = get_highest_class_vote(pre_value['Class'])
-				elif voter_count == 1:
-					if class_type == "emotion":
-						# Only one voter, translate into noann
-						highest_vote_class = [silence_string]
-					if class_type == "norm":
-						# Only one voter, count his/her votes as result
-						highest_vote_class = list(pre_value['Class'].keys())
-				time_dict[pre_key]['Class'] = highest_vote_class
-				for emo in highest_vote_class:
-					pre = pre_key.split(' - ')
-					if emo not in emo_dict:
-						emo_dict[emo] = []
-					emo_dict[emo].append({'start' : pre[0], 'end' :pre[1] })
-			# update pre_key
-			pre_key = time_key
-			voter_count = 1
-			# Compose new key value pair
-			cur_classes = row['Class'].replace(" ", "").split(",")
-			value = {'file_id':row['file_id'], 'segment_id': row['segment_id'], 'start':row['start'], 'end':row['end'], 'user_id':row['user_id'] }
-			value['Class'] = {}
-			for e in cur_classes:
-				value['Class'][e] = 1
-			time_dict[time_key] = value
-		
-		# By the end, add last collected vote to count
-		if counted_items == len(data_frame.index):
-			cur_value = time_dict[time_key]
-			if voter_count > 1:
-				# More than one voter, need to get highest voted class
-				highest_vote_class = get_highest_class_vote(cur_value['Class'])
-			elif voter_count == 1:
-				if class_type == "emotion":
-					# Only one voter, translate into noann
-					highest_vote_class = [silence_string]
-				if class_type == "norm":
-					# Only one voter, count his/her votes as result
-					highest_vote_class = list(cur_value['Class'].keys())
-			time_dict[time_key]['Class'] = highest_vote_class  
-			for emo in highest_vote_class:
-				if emo not in emo_dict:
-					emo_dict[emo] = []
-				emo_dict[emo].append({'start' : row['start'], 'end' : row['end'] })
-
-	return emo_dict  
 
 def get_highest_vote_based_on_time(data_frame, class_type, minimum_vote_agreement):
 	"""
@@ -450,7 +352,7 @@ def merge_vote_time_periods(vote_dict, class_type, allowed_gap = None, merge_lab
 			if (class_type == "norm"):
 				status_dict = {}
 				status_dict[current_time_period['status']] = 1  ### add the first one
-			if allowed_gap is not None:
+			if allowed_gap is not None and key != "noann":
 				while ((i + 1 < len(time_array)) and 
                                        (float(current_time_period['end']) + allowed_gap > float(time_array[i + 1]['start'])) and
                                        ((class_type == "emotion") or
@@ -779,29 +681,31 @@ def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time
 
 		ref_final = change_class_type(ref, convert_task_column(task))  ### Changes the timestamp to Class
 
-		## Load the segment file to add Noscore segments
-		segment_file = os.path.join(ref_dir,"docs","segments.tab")
-		segment_df = read_dedupe_file(segment_file)
-		segment_df = segment_df.merge(index_df)
+		if ref_final.shape[0] > 0:
+			## Load the segment file to add Noscore segments
+			segment_file = os.path.join(ref_dir,"docs","segments.tab")
+			segment_df = read_dedupe_file(segment_file)
+			segment_df = segment_df.merge(index_df)
 
-		#Add the noscore regions 
-		if (True):
-			for file_id in set(segment_df['file_id']):
-				#print("File {}".format(file_id))
-				ref_sub = segment_df[segment_df['file_id'] == file_id]
-				#print(ref_sub)
-				start = min(list(ref_sub["start"]))
-				end = max(list(ref_sub["end"]))
-				length = ref_sub.loc[ref_sub.index[0], 'length'] 
-				type_col = ref_sub.loc[ref_sub.index[0], 'type'] 
-				#print("file {} {} {} {}".format(file_id, start, end, length))
-				if (start > 0):
-								ref_final.loc[len(ref_final)] = [0, file_id, 0,   'NO_SCORE_REGION', "StartNoScore", type_col, length, 0,   start]
-				if (end < length):
-								ref_final.loc[len(ref_final)] = [0, file_id, end, 'NO_SCORE_REGION', "EndNoScore",   type_col, length, end, length]
-
-	ref_final['ref_uid'] = [ "R"+str(s) for s in range(len(ref_final['file_id'])) ] ### This is a unique REF ID to help find FN
-	ref_final['isNSCR'] = ref_final.Class.isin(['noann', 'NO_SCORE_REGION'])
+			#Add the noscore regions 
+			if (True):
+				for file_id in set(segment_df['file_id']):
+					#print("File {}".format(file_id))
+					ref_sub = segment_df[segment_df['file_id'] == file_id]
+					#print(ref_sub)
+					start = min(list(ref_sub["start"]))
+					end = max(list(ref_sub["end"]))
+					length = ref_sub.loc[ref_sub.index[0], 'length'] 
+					type_col = ref_sub.loc[ref_sub.index[0], 'type'] 
+					#print("file {} {} {} {}".format(file_id, start, end, length))
+					if (start > 0):
+									ref_final.loc[len(ref_final)] = [0, file_id, 0,   'NO_SCORE_REGION', "StartNoScore", type_col, length, 0,   start]
+					if (end < length):
+									ref_final.loc[len(ref_final)] = [0, file_id, end, 'NO_SCORE_REGION', "EndNoScore",   type_col, length, end, length]
+									
+	if ref_final.shape[0] > 0:	
+		ref_final['ref_uid'] = [ "R"+str(s) for s in range(len(ref_final['file_id'])) ] ### This is a unique REF ID to help find FN
+		ref_final['isNSCR'] = ref_final.Class.isin(['noann', 'NO_SCORE_REGION'])
 	return ref_final
 
 

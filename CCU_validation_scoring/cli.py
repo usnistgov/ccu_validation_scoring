@@ -207,7 +207,7 @@ def main():
         ### This is to make sure the argument is parsable before anything is done.  The result is ignored for now.  The command throws an assertion error to exit
         o = (score_submission.parse_thresholds(args.iou_thresholds))
 
-    if "score_nd" in str(vars(args)['func']) or "score_ed" in str(vars(args)['func']) or "score_x\d" in str(vars(args)['func']):
+    if "score_nd" in str(vars(args)['func']) or "score_ed" in str(vars(args)['func']) or "score_cd" in str(vars(args)['func']):
         ### This is to make sure the argument is parsable before anything is done.  The result is ignored for now.  The command throws an assertion error to exit
         o = (score_submission.parse_llr_filter(args.llr_filter))
         
