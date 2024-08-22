@@ -30,6 +30,8 @@ def generate_zero_scores_norm_emotion(ref):
                'llr_at_MinLLR': None,
                'sum_tp_at_MinLLR': 0.0,
                'sum_fp_at_MinLLR': 0.0,
+               'sum_md_at_MinLLR': 0.0,
+               'sum_reference': 0.0,
                'sum_scaled_tp_at_MinLLR': 0.0, 
                'sum_scaled_fp_at_MinLLR': 0.0,
                'scaled_recall_at_MinLLR': 0.0,
@@ -44,7 +46,6 @@ def generate_zero_scores_norm_emotion(ref):
 
     y = []
     if len(ref) > 0:
-        pr_iou_scores = {}
         unique_combo = ref[["Class", "type"]].value_counts().reset_index()
         unique_combo_pruned = unique_combo.loc[unique_combo.Class != 'NO_SCORE_REGION']
         unique_all = ref[["Class"]].value_counts().reset_index()
@@ -61,6 +62,12 @@ def generate_zero_scores_norm_emotion(ref):
                 t = empty.copy()
                 t['Class'] = final_combo_pruned.loc[i, "Class"]
                 t['type'] =  final_combo_pruned.loc[i, "type"]
+                if final_combo_pruned.loc[i, "type"] == "all":
+                    t['sum_reference'] = ref.loc[ref["Class"] == final_combo_pruned.loc[i, "Class"]].shape[0]
+                    t['sum_md_at_MinLLR'] = ref.loc[ref["Class"] == final_combo_pruned.loc[i, "Class"]].shape[0]
+                else:
+                    t['sum_reference'] = ref.loc[(ref["Class"] == final_combo_pruned.loc[i, "Class"]) & (ref["type"] == final_combo_pruned.loc[i, "type"])].shape[0]
+                    t['sum_md_at_MinLLR'] = ref.loc[(ref["Class"] == final_combo_pruned.loc[i, "Class"]) & (ref["type"] == final_combo_pruned.loc[i, "type"])].shape[0]
                 y.append(t)
         else:
             logger.error("No matching Classes and types found in system output.")
@@ -376,7 +383,6 @@ def generate_align_cal_measure_by_type(ihyp, ref, iou_thresholds, Class, task):
             # print(sum_scaled_tp)
             # print(sum_scaled_fp)
             scaled_precision = sum_scaled_tp / (sum_scaled_tp + sum_scaled_fp)  
-            
             measures['AP'] = ap_interp(prec, rec)
             measures['prcurve:precision'] = prec
             measures['prcurve:recall'] = rec
@@ -393,6 +399,9 @@ def generate_align_cal_measure_by_type(ihyp, ref, iou_thresholds, Class, task):
             measures['scaled_precision_at_MinLLR'] =  scaled_precision
             measures['scaled_f1_at_MinLLR'] =  f1(scaled_precision, scaled_recall)
 
+        # Add reference and MD count outside of fhyp check to catch all number
+        measures['sum_reference'] = npos
+        measures['sum_md_at_MinLLR'] = npos - ihyp.tp.sum()
         output[iout] = measures
  
         ihyp_fields = ["Class","type","tp","fp","md","ref_uid","hyp_uid","hyp_isTruncated","file_id","start_ref","end_ref","start_hyp","end_hyp","IoU","llr","intersection", "union", 'shifted_sys_start', 'shifted_sys_end', 'pct_tp', 'pct_fp', 'scale_collar']
@@ -627,34 +636,6 @@ Parameters
         print(final_alignment_df)
         
     return pr_scores, final_alignment_df
-
-def sumup_tad_system_level_scores(pr_iou_scores, iou_thresholds, class_type, output_dir):
-    """
-    Write aggregate result into a file
-    """
-    map_scores_threshold = pd.DataFrame()
-    for iout in sorted(iou_thresholds):
-        pr_scores = pr_iou_scores[iout]
-        if pr_scores["ap"].values[0] != "NA":
-            map_scores = pr_scores.groupby('type')['ap'].mean().reset_index()
-            map_scores.ap = map_scores.ap.round(3)
-            
-            map_scores = map_scores.rename(columns={'type': 'genre', 'ap': 'value'})
-        else:
-            map_scores = pd.DataFrame([["NA","NA"]], columns=["genre","value"])
-        
-        map_scores["correctness_criteria"] = "{%s}" % iout
-        map_scores["metric"] = "mAP"
-
-        if class_type == "norm":
-            map_scores["task"] = "nd"
-        if class_type == "emotion":
-            map_scores["task"] = "ed"
-        
-        map_scores = map_scores[["task","genre","metric","value","correctness_criteria"]]
-        map_scores_threshold = pd.concat([map_scores, map_scores_threshold])
-    
-    map_scores_threshold.to_csv(os.path.join(output_dir, "scores_aggregated.tab"), sep = "\t", index = None)
             
 def sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir, class_type):
     """
@@ -687,15 +668,35 @@ def sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir, clas
                 table.append([ Class, Type, "PRCurve_json", json.dumps(d), "{%s}" % iout] )
 
     table_df = pd.DataFrame(table, columns=["class", "genre", "metric", "value", "correctness_criteria"])
-    table_df.to_csv(os.path.join(output_dir, "scores_by_class.tab"), sep = "\t", index = None)
+    table_df_final = table_df.loc[table_df["metric"] != "sum_reference"]
+    table_df_final.to_csv(os.path.join(output_dir, "scores_by_class.tab"), sep = "\t", index = None)
 
     ### Build the aggregated table from table_df
-    agg_table = table_df[table_df.metric != 'PRCurve_json'].groupby(['genre', "metric", "correctness_criteria"])['value'].mean().reset_index()
+    agg_table = table_df[(table_df.metric != 'PRCurve_json') & (table_df.metric != 'sum_reference') & (table_df.metric != 'sum_md_at_MinLLR')].groupby(['genre', "metric", "correctness_criteria"])['value'].mean().reset_index()
     agg_table['value'] = agg_table['value'].astype(float)
     agg_table['metric'] = 'mean_' + agg_table['metric']
     agg_table.loc[agg_table.metric == 'mean_AP', ['metric']] = [ 'mAP' ]      ## Rename AP to mAP
     agg_table['task'] = 'nd' if (class_type == 'norm') else 'ed'
     agg_table['value'] = agg_table['value'].round(3)
+
+    genre = set(table_df["genre"])
+    correctness_criteria = set(table_df["correctness_criteria"])
+    for i,j in ((x, y) for x in genre for y in correctness_criteria):
+        sum_tp = sum(table_df.loc[(table_df["genre"] == i) & (table_df["correctness_criteria"] == j) & (table_df["metric"] == "sum_tp_at_MinLLR"), "value"])
+        sum_fp = sum(table_df.loc[(table_df["genre"] == i) & (table_df["correctness_criteria"] == j) & (table_df["metric"] == "sum_fp_at_MinLLR"), "value"])
+        sum_ref = sum(table_df.loc[(table_df["genre"] == i) & (table_df["correctness_criteria"] == j) & (table_df["metric"] == "sum_reference"), "value"])
+        if sum_tp + sum_fp == 0:
+            micro_precision = np.nan
+        else:
+            micro_precision = sum_tp/(sum_tp + sum_fp)
+        micro_recall = sum_tp/sum_ref
+        micro_f1 = f1(micro_precision, micro_recall)
+
+        agg_table = pd.concat([agg_table, pd.DataFrame([[i, 'precision_at_MinLLR', j, micro_precision, agg_table['task'][0]]], columns=agg_table.columns)], ignore_index=True)
+        agg_table = pd.concat([agg_table, pd.DataFrame([[i, 'recall_at_MinLLR', j, micro_recall, agg_table['task'][0]]], columns=agg_table.columns)], ignore_index=True)
+        agg_table = pd.concat([agg_table, pd.DataFrame([[i, 'f1_at_MinLLR', j, micro_f1, agg_table['task'][0]]], columns=agg_table.columns)], ignore_index=True)
+
+    agg_table = agg_table.sort_values(by=['genre', 'metric'])
     agg_table[["task", "genre", "metric", "value", "correctness_criteria"]].to_csv(os.path.join(output_dir, "scores_aggregated.tab"), sep = "\t", index = None)
 
 def write_type_level_scores(output_dir, results, delta_cp_text_thresholds, delta_cp_time_thresholds):

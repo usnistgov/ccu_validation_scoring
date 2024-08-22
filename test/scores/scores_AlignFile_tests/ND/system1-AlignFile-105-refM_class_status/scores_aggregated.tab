@@ -1,4 +1,5 @@
 task	genre	metric	value	correctness_criteria
+nd	all	f1_at_MinLLR	0.27272727272727276	{iou=0.2}
 nd	all	mAP	0.4	{iou=0.2}
 nd	all	mean_average_precision	0.4	{iou=0.2}
 nd	all	mean_f1_at_MinLLR	0.273	{iou=0.2}
@@ -12,6 +13,9 @@ nd	all	mean_sum_fp_at_MinLLR	15.0	{iou=0.2}
 nd	all	mean_sum_scaled_fp_at_MinLLR	15.7	{iou=0.2}
 nd	all	mean_sum_scaled_tp_at_MinLLR	2.746	{iou=0.2}
 nd	all	mean_sum_tp_at_MinLLR	3.0	{iou=0.2}
+nd	all	precision_at_MinLLR	0.16666666666666666	{iou=0.2}
+nd	all	recall_at_MinLLR	0.75	{iou=0.2}
+nd	audio	f1_at_MinLLR	0.27272727272727276	{iou=0.2}
 nd	audio	mAP	0.4	{iou=0.2}
 nd	audio	mean_average_precision	0.4	{iou=0.2}
 nd	audio	mean_f1_at_MinLLR	0.273	{iou=0.2}
@@ -25,3 +29,5 @@ nd	audio	mean_sum_fp_at_MinLLR	15.0	{iou=0.2}
 nd	audio	mean_sum_scaled_fp_at_MinLLR	15.7	{iou=0.2}
 nd	audio	mean_sum_scaled_tp_at_MinLLR	2.746	{iou=0.2}
 nd	audio	mean_sum_tp_at_MinLLR	3.0	{iou=0.2}
+nd	audio	precision_at_MinLLR	0.16666666666666666	{iou=0.2}
+nd	audio	recall_at_MinLLR	0.75	{iou=0.2}

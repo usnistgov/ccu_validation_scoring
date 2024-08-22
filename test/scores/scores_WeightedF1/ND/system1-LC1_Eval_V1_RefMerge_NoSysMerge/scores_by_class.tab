@@ -9,6 +9,7 @@ class	genre	metric	value	correctness_criteria
 101	all	scaled_precision_at_MinLLR	0.643	{intersection:gt:0}
 101	all	scaled_recall_at_MinLLR	0.728	{intersection:gt:0}
 101	all	sum_fp_at_MinLLR	1	{intersection:gt:0}
+101	all	sum_md_at_MinLLR	2	{intersection:gt:0}
 101	all	sum_scaled_fp_at_MinLLR	4.038	{intersection:gt:0}
 101	all	sum_scaled_tp_at_MinLLR	7.282	{intersection:gt:0}
 101	all	sum_tp_at_MinLLR	8	{intersection:gt:0}
@@ -23,6 +24,7 @@ class	genre	metric	value	correctness_criteria
 101	audio	scaled_precision_at_MinLLR	0.643	{intersection:gt:0}
 101	audio	scaled_recall_at_MinLLR	0.728	{intersection:gt:0}
 101	audio	sum_fp_at_MinLLR	1	{intersection:gt:0}
+101	audio	sum_md_at_MinLLR	2	{intersection:gt:0}
 101	audio	sum_scaled_fp_at_MinLLR	4.038	{intersection:gt:0}
 101	audio	sum_scaled_tp_at_MinLLR	7.282	{intersection:gt:0}
 101	audio	sum_tp_at_MinLLR	8	{intersection:gt:0}

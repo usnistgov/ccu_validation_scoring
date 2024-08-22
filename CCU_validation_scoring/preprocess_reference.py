@@ -96,35 +96,28 @@ def file_based_merge(ref, annot_segments, text_gap, time_gap):
 	
 	class_type = list(ref["Class_type"])[0]
 	file_ids = get_unique_items_in_array(ref['file_id'])
-	# print(annot_segments)
 	#print(f"gaps: time={time_gap}  text={text_gap}")
 
 	### Check if there is a status field.  If so, then the adjust the array to have an empyt status
 	has_status = ('status' in ref.columns)
-	# print(ref)
 	for i in file_ids:
-		# print(i)
 		ftype = ref[ref['file_id'] == i]['type'].iloc[0]
 		if ((ftype in ['audio', 'video'] and time_gap == 9999999999) or
 			(ftype in ['text']           and text_gap == 9999999999)):
 				st = annot_segments[i]['start']
 				en = annot_segments[i]['end']
 				#print(f"filtering file {i} type {ftype} annot[{st},{en}]")
-				#print(ref[ref['file_id'] == i])
 
 				#print("drop internal noann")
 				ref = ref.drop(ref[(ref['file_id'] == i) & (ref['Class'] == 'noann')].index)
-				#print(ref[ref['file_id'] == i])
 				#print("drop duplicate classes")
 				sub = ref[(ref['file_id'] == i) & (ref['Class'] != 'noann:seg')]
 				keep = sub.drop_duplicates(subset=['Class'], keep='first')
 				ref = ref.drop(set(sub.index) - set(keep.index))
-				#print(ref[ref['file_id'] == i])
 				
 				#print("Set the full extent")
 				ref.loc[(ref['file_id'] == i) & (ref['Class'] != 'noann:seg'), 'start'] = st
 				ref.loc[(ref['file_id'] == i) & (ref['Class'] != 'noann:seg'), 'end'] = en
-				#print(ref)
                         
 	return(ref)
 
