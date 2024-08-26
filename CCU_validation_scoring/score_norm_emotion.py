@@ -684,6 +684,7 @@ def sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir, clas
     for i,j in ((x, y) for x in genre for y in correctness_criteria):
         sum_tp = sum(table_df.loc[(table_df["genre"] == i) & (table_df["correctness_criteria"] == j) & (table_df["metric"] == "sum_tp_at_MinLLR"), "value"])
         sum_fp = sum(table_df.loc[(table_df["genre"] == i) & (table_df["correctness_criteria"] == j) & (table_df["metric"] == "sum_fp_at_MinLLR"), "value"])
+        sum_md = sum(table_df.loc[(table_df["genre"] == i) & (table_df["correctness_criteria"] == j) & (table_df["metric"] == "sum_md_at_MinLLR"), "value"])
         sum_ref = sum(table_df.loc[(table_df["genre"] == i) & (table_df["correctness_criteria"] == j) & (table_df["metric"] == "sum_reference"), "value"])
         if sum_tp + sum_fp == 0:
             micro_precision = np.nan
@@ -692,6 +693,9 @@ def sumup_tad_class_level_scores(pr_iou_scores, iou_thresholds, output_dir, clas
         micro_recall = sum_tp/sum_ref
         micro_f1 = f1(micro_precision, micro_recall)
 
+        agg_table = pd.concat([agg_table, pd.DataFrame([[i, 'sum_tp_at_MinLLR', j, sum_tp, agg_table['task'][0]]], columns=agg_table.columns)], ignore_index=True)
+        agg_table = pd.concat([agg_table, pd.DataFrame([[i, 'sum_fp_at_MinLLR', j, sum_fp, agg_table['task'][0]]], columns=agg_table.columns)], ignore_index=True)
+        agg_table = pd.concat([agg_table, pd.DataFrame([[i, 'sum_md_at_MinLLR', j, sum_md, agg_table['task'][0]]], columns=agg_table.columns)], ignore_index=True)
         agg_table = pd.concat([agg_table, pd.DataFrame([[i, 'precision_at_MinLLR', j, micro_precision, agg_table['task'][0]]], columns=agg_table.columns)], ignore_index=True)
         agg_table = pd.concat([agg_table, pd.DataFrame([[i, 'recall_at_MinLLR', j, micro_recall, agg_table['task'][0]]], columns=agg_table.columns)], ignore_index=True)
         agg_table = pd.concat([agg_table, pd.DataFrame([[i, 'f1_at_MinLLR', j, micro_f1, agg_table['task'][0]]], columns=agg_table.columns)], ignore_index=True)

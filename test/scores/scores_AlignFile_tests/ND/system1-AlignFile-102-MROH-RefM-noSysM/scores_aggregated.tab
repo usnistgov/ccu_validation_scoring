@@ -15,6 +15,9 @@ nd	all	mean_sum_scaled_tp_at_MinLLR	1.0	{intersection:gt:0}
 nd	all	mean_sum_tp_at_MinLLR	1.0	{intersection:gt:0}
 nd	all	precision_at_MinLLR	0.3333333333333333	{intersection:gt:0}
 nd	all	recall_at_MinLLR	0.5	{intersection:gt:0}
+nd	all	sum_fp_at_MinLLR	2.0	{intersection:gt:0}
+nd	all	sum_md_at_MinLLR	1.0	{intersection:gt:0}
+nd	all	sum_tp_at_MinLLR	1.0	{intersection:gt:0}
 nd	audio	f1_at_MinLLR	0.4	{intersection:gt:0}
 nd	audio	mAP	0.25	{intersection:gt:0}
 nd	audio	mean_average_precision	0.25	{intersection:gt:0}
@@ -31,3 +34,6 @@ nd	audio	mean_sum_scaled_tp_at_MinLLR	1.0	{intersection:gt:0}
 nd	audio	mean_sum_tp_at_MinLLR	1.0	{intersection:gt:0}
 nd	audio	precision_at_MinLLR	0.3333333333333333	{intersection:gt:0}
 nd	audio	recall_at_MinLLR	0.5	{intersection:gt:0}
+nd	audio	sum_fp_at_MinLLR	2.0	{intersection:gt:0}
+nd	audio	sum_md_at_MinLLR	1.0	{intersection:gt:0}
+nd	audio	sum_tp_at_MinLLR	1.0	{intersection:gt:0}
