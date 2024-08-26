@@ -172,7 +172,7 @@ def score_nd_submission_dir_cli(args):
 	statistic(args.reference_dir, ref, args.submission_dir, merged_hyp, args.output_dir, "norms")
 
 	if (llr_filter['filter_order'] is not None and llr_filter['filter_order'] == 'after_transforms'):
-		merged_hyp = merged_hyp.drop(hyp[ hyp['llr'] < float(llr_filter['filter_threshold']) ].index)
+		merged_hyp = merged_hyp.drop(merged_hyp[ merged_hyp['llr'] < float(llr_filter['filter_threshold']) ].index)
 
 	if (args.dump_inputs):
 		ref.to_csv(os.path.join(args.output_dir, "inputs.ref.scored.tab"), sep = "\t", index = None)
@@ -236,7 +236,7 @@ def score_ed_submission_dir_cli(args):
 	thresholds = parse_thresholds(args.iou_thresholds)
 
 	if (llr_filter['filter_order'] is not None and llr_filter['filter_order'] == 'after_transforms'):
-		merged_hyp = merged_hyp.drop(hyp[ hyp['llr'] < float(llr_filter['filter_threshold']) ].index)
+		merged_hyp = merged_hyp.drop(merged_hyp[ merged_hyp['llr'] < float(llr_filter['filter_threshold']) ].index)
 
 	statistic(args.reference_dir, ref, args.submission_dir, merged_hyp, args.output_dir, "emotions")
 	if (args.dump_inputs):
