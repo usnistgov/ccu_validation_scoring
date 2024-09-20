@@ -47,7 +47,7 @@ def generate_submission_dir(output_dir, task):
 
 	return output_submission
 
-def generate_perfect_submission(task, submission_format, reference_dir, scoring_index_file, output_dir, text_gap, time_gap, merge_label, fix_ref_status_conflict = None):
+def generate_perfect_submission(task, submission_format, reference_dir, scoring_index_file, output_dir, text_gap, time_gap, merge_label, minimum_vote_agreement, fix_ref_status_conflict = None):
 
 	try:
 		scoring_index = pd.read_csv(scoring_index_file, usecols = ['file_id'], sep = "\t")
@@ -55,7 +55,7 @@ def generate_perfect_submission(task, submission_format, reference_dir, scoring_
 		logger.error('ERROR:GENERATING:{} is not a valid scoring index file'.format(scoring_index_file))
 		exit(1)
 
-	ref = preprocess_reference_dir(reference_dir, scoring_index, task, text_gap, time_gap, merge_label, fix_ref_status_conflict_label=fix_ref_status_conflict)
+	ref = preprocess_reference_dir(reference_dir, scoring_index, task, text_gap, time_gap, merge_label, fix_ref_status_conflict_label=fix_ref_status_conflict, minimum_vote_agreement = minimum_vote_agreement)
 	if (task == 'norms'):
 		ref.loc[ref["status"] == "adhere,violate", "status"] = "adhere"
 
@@ -65,6 +65,8 @@ def generate_perfect_submission(task, submission_format, reference_dir, scoring_
 
 	system_input_index_file_path = os.path.join(reference_dir, "index_files", "*system_input.index.tab")
 	system_input_index_df = pd.read_csv(glob.glob(system_input_index_file_path)[0], sep = "\t")
+
+	file_info_df = pd.read_csv(os.path.join(reference_dir, "docs", "file_info.tab"), sep='\t')
 
 	for i in sorted(list(system_input_index_df["file_id"].unique())):
 
@@ -81,7 +83,12 @@ def generate_perfect_submission(task, submission_format, reference_dir, scoring_
 				filter_sub_ref_ann = sub_ref_ann[["file_id","Class","start","end","status"]]
 		else:
 			filter_sub_ref_ann = sub_ref_ann[["file_id","Class","start","end"]]
+
 		rename_filter_sub_ref_ann = filter_sub_ref_ann.rename(columns = {"Class": task_column})
+		type = file_info_df.loc[file_info_df["file_uid"] == i, "type"].values[0]
+		if type == "text":
+			rename_filter_sub_ref_ann['start'] = filter_sub_ref_ann['start'].astype(int)
+			rename_filter_sub_ref_ann['end'] = filter_sub_ref_ann['end'].astype(int)
 		rename_filter_sub_ref_ann["llr"] = 0.5  
 		index_df = generate_submission_file(i, rename_filter_sub_ref_ann, output_submission, index_df, "True")
 	index_df.to_csv(os.path.join(output_submission, "system_output.index.tab"), sep = "\t", index = None)
@@ -95,6 +102,7 @@ def main():
 	parser.add_argument("-aR", "--merge_ref_time_gap", type=str, required=False, help="merge reference time gap second")
 	parser.add_argument("-vR", "--merge_ref_label", type=str, choices=['class', 'class-status'], required=False, help="choose class or class-status to define how to handle the adhere/violate labels for the reference norm instances merging. class is to use the class label only (ignoring status) to merge and class-status is to use the class and status label to merge")
 	parser.add_argument("-f", "--fix_ref_status_conflict", action='store_true', help="set reference annotation to noann when there are the same annotations but different status")
+	parser.add_argument("-mv", "--minimum_vote_agreement", type=int, default=2, required=False, help="Set the mimimum agreement for voting between annotators. Default is 2 agreeing annotators per segment.")
 	parser.add_argument('-i','--scoring-index-file', type=str, required=True, help='Use to filter file from scoring (REF)')
 	parser.add_argument("-o", "--output_dir", type=str, required=True, help="Output directory")
 
@@ -110,7 +118,7 @@ def main():
 	else:
 		merge_ref_time_gap = None
 
-	generate_perfect_submission(args.task, args.submission_format, args.reference_dir, args.scoring_index_file, args.output_dir, merge_ref_text_gap, merge_ref_time_gap, args.merge_ref_label, args.fix_ref_status_conflict)
+	generate_perfect_submission(args.task, args.submission_format, args.reference_dir, args.scoring_index_file, args.output_dir, merge_ref_text_gap, merge_ref_time_gap, args.merge_ref_label, args.minimum_vote_agreement, args.fix_ref_status_conflict)
 
 if __name__ == '__main__':
 	main()

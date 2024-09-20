@@ -202,7 +202,20 @@ def get_highest_class_vote(class_dict, minimum_vote_agreement):
 			result_array.append(key)
 	if len(result_array) == 0:
 		result_array.append('none')
-	return result_array    
+	return result_array
+
+def pick_highest_vote(voter_count, minimum_vote_agreement, value, class_type):
+
+	if class_type == "emotion" and minimum_vote_agreement > 1:
+		if voter_count >= minimum_vote_agreement:
+			highest_vote_class = get_highest_class_vote(value['Class'], minimum_vote_agreement)
+		elif voter_count < minimum_vote_agreement:
+				highest_vote_class = [silence_string]
+
+	else:
+		highest_vote_class = list(value['Class'].keys())
+
+	return highest_vote_class
 
 def get_highest_vote_based_on_time(data_frame, class_type, minimum_vote_agreement):
 	"""
@@ -259,17 +272,7 @@ def get_highest_vote_based_on_time(data_frame, class_type, minimum_vote_agreemen
 			# Finish previous counted vote, only leave the majority counted class for all time periods except the last one
 			if pre_key in time_dict:
 				pre_value = time_dict[pre_key]
-				if voter_count > 1:
-					# More than one voter, need to get highest voted class
-					highest_vote_class = get_highest_class_vote(pre_value['Class'], minimum_vote_agreement)
-				elif voter_count == 1:
-                                        #### JON's NOTE - Why are these going to noann
-					if class_type == "emotion":
-						# Only one voter, translate into noann
-						highest_vote_class = [silence_string]
-					if class_type == "norm":
-						# Only one voter, count his/her votes as result
-						highest_vote_class = list(pre_value['Class'].keys())
+				highest_vote_class = pick_highest_vote(voter_count, minimum_vote_agreement, pre_value, class_type)
 				time_dict[pre_key]['Class'] = highest_vote_class
 				for emo in highest_vote_class:
 					pre = pre_key.split(' - ')
@@ -297,17 +300,7 @@ def get_highest_vote_based_on_time(data_frame, class_type, minimum_vote_agreemen
 		# By the end, add last collected vote to count
 		if counted_items == len(data_frame.index):
 			cur_value = time_dict[time_key]
-			if voter_count > 1:
-				# More than one voter, need to get highest voted class
-				highest_vote_class = get_highest_class_vote(cur_value['Class'], minimum_vote_agreement)
-			elif voter_count == 1:
-                                #### JON's NOTE - Why are these going to noann
-				if class_type == "emotion":
-					# Only one voter, translate into noann
-					highest_vote_class = [silence_string]
-				if class_type == "norm":
-					# Only one voter, count his/her votes as result
-					highest_vote_class = list(cur_value['Class'].keys())
+			highest_vote_class = pick_highest_vote(voter_count, minimum_vote_agreement, cur_value, class_type)
 			time_dict[time_key]['Class'] = highest_vote_class  
 			for emo in highest_vote_class:
 				if emo not in emo_dict:
