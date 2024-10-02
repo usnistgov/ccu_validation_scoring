@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import logging
 import re
+from fractions import Fraction
 from .preprocess_reference import *
 from .utils import *
 from .build_statistic import *
@@ -97,19 +98,13 @@ def pre_filter_system_in_noann_region(hyp, ref):
 
 def set_text_gap(arg):
     if (arg):
-        if (arg == "file"):
-            return(9999999999)
-        else:
-            return(int(arg))
+        return(int(arg))
     else:
         return(None)
 
 def set_time_gap(arg):
     if (arg):
-        if (arg == "file"):
-            return(9999999999)
-        else:
-            return(float(arg))
+        return(float(arg))
     else:
         return(None)
     
@@ -163,11 +158,13 @@ def score_nd_submission_dir_cli(args):
 		hyp = pre_filter_system_in_noann_region(hyp, ref)
 		
 	merged_hyp = merge_sys_instance(hyp, merge_sys_text_gap, merge_sys_time_gap, args.combine_sys_llrs, args.merge_sys_label, "norms")
-	#print("Post merge hyp")
-	#print(merged_hyp[merged_hyp.Class == "108"])
-	#exit(0)
 
 	thresholds = parse_thresholds(args.iou_thresholds)
+
+	if ref.shape[0] > 0:
+		ref = ref[ref.Class != "none"]
+		ref['ref_uid'] = [ "R"+str(s) for s in range(len(ref['file_id'])) ] ### This is a unique REF ID to help find FN
+		ref['isNSCR'] = ref.Class.isin(['noann', 'NO_SCORE_REGION'])
 
 	statistic(args.reference_dir, ref, args.submission_dir, merged_hyp, args.output_dir, "norms")
 
@@ -207,7 +204,11 @@ def score_ed_submission_dir_cli(args):
 	merge_ref_time_gap = set_time_gap(args.merge_ref_time_gap)
 
 	ensure_output_dir(args.output_dir)
-	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "emotions", text_gap = merge_ref_text_gap, time_gap = merge_ref_time_gap, dump_inputs=args.dump_inputs, output_dir=args.output_dir, minimum_vote_agreement=args.minimum_vote_agreement)
+	if args.file_merge_proportion:
+		file_merge_proportion = float(Fraction(args.file_merge_proportion))
+		ref,seg = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "emotions", text_gap = merge_ref_text_gap, time_gap = merge_ref_time_gap, dump_inputs=args.dump_inputs, output_dir=args.output_dir, minimum_vote_agreement=args.minimum_vote_agreement, file_merge_proportion=file_merge_proportion)
+	else:
+		ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "emotions", text_gap = merge_ref_text_gap, time_gap = merge_ref_time_gap, dump_inputs=args.dump_inputs, output_dir=args.output_dir, minimum_vote_agreement=args.minimum_vote_agreement)
 	if args.emotion_list_file:
 		ref = process_subset_norm_emotion(args.emotion_list_file, ref)
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "emotions")
@@ -228,22 +229,30 @@ def score_ed_submission_dir_cli(args):
 	else:
 		merge_sys_time_gap = None
 
-	if hyp.shape[0] > 0:
-		hyp = pre_filter_system_in_noann_region(hyp, ref)
-
-	merged_hyp = merge_sys_instance(hyp, merge_sys_text_gap, merge_sys_time_gap, args.combine_sys_llrs, args.merge_sys_label, "emotions")
+	if args.file_merge_proportion:
+		file_merge_proportion = float(Fraction(args.file_merge_proportion))
+		final_hyp = file_based_merge_sys(hyp, seg)
+	else:
+		if hyp.shape[0] > 0:
+			hyp = pre_filter_system_in_noann_region(hyp, ref)
+		final_hyp = merge_sys_instance(hyp, merge_sys_text_gap, merge_sys_time_gap, args.combine_sys_llrs, args.merge_sys_label, "emotions")
 
 	thresholds = parse_thresholds(args.iou_thresholds)
 
-	if (llr_filter['filter_order'] is not None and llr_filter['filter_order'] == 'after_transforms'):
-		merged_hyp = merged_hyp.drop(merged_hyp[ merged_hyp['llr'] < float(llr_filter['filter_threshold']) ].index)
+	if ref.shape[0] > 0:
+		ref = ref[ref.Class != "none"]
+		ref['ref_uid'] = [ "R"+str(s) for s in range(len(ref['file_id'])) ] ### This is a unique REF ID to help find FN
+		ref['isNSCR'] = ref.Class.isin(['noann', 'NO_SCORE_REGION'])
 
-	statistic(args.reference_dir, ref, args.submission_dir, merged_hyp, args.output_dir, "emotions")
+	if (llr_filter['filter_order'] is not None and llr_filter['filter_order'] == 'after_transforms'):
+		final_hyp = final_hyp.drop(final_hyp[ final_hyp['llr'] < float(llr_filter['filter_threshold']) ].index)
+
+	statistic(args.reference_dir, ref, args.submission_dir, final_hyp, args.output_dir, "emotions")
 	if (args.dump_inputs):
 		ref.to_csv(os.path.join(args.output_dir, "inputs.ref.scored.tab"), sep = "\t", index = None)
-		merged_hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.scored.tab"), sep = "\t", index = None)
+		final_hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.scored.tab"), sep = "\t", index = None)
 
-	score_tad(ref, merged_hyp, "emotion", thresholds, args.output_dir, None, float(args.time_span_scale_collar), float(args.text_span_scale_collar), args.align_hacks)
+	score_tad(ref, final_hyp, "emotion", thresholds, args.output_dir, None, float(args.time_span_scale_collar), float(args.text_span_scale_collar), args.align_hacks)
 	generate_scoring_parameter_file(args)
         
 	if (not args.quiet):
@@ -268,6 +277,10 @@ def score_vd_submission_dir_cli(args):
 	check_scoring_index_out_of_scope(args.reference_dir, scoring_index, "valence_continuous")
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "valence_continuous")
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "valence_continuous", gap_allowed = args.gap_allowed)
+
+	if ref.shape[0] > 0:
+		ref['ref_uid'] = [ "R"+str(s) for s in range(len(ref['file_id'])) ] ### This is a unique REF ID to help find FN
+		ref['isNSCR'] = ref.Class.isin(['noann', 'NO_SCORE_REGION'])
 
 	ensure_output_dir(args.output_dir)
 	statistic(args.reference_dir, ref, args.submission_dir, hyp, args.output_dir, "valence_continuous")
@@ -294,6 +307,10 @@ def score_ad_submission_dir_cli(args):
 	check_scoring_index_out_of_scope(args.reference_dir, scoring_index, "arousal_continuous")
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "arousal_continuous")
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "arousal_continuous", gap_allowed = args.gap_allowed)
+
+	if ref.shape[0] > 0:
+		ref['ref_uid'] = [ "R"+str(s) for s in range(len(ref['file_id'])) ] ### This is a unique REF ID to help find FN
+		ref['isNSCR'] = ref.Class.isin(['noann', 'NO_SCORE_REGION'])
 
 	ensure_output_dir(args.output_dir)
 	statistic(args.reference_dir, ref, args.submission_dir, hyp, args.output_dir, "arousal_continuous")
@@ -322,6 +339,10 @@ def score_cd_submission_dir_cli(args):
 	check_scoring_index_out_of_scope(args.reference_dir, scoring_index, "changepoint")
 	ref = preprocess_reference_dir(ref_dir = args.reference_dir, scoring_index = scoring_index, task = "changepoint")
 	hyp = preprocess_submission_file(args.submission_dir, args.reference_dir, scoring_index, "changepoint")
+
+	if ref.shape[0] > 0:
+		ref['ref_uid'] = [ "R"+str(s) for s in range(len(ref['file_id'])) ] ### This is a unique REF ID to help find FN
+		ref['isNSCR'] = ref.Class.isin(['noann', 'NO_SCORE_REGION'])
 
 	if (args.dump_inputs):
 		hyp.to_csv(os.path.join(args.output_dir, "inputs.sys.read.tab"), sep = "\t", index = None)

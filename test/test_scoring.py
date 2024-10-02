@@ -80,14 +80,15 @@ def run_scorer(tmp_dir):
                           ('LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'ND', '', 'known_norms_LC1.txt', '',                                                                   'nomerge'),
                           ('LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'ND', '', 'known_norms_LC1.txt', '-aS 3 -lS min_llr -vS class-status -xS 30',                          'merge-min_llr-class-status'),
                           ('LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'ND', '', 'known_norms_LC1.txt', '-aS 3 -lS min_llr -vS class -xS 30',                                 'merge-min_llr-class'),
-                          ('LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'LC1-SimulatedMiniEvalP1.20220909.ND.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'ND', '', 'known_norms_LC1.txt', '-aR file -xR file -d -aS 9999999 -xS 9999999 -lS max_llr -vS class', 'filemerge'),
 
                           ('LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'LC1-SimulatedMiniEvalP1.20220909.ED.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'ED', '', '',                    '',                                                                   'nomerge'),
                           ('LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'LC1-SimulatedMiniEvalP1.20220909.ED.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'ED', '', '',                    '-aR 0 -xR 0 -mv 1',                                                  'vote1'),
                           ('LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'LC1-SimulatedMiniEvalP1.20220909.ED.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'ED', '', '',                    '-aR 0 -xR 0 -mv 2',                                                  'vote2'),
                           ('LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'LC1-SimulatedMiniEvalP1.20220909.ED.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'ED', '', '',                    '-aR 0 -xR 0 -mv 3',                                                  'vote3'),
                           ('LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'LC1-SimulatedMiniEvalP1.20220909.ED.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'ED', '', '',                    '-aS 3 -lS min_llr -vS class -xS 30',                                 'merge-min_llr-class'),
-                          ('LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'LC1-SimulatedMiniEvalP1.20220909.ED.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'ED', '', '',                    '-aR file -xR file -d -aS 9999999 -xS 9999999 -lS max_llr -vS class', 'filemerge'),
+                          ('LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'LC1-SimulatedMiniEvalP1.20220909.ED.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'ED_filemerge', '', '',                    '-d -fm 1', 'fullfilemerge'),
+                          ('LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'LC1-SimulatedMiniEvalP1.20220909.ED.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'ED_filemerge', '', '',                    '-d -fm 1/2', 'halffilemerge'),
+                          ('LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'LC1-SimulatedMiniEvalP1.20220909.ED.scoring.index.tab', 'pass_submissions_LC1-SimulatedMiniEvalP1_ref_annotation_merge', 'ED_filemerge', '', '',                    '-d -fm 1/4', 'quarterfilemerge'),
                           
                           ### These use class 105 to explore the merging variations
                           ('AlignFile_tests', 'AlignFile_tests.scoring_input.index.tab', 'pass_submissions_AlignFile_tests', 'ND', '', 'known_norms_AlignFile_tests.txt', '', 'AlignFile-105-noopt'),
@@ -112,7 +113,7 @@ def run_scorer(tmp_dir):
 
                           ('WeightedF1', 'WeightedF1.scoring_input.index.tab', 'pass_submissions_WeightedF1', 'ND', '', 'known_norms_WeightedF1.txt', '', ''),
                           ('WeightedF1', 'WeightedF1.scoring_input.index.tab', 'pass_submissions_WeightedF1', 'ND', '', 'known_norms_WeightedF1.txt', '-t intersection:gt:0', 'any_overlap'),
-                          ('WeightedF1', 'WeightedF1.scoring_input.index.tab', 'pass_submissions_WeightedF1', 'ND', '', 'known_norms_WeightedF1.txt', '-aR 30 -xR 300 -vR class -aC 15 -xC 150 -t intersection:gt:0', 'LC1_Eval_V1_RefMerge_NoSysMerge'),
+                          ('WeightedF1', 'WeightedF1.scoring_input.index.tab', 'pass_submissions_WeightedF1', 'ND', '', 'known_norms_WeightedF1.txt', '-aR 30 -xR 300 -vR class -aC 15 -xC 150 -t intersection:gt:0', 'LC1_Eval_V1_RefMerge_NoSysMerge')
                           ])
 
 def test_run_score_submissions(dataset, system_input_index, system_dir, task, opt1, opt2, opt3, score_tag):
@@ -141,7 +142,7 @@ def test_run_score_submissions(dataset, system_input_index, system_dir, task, op
     print("/n")
     for s in subdirs:
         print(f"SUBDIR: {s}")
-    
+
     if (task in ['AD', 'VD', 'VD_gaps']):
         assert len(subdirs) > 0        
         for subdir in subdirs:
@@ -166,17 +167,25 @@ def test_run_score_submissions(dataset, system_input_index, system_dir, task, op
             clean_tmp_dir(tmp_dir)
 
 
-    if (task in ["ND", "ED"]):
+    if (task in ["ND", "ED", "ED_filemerge", "ND_open"]):
         assert len(subdirs) > 0
         
         for subdir in subdirs:
             if task == "ED":            
                 sys.argv[1:] = ["score-{}".format(task.lower()), "-ref", refdir,
                                 "-s", subdir, "-i", scoring_index_path, "-o", tmp_dir, "-aR", "1.0", "-xR", "10"]
+            if task == "ED_filemerge":
+                sys.argv[1:] = ["score-{}".format("ed"), "-ref", refdir,
+                                "-s", subdir, "-i", scoring_index_path, "-o", tmp_dir]
             if task == "ND":
                 sys.argv[1:] = ["score-{}".format(task.lower()), "-ref", refdir,
-                                "-s", subdir, "-i", scoring_index_path, "-o", tmp_dir, "-aR", "1.0", "-xR", "10", "-vR", "class"]                
+                                "-s", subdir, "-i", scoring_index_path, "-o", tmp_dir, "-aR", "1.0", "-xR", "10", "-vR", "class"]
+
+            if task == "ND_open":
+                sys.argv[1:] = ["score-{}".format("nd"), "-ref", refdir,
+                                "-s", subdir, "-i", scoring_index_path, "-o", tmp_dir]
             clean_tmp_dir(tmp_dir)
+
             ### Add opt2 if there
             if (opt2 != ''):
                 sys.argv.append("-n")

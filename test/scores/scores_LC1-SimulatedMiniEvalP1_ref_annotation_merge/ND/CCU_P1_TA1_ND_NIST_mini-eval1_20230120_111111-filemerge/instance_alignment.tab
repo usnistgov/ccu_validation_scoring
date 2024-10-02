@@ -1,4 +1,0 @@
-class	file_id	eval	ref	sys	llr	parameters	ref_status	hyp_status
-001	M010005NJ	mapped	{start=0,end=50}	{start=1,end=50}	0.9	{iou=0.980,intersection=49.000,union=50.000,shifted_start_hyp=0.000,shifted_end_hyp=50.000,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=15.000,type=audio}	adhere,violate	adhere,violate
-002	M01000G2T	mapped	{start=0,end=49}	{start=1,end=47}	0.9	{iou=0.939,intersection=46.000,union=49.000,shifted_start_hyp=0.000,shifted_end_hyp=49.000,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=15.000,type=video}	adhere,violate	adhere,violate
-002	M01000H0B	mapped	{start=0,end=500}	{start=0,end=490}	0.9	{iou=0.980,intersection=491.000,union=501.000,shifted_start_hyp=0.000,shifted_end_hyp=500.000,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=150.000,type=text}	adhere,violate	adhere,violate

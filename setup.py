@@ -39,7 +39,8 @@ setup(name=PACKAGE_NAME,
         'numpy',
         'pytest',
         'matplotlib',
-        'scipy'
+        'scipy',
+        'fractions'
     ],
       version=CCU_validation_scoring.__version__,
       entry_points='''

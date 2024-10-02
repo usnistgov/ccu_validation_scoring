@@ -49,6 +49,7 @@ The tools mentioned above are included as a Python package. They can be run unde
 - [Numpy >= 1.22.3](https://numpy.org/install/)
 - [Pytest >= 7.1.3](https://docs.pytest.org/en/7.1.x/getting-started.html)
 - [matplotlib >= 3.5.2](https://matplotlib.org/stable/users/getting_started/index.html#installation-quick-start)
+- [Fraction >= 2.2.0](https://pypi.org/project/Fraction/)
 
 ### <a name="installation">Installation</a>
 

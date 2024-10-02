@@ -283,6 +283,125 @@ def merge_sys_time_periods(result_dict, llr_value, allowed_gap, merge_label, tas
 	#exit(0)
 	return result_array
 
+def indices(lst, item):
+
+	return [i for i, x in enumerate(lst) if x == item]
+
+def define_sys_boundary_general(sub_hyp, sub_ref_segments, list_of_lists, file_id, type):
+
+	start = list(np.around(np.array(list(sub_ref_segments["start"])),3))
+	end = list(np.around(np.array(list(sub_ref_segments["end"])),3))
+	
+	temp_label = {}
+	temp_llr = {}
+	final_label = {}
+	final_llr = {}
+	for i in range(len(sub_ref_segments)):
+		temp_label[i] = []
+		temp_llr[i] = []
+		final_label[i] = []
+		final_llr[i] = []
+
+	count = 0
+	for i,j in zip(start,end):
+		for k in range(sub_hyp.shape[0]):
+			sys_start = sub_hyp.iloc[k]["start"]
+			sys_end = sub_hyp.iloc[k]["end"]
+
+			tt1 = np.maximum(i, sys_start)
+			tt2 = np.minimum(j, sys_end)    
+			inter = (tt2 - tt1).clip(0)
+			if inter > 0:
+				temp_label[count].append(sub_hyp.iloc[k]["Class"])
+				temp_llr[count].append(float(sub_hyp.iloc[k]["llr"]))
+		count = count + 1
+
+	count = 0
+	for i in range(len(temp_llr)):
+		for j in set(temp_label[i]):
+			occur_index = indices(temp_label[i], j)
+			llr_list = list(np.take(temp_llr[i], occur_index))
+			max_llr = max(llr_list)
+
+			final_label[count].append(j)
+			final_llr[count].append(float(max_llr))
+		count = count + 1
+
+	# for i,j in zip(start,end):
+	# 	print(i,j)
+	for i in range(len(final_label)):
+		for j in range(len(final_label[i])):
+			list_of_lists.append([file_id,final_label[i][j],start[i],end[i],final_llr[i][j],file_id,type])
+
+	return list_of_lists
+
+def define_sys_boundary_text(sub_hyp, sub_ref_segments, list_of_lists, file_id, type):
+
+	start = list(np.around(np.array(list(sub_ref_segments["start"])),3))
+	end = list(np.around(np.array(list(sub_ref_segments["end"])),3))
+	
+	temp_label = {}
+	temp_llr = {}
+	final_label = {}
+	final_llr = {}
+	for i in range(len(sub_ref_segments)):
+		temp_label[i] = []
+		temp_llr[i] = []
+		final_label[i] = []
+		final_llr[i] = []
+
+	count = 0
+	for i,j in zip(start,end):
+		for k in range(sub_hyp.shape[0]):
+			sys_start = sub_hyp.iloc[k]["start"]
+			sys_end = sub_hyp.iloc[k]["end"]
+
+			tt1 = np.maximum(i, sys_start)
+			tt2 = np.minimum(j, sys_end)    
+			inter = (tt2 - tt1).clip(0)
+			if inter > 0 or tt2 == tt1:
+				temp_label[count].append(sub_hyp.iloc[k]["Class"])
+				temp_llr[count].append(float(sub_hyp.iloc[k]["llr"]))
+		count = count + 1
+
+	count = 0
+	for i in range(len(temp_llr)):
+		for j in set(temp_label[i]):
+			occur_index = indices(temp_label[i], j)
+			llr_list = list(np.take(temp_llr[i], occur_index))
+			max_llr = max(llr_list)
+
+			final_label[count].append(j)
+			final_llr[count].append(float(max_llr))
+		count = count + 1
+
+	# for i,j in zip(start,end):
+	# 	print(i,j)
+	for i in range(len(final_label)):
+		for j in range(len(final_label[i])):
+			list_of_lists.append([file_id,final_label[i][j],start[i],end[i],final_llr[i][j],file_id,type])
+
+	return list_of_lists
+
+def file_based_merge_sys(hyp, ref_segment):
+
+	file_ids = get_unique_items_in_array(ref_segment['file_id'])
+	list_of_lists = []
+	for file_id in file_ids:
+		sub_hyp = hyp.loc[hyp["file_id"] == file_id]
+		type = list(sub_hyp["type"])[0]
+		sub_ref_segments = ref_segment.loc[ref_segment["file_id"] == file_id]
+
+		if type == "text":
+			list_of_lists = define_sys_boundary_text(sub_hyp, sub_ref_segments, list_of_lists, file_id, type)
+		else:
+			list_of_lists = define_sys_boundary_general(sub_hyp, sub_ref_segments, list_of_lists, file_id, type)
+
+	new_sys = pd.DataFrame(list_of_lists, columns=['file_id', 'Class', 'start', 'end', 'llr', 'file_uid', 'type'])
+	new_sys["hyp_uid"] = ["H{}".format(x) for x in new_sys.index]
+	new_sys["hyp_isTruncated"] = False
+	return new_sys
+
 def get_result_dict(sorted_df, merge_label, task):
         
 	#print(f"get result_dict {merge_label}")
