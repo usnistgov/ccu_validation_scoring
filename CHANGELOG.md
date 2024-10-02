@@ -1,8 +1,8 @@
 # CHANGELOG
 All notable changes to this project will be documented in this file.
 
-## [1.3.5] - 2024-09-05
-- Implemented filemerge scoring method for ND/ED scoring
+## [1.3.5] - 2024-10-02
+- Implemented full, half, one third and quarter filemerge scoring method for ED scoring
 - Added judgement voting threshold for ED scoring. Default is still 2
 - Added LLR filtering to filter system output for CD, ND and ED scoring
 - Added micro metrics for ND and ED scoring

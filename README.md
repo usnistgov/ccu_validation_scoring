@@ -292,15 +292,15 @@ CCU_scoring score-nd -s <norm_submission_directory> -m <norm_mapping_submission_
 
  * `-o`: output directory containing the score and alignment file
 
- * `-xR`: gap (in characters) for the text reference instances merging, input "file" for filemerge scoring
+ * `-xR`: gap (in characters) for the text reference instances merging
 
- * `-aR`: gap (in seconds) for the audio/video reference instances merging, input "file" for filemerge scoring
+ * `-aR`: gap (in seconds) for the audio/video reference instances merging
 
  * `-vR`: define how to handle the adhere/violate labels for the reference norm instances merging. "class" is to use the class label only (ignoring status) to merge and "class-status" is to use the class and status label to merge
 
- * `-xS`: gap (in characters) for the text system instances merging, input "9999999999" for filemerge scoring
+ * `-xS`: gap (in characters) for the text system instances merging
 
- * `-aS`: gap (in seconds) for the audio/video system instances merging, input "9999999999" for filemerge scoring
+ * `-aS`: gap (in seconds) for the audio/video system instances merging
 
  * `-lS`: choose "min_llr" or "max_llr" to combine system llrs for the system instances merging
 
@@ -357,13 +357,13 @@ CCU_scoring score-ed -s <emotion_submission_directory> -ref <reference_directory
 
  * `-o`: output directory containing the score and alignment file
 
- * `-xR`: gap (in characters) for the text reference instances merging, input "file" for filemerge scoring
+ * `-xR`: gap (in characters) for the text reference instances merging
 
- * `-aR`: gap (in seconds) for the audio/video reference instances merging, input "file" for filemerge scoring
+ * `-aR`: gap (in seconds) for the audio/video reference instances merging
 
- * `-xS`: gap (in characters) for the text system instances merging, input "9999999999" for filemerge scoring
+ * `-xS`: gap (in characters) for the text system instances merging
 
- * `-aS`: gap (in seconds) for the audio/video system instances merging, input "9999999999" for filemerge scoring
+ * `-aS`: gap (in seconds) for the audio/video system instances merging
 
  * `-lS`: choose "min_llr" or "max_llr" to combine system llrs for the system instances merging
 
@@ -374,6 +374,8 @@ CCU_scoring score-ed -s <emotion_submission_directory> -ref <reference_directory
  * `-q`: do not dump ther final alignment and scores to stdout
 
  * `-lf`: Filter system output by LLRs. The option requires the form <ORDER>:by_value:<VALUE>.  <ORDER> is one of: 'after_read|after_transforms'.  <VALUE> is the floating point threshold to retain detections with values >= <VALUE>
+
+ * `-fm`: choose one from [1/4, 1/3, 1/2, 1] to define Filemerge proportion
 
 ```bash
 # an example of ed scoring
