@@ -103,7 +103,7 @@ def file_based_merge_ref(ref, annot_segments, file_merge_proportion):
 		type = list(sub["type"])[0]
 		length = list(sub["length"])[0]
 		sub_annot_segments = annot_segments.loc[annot_segments["file_id"] == file_id]
-		step = (max(sub_annot_segments["end"]) - min(sub_annot_segments["start"]))*file_merge_proportion
+		step = round((max(sub_annot_segments["end"]) - min(sub_annot_segments["start"]))*file_merge_proportion,3)
 		start = list(np.around(np.array(list(sub_annot_segments["start"])),3))
 		end = list(np.around(np.array(list(sub_annot_segments["end"])),3))
 		time_pool = start + end
@@ -113,7 +113,6 @@ def file_based_merge_ref(ref, annot_segments, file_merge_proportion):
 			divisor = (max(time_pool) - min(time_pool)) // step
 			remainder = (max(time_pool) - min(time_pool)) % step
 			step_list = np.append(np.linspace(min(time_pool), max(time_pool) - remainder, int(divisor + 1)), max(time_pool))
-		
 		startpoint = []
 		endpoint = []
 		temp_step = {}
