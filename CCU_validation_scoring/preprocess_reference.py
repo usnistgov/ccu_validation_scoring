@@ -650,6 +650,7 @@ def preprocess_reference_dir(ref_dir, scoring_index, task, text_gap = None, time
 				return ref_final, ref_seg
 			else:
 				ref_final = fill_start_end_ref(ref_inter)   ### This adds the beginning and ending noann segments
+				# ref_final = ref_inter
 		else:
 			ref_final = ref_inter
 

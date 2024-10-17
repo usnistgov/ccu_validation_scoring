@@ -16,6 +16,42 @@ def f1(precision, recall):
         return(float("nan"))
     return(2 * (precision * recall) / (precision + recall))
 
+def generate_zero_scores_norm_emotion_single_type(ref, Type = None):
+	"""
+	Generate the result when no match was founded
+	""" 
+	empty =  { 'AP': 0.0,
+			   'prcurve:precision': None,
+			   'prcurve:recall': None,
+			   'prcurve:llr': None,
+			   'precision_at_MinLLR': 0.0,
+			   'recall_at_MinLLR': 0.0,
+			   'f1_at_MinLLR': 0.0,
+			   'llr_at_MinLLR': None,
+			   'sum_tp_at_MinLLR': 0.0,
+			   'sum_fp_at_MinLLR': 0.0,
+			   'sum_md_at_MinLLR': 0.0,
+			   'sum_reference': 0.0,
+			   'sum_scaled_tp_at_MinLLR': 0.0, 
+			   'sum_scaled_fp_at_MinLLR': 0.0,
+			   'scaled_recall_at_MinLLR': 0.0,
+			   'scaled_precision_at_MinLLR': 0.0,
+			   'scaled_f1_at_MinLLR': 0.0
+			 }    
+	
+	if len(ref) > 0:
+		t = empty.copy()
+		if Type == "all":
+			t['sum_reference'] = len(ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False])
+			t['sum_md_at_MinLLR'] = len(ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False])
+		else:
+			t['sum_reference'] = len(ref.loc[(ref.Class.str.contains('NO_SCORE_REGION')==False) & (ref["type"] == Type)])
+			t['sum_md_at_MinLLR'] = len(ref.loc[(ref.Class.str.contains('NO_SCORE_REGION')==False) & (ref["type"] == Type)])
+		return(t)
+	else:
+		logger.error("No reference to score")
+		return(empty.copy())
+
 def generate_zero_scores_norm_emotion(ref):
     """
     Generate the result when no match was founded
@@ -475,9 +511,9 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
         for i in Type:
             output_type = {}
             for iout in iou_thresholds:
-                output_type[iout] = generate_zero_scores_norm_emotion(None)
+                output_type[iout] = generate_zero_scores_norm_emotion_single_type(ref, i)
                 result_tuple = result_tuple + (output_type,)
-         
+ 
         return result_tuple
 
     pd.set_option('display.max_columns', None)

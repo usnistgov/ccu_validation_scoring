@@ -69,7 +69,7 @@ class	genre	metric	value	correctness_criteria
 005	all	scaled_precision_at_MinLLR	0.0	{iou=0.2}
 005	all	scaled_recall_at_MinLLR	0.0	{iou=0.2}
 005	all	sum_fp_at_MinLLR	0.0	{iou=0.2}
-005	all	sum_md_at_MinLLR	0.0	{iou=0.2}
+005	all	sum_md_at_MinLLR	4	{iou=0.2}
 005	all	sum_scaled_fp_at_MinLLR	0.0	{iou=0.2}
 005	all	sum_scaled_tp_at_MinLLR	0.0	{iou=0.2}
 005	all	sum_tp_at_MinLLR	0.0	{iou=0.2}
@@ -83,7 +83,7 @@ class	genre	metric	value	correctness_criteria
 005	audio	scaled_precision_at_MinLLR	0.0	{iou=0.2}
 005	audio	scaled_recall_at_MinLLR	0.0	{iou=0.2}
 005	audio	sum_fp_at_MinLLR	0.0	{iou=0.2}
-005	audio	sum_md_at_MinLLR	0.0	{iou=0.2}
+005	audio	sum_md_at_MinLLR	4	{iou=0.2}
 005	audio	sum_scaled_fp_at_MinLLR	0.0	{iou=0.2}
 005	audio	sum_scaled_tp_at_MinLLR	0.0	{iou=0.2}
 005	audio	sum_tp_at_MinLLR	0.0	{iou=0.2}
