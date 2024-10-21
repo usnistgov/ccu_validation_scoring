@@ -154,7 +154,7 @@ def main():
     score_ed_parser.add_argument("-q", "--quiet", action='store_true', default=False, help="Do not dump ther final alignment and scores to stdout.")
     score_ed_parser.add_argument(      "--align_hacks", type=str, default="", help="NIST Field for undocumented experiments.")
     score_ed_parser.add_argument("-lf", "--llr_filter", type=str, default="", help="Filter system output by LLRs.  The option requires the form <ORDER>:by_value:<VALUE>.  <ORDER> is one of: 'after_read|after_transforms'.  <VALUE> is the floating point threshold to retain detections with values >= <VALUE>")
-    score_ed_parser.add_argument("-fm", "--file_merge_proportion", type=str, choices=['1/4', '1/3', '1/2', '1'], required=False, help='choose one from list to define Filemerge proportion')
+    score_ed_parser.add_argument("-fm", "--file_merge_proportion", type=str, choices=['1/5', '1/4', '1/3', '1/2', '1'], required=False, help='choose one from list to define Filemerge proportion')
 
     score_ed_parser.set_defaults(func=score_submission.score_ed_submission_dir_cli)
 
