@@ -103,21 +103,23 @@ def file_based_merge_ref(ref, annot_segments, file_merge_proportion):
 		type = list(sub["type"])[0]
 		length = list(sub["length"])[0]
 		sub_annot_segments = annot_segments.loc[annot_segments["file_id"] == file_id]
-		step = round((max(sub_annot_segments["end"]) - min(sub_annot_segments["start"]))*file_merge_proportion,3)
+		step = (max(sub_annot_segments["end"]) - min(sub_annot_segments["start"]))*file_merge_proportion
 		start = list(np.around(np.array(list(sub_annot_segments["start"])),3))
 		end = list(np.around(np.array(list(sub_annot_segments["end"])),3))
 		time_pool = start + end
 		if (max(time_pool) - min(time_pool)) % step == 0:
 			step_list = np.linspace(min(time_pool), max(time_pool), int((max(time_pool) - min(time_pool))/step + 1))
 		else:
-			divisor = (max(time_pool) - min(time_pool)) // step
-			remainder = (max(time_pool) - min(time_pool)) % step
-			step_list = np.append(np.linspace(min(time_pool), max(time_pool) - remainder, int(divisor + 1)), max(time_pool))
+			divisor = 1/file_merge_proportion
+			remainder = (max(time_pool) - min(time_pool)) - int(step)*divisor
+			step_list = np.append(np.linspace(min(time_pool), max(time_pool)-remainder-int(step), int(divisor)), max(time_pool))
+
 		startpoint = []
 		endpoint = []
 		temp_step = {}
 		final_step = {}
 		temp_label = {}
+
 		for i in range(len(step_list)-1):
 			startpoint.append(round(step_list[i],3))
 			endpoint.append(round(step_list[i+1],3))
@@ -142,21 +144,24 @@ def file_based_merge_ref(ref, annot_segments, file_merge_proportion):
 			count = count + 1
 		
 		for i in range(len(temp_step)):
-			final_step[i] = [min(temp_step[i]), max(temp_step[i])]
+			if len(temp_step[i]) > 0:
+				final_step[i] = [min(temp_step[i]), max(temp_step[i])]
 		
 		final_label = {}
 		for i in range(len(temp_label)):
-			noann_prec = temp_label[i].count("noann")/len(temp_label[i])
-			if noann_prec >= 0.5:
-				final_label[i] = ["noann"]
-			else:
-				if "noann" in temp_label[i]:
-					temp_label[i].remove("noann")
-				final_label[i] = list(set(temp_label[i]))
-		
-		for i in range(len(final_step)):
-			for j in final_label[i]:
-				list_of_lists.append([file_id,j,final_step[i][0],final_step[i][1],class_type,type,length])
+			if len(temp_step[i]) > 0:
+				noann_prec = temp_label[i].count("noann")/len(temp_label[i])
+				if noann_prec >= 0.5:
+					final_label[i] = ["noann"]
+				else:
+					if "noann" in temp_label[i]:
+						temp_label[i].remove("noann")
+					final_label[i] = list(set(temp_label[i]))
+
+		for i in list(final_step.keys()):
+			if len(final_label[i]) > 0:
+				for j in final_label[i]:
+					list_of_lists.append([file_id,j,final_step[i][0],final_step[i][1],class_type,type,length])
 
 	new_ref = pd.DataFrame(list_of_lists, columns=['file_id', 'Class', 'start', 'end', 'Class_type', 'type', 'length'])
 	new_seg = new_ref[["file_id","start","end"]].drop_duplicates()
