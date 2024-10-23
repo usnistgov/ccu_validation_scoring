@@ -154,10 +154,7 @@ def file_based_merge_ref(ref, annot_segments, file_merge_proportion):
 				if noann_prec >= 0.5:
 					final_label[i] = ["noann"]
 				else:
-					if "noann" in temp_label[i]:
-						temp_label[i].remove("noann")
-					final_label[i] = list(set(temp_label[i]))
-
+					final_label[i] = list(set([item for item in temp_label[i] if item != "noann"]))
 		for i in list(final_step.keys()):
 			if len(final_label[i]) > 0:
 				for j in final_label[i]:
