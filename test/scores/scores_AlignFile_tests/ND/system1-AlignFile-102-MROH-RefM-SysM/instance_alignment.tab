@@ -1,3 +1,3 @@
 class	file_id	eval	ref	sys	llr	parameters	ref_status	hyp_status
-102	AlignFile	mapped	{start=428.81,end=503.64}	{start=417.43,end=550.46}	-0.8287143874568343	{iou=0.563,intersection=74.830,union=133.030,shifted_start_hyp=417.430,shifted_end_hyp=550.460,pct_temp_tp=1.000,pct_temp_fp=0.778,collar=15.000,type=audio}	adhere	adhere,violate
-102	AlignFile	mapped	{start=581.24,end=595.96}	{start=582,end=595}	-0.3670911949273541	{iou=0.883,intersection=13.000,union=14.720,shifted_start_hyp=581.240,shifted_end_hyp=595.960,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=15.000,type=audio}	EMPTY_NA	violate
+102	AlignFile	mapped	{start=428.81,end=503.64}	{start=417.43,end=550.46}	-0.8287143874568343	{iou=0.563,intersection=74.830,union=133.030,shifted_start_hyp=417.430,shifted_end_hyp=550.460,pct_temp_tp=1.000,pct_temp_fp=0.778,collar=15.000,type=audio,eval=CD}	adhere	adhere,violate
+102	AlignFile	mapped	{start=581.24,end=595.96}	{start=582,end=595}	-0.3670911949273541	{iou=0.883,intersection=13.000,union=14.720,shifted_start_hyp=581.240,shifted_end_hyp=595.960,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=15.000,type=audio,eval=CD}	EMPTY_NA	violate

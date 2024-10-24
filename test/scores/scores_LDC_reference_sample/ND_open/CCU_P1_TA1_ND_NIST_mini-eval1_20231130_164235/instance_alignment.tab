@@ -1,15 +1,15 @@
 class	file_id	eval	ref	sys	llr	parameters	ref_status	hyp_status
-001	M010005QD	mapped	{start=45.2,end=60.2}	{start=45.2,end=60.2}	1.5	{iou=1.000,intersection=15.000,union=15.000,shifted_start_hyp=45.200,shifted_end_hyp=60.200,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=15.000,type=video}	adhere	adhere
-001	M010015BY	mapped	{start=1104.567,end=1119.567}	{start=1104.567,end=1119.567}	1.5	{iou=1.000,intersection=15.000,union=15.000,shifted_start_hyp=1104.567,shifted_end_hyp=1119.567,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=15.000,type=audio}	adhere	adhere
-001	M010019QD	unmapped	{start=45,end=60}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0}	adhere	EMPTY_NA
-001	M010029SP	unmapped	{start=200,end=215}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0}	adhere	EMPTY_NA
-002	M010005QD	mapped	{start=45.2,end=60.2}	{start=45.2,end=60.2}	1.5	{iou=1.000,intersection=15.000,union=15.000,shifted_start_hyp=45.200,shifted_end_hyp=60.200,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=15.000,type=video}	violate	violate
-002	M010015BY	mapped	{start=1104.567,end=1119.567}	{start=1104.567,end=1119.567}	1.5	{iou=1.000,intersection=15.000,union=15.000,shifted_start_hyp=1104.567,shifted_end_hyp=1119.567,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=15.000,type=audio}	violate	violate
-002	M010019QD	unmapped	{start=45,end=60}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0}	violate	EMPTY_NA
-002	M010029SP	unmapped	{start=200,end=215}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0}	violate	EMPTY_NA
-007	M010005QD	unmapped	{start=60.201,end=75.201}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0}	violate	EMPTY_NA
-007	M010005QD	unmapped	{}	{start=75.202,end=90.202}	1.5	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	violate
-007	M010015BY	unmapped	{start=1119.568,end=1134.568}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0}	violate	EMPTY_NA
-007	M010015BY	unmapped	{}	{start=1134.569,end=1149.569}	1.5	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	violate
-007	M010019QD	unmapped	{start=78,end=78}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0}	violate	EMPTY_NA
-007	M010029SP	unmapped	{start=216,end=230}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0}	violate	EMPTY_NA
+001	M010005QD	mapped	{start=45.2,end=60.2}	{start=45.2,end=60.2}	1.5	{iou=1.000,intersection=15.000,union=15.000,shifted_start_hyp=45.200,shifted_end_hyp=60.200,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=15.000,type=video,eval=CD}	adhere	adhere
+001	M010015BY	mapped	{start=1104.567,end=1119.567}	{start=1104.567,end=1119.567}	1.5	{iou=1.000,intersection=15.000,union=15.000,shifted_start_hyp=1104.567,shifted_end_hyp=1119.567,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=15.000,type=audio,eval=CD}	adhere	adhere
+001	M010019QD	unmapped	{start=45,end=60}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0,eval=MD}	adhere	EMPTY_NA
+001	M010029SP	unmapped	{start=200,end=215}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0,eval=MD}	adhere	EMPTY_NA
+002	M010005QD	mapped	{start=45.2,end=60.2}	{start=45.2,end=60.2}	1.5	{iou=1.000,intersection=15.000,union=15.000,shifted_start_hyp=45.200,shifted_end_hyp=60.200,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=15.000,type=video,eval=CD}	violate	violate
+002	M010015BY	mapped	{start=1104.567,end=1119.567}	{start=1104.567,end=1119.567}	1.5	{iou=1.000,intersection=15.000,union=15.000,shifted_start_hyp=1104.567,shifted_end_hyp=1119.567,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=15.000,type=audio,eval=CD}	violate	violate
+002	M010019QD	unmapped	{start=45,end=60}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0,eval=MD}	violate	EMPTY_NA
+002	M010029SP	unmapped	{start=200,end=215}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0,eval=MD}	violate	EMPTY_NA
+007	M010005QD	unmapped	{start=60.201,end=75.201}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0,eval=MD}	violate	EMPTY_NA
+007	M010005QD	unmapped	{}	{start=75.202,end=90.202}	1.5	{pct_temp_tp=0.0,pct_temp_fp=1.0,eval=FA}	EMPTY_NA	violate
+007	M010015BY	unmapped	{start=1119.568,end=1134.568}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0,eval=MD}	violate	EMPTY_NA
+007	M010015BY	unmapped	{}	{start=1134.569,end=1149.569}	1.5	{pct_temp_tp=0.0,pct_temp_fp=1.0,eval=FA}	EMPTY_NA	violate
+007	M010019QD	unmapped	{start=78,end=78}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0,eval=MD}	violate	EMPTY_NA
+007	M010029SP	unmapped	{start=216,end=230}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0,eval=MD}	violate	EMPTY_NA

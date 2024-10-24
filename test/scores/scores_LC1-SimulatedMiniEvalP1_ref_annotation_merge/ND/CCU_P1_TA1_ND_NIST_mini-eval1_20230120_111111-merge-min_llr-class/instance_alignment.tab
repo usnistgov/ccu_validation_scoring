@@ -1,16 +1,16 @@
 class	file_id	eval	ref	sys	llr	parameters	ref_status	hyp_status
-001	M010005NJ	mapped	{start=0,end=15}	{start=1,end=16}	0.6	{iou=0.875,intersection=14.000,union=16.000,shifted_start_hyp=0.000,shifted_end_hyp=16.000,pct_temp_tp=1.000,pct_temp_fp=0.067,collar=15.000,type=audio}	adhere,violate	adhere,violate
-001	M010005NJ	mapped	{start=20,end=27}	{start=23,end=30}	0.9	{iou=0.400,intersection=4.000,union=10.000,shifted_start_hyp=20.000,shifted_end_hyp=30.000,pct_temp_tp=1.000,pct_temp_fp=0.429,collar=15.000,type=audio}	adhere	violate
-001	M010005NJ	unmapped	{start=36.8,end=41}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0}	adhere	EMPTY_NA
-001	M010005NJ	mapped	{start=44,end=50}	{start=43,end=50}	0.7	{iou=0.857,intersection=6.000,union=7.000,shifted_start_hyp=43.000,shifted_end_hyp=50.000,pct_temp_tp=1.000,pct_temp_fp=0.167,collar=15.000,type=audio}	adhere	adhere,violate
-002	M01000G2T	mapped	{start=0,end=20}	{start=1,end=20.5}	0.4	{iou=0.927,intersection=19.000,union=20.500,shifted_start_hyp=0.000,shifted_end_hyp=20.500,pct_temp_tp=1.000,pct_temp_fp=0.025,collar=15.000,type=video}	adhere,violate	adhere,violate
-002	M01000G2T	mapped	{start=25.5,end=30}	{start=25,end=32}	0.8	{iou=0.643,intersection=4.500,union=7.000,shifted_start_hyp=25.000,shifted_end_hyp=32.000,pct_temp_tp=1.000,pct_temp_fp=0.556,collar=15.000,type=video}	adhere	adhere,violate
-002	M01000G2T	unmapped	{start=31,end=35}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0}	violate	EMPTY_NA
-002	M01000G2T	mapped	{start=36,end=40}	{start=36,end=40}	0.6	{iou=1.000,intersection=4.000,union=4.000,shifted_start_hyp=36.000,shifted_end_hyp=40.000,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=15.000,type=video}	violate	violate
-002	M01000G2T	mapped	{start=42,end=45}	{start=44,end=47}	0.7	{iou=0.200,intersection=1.000,union=5.000,shifted_start_hyp=42.000,shifted_end_hyp=47.000,pct_temp_tp=1.000,pct_temp_fp=0.667,collar=15.000,type=video}	violate	adhere
-002	M01000G2T	unmapped	{start=46,end=49}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0}	violate	EMPTY_NA
-002	M01000H0B	mapped	{start=0,end=70}	{start=0,end=70}	0.8	{iou=1.000,intersection=71.000,union=71.000,shifted_start_hyp=0.000,shifted_end_hyp=70.000,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=150.000,type=text}	adhere	adhere
-002	M01000H0B	mapped	{start=80,end=150}	{start=120,end=169}	0.9	{iou=0.344,intersection=31.000,union=90.000,shifted_start_hyp=80.000,shifted_end_hyp=169.000,pct_temp_tp=1.000,pct_temp_fp=0.268,collar=150.000,type=text}	violate	violate
-002	M01000H0B	mapped	{start=220,end=280}	{start=220,end=320}	0.7	{iou=0.604,intersection=61.000,union=101.000,shifted_start_hyp=220.000,shifted_end_hyp=320.000,pct_temp_tp=1.000,pct_temp_fp=0.656,collar=150.000,type=text}	adhere	adhere,violate
-002	M01000H0B	unmapped	{start=290,end=350}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0}	adhere	EMPTY_NA
-002	M01000H0B	mapped	{start=360,end=500}	{start=370,end=490}	0.6	{iou=0.858,intersection=121.000,union=141.000,shifted_start_hyp=360.000,shifted_end_hyp=500.000,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=150.000,type=text}	adhere,violate	adhere,violate
+001	M010005NJ	mapped	{start=0,end=15}	{start=1,end=16}	0.6	{iou=0.875,intersection=14.000,union=16.000,shifted_start_hyp=0.000,shifted_end_hyp=16.000,pct_temp_tp=1.000,pct_temp_fp=0.067,collar=15.000,type=audio,eval=CD}	adhere,violate	adhere,violate
+001	M010005NJ	mapped	{start=20,end=27}	{start=23,end=30}	0.9	{iou=0.400,intersection=4.000,union=10.000,shifted_start_hyp=20.000,shifted_end_hyp=30.000,pct_temp_tp=1.000,pct_temp_fp=0.429,collar=15.000,type=audio,eval=CD}	adhere	violate
+001	M010005NJ	unmapped	{start=36.8,end=41}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0,eval=MD}	adhere	EMPTY_NA
+001	M010005NJ	mapped	{start=44,end=50}	{start=43,end=50}	0.7	{iou=0.857,intersection=6.000,union=7.000,shifted_start_hyp=43.000,shifted_end_hyp=50.000,pct_temp_tp=1.000,pct_temp_fp=0.167,collar=15.000,type=audio,eval=CD}	adhere	adhere,violate
+002	M01000G2T	mapped	{start=0,end=20}	{start=1,end=20.5}	0.4	{iou=0.927,intersection=19.000,union=20.500,shifted_start_hyp=0.000,shifted_end_hyp=20.500,pct_temp_tp=1.000,pct_temp_fp=0.025,collar=15.000,type=video,eval=CD}	adhere,violate	adhere,violate
+002	M01000G2T	mapped	{start=25.5,end=30}	{start=25,end=32}	0.8	{iou=0.643,intersection=4.500,union=7.000,shifted_start_hyp=25.000,shifted_end_hyp=32.000,pct_temp_tp=1.000,pct_temp_fp=0.556,collar=15.000,type=video,eval=CD}	adhere	adhere,violate
+002	M01000G2T	unmapped	{start=31,end=35}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0,eval=MD}	violate	EMPTY_NA
+002	M01000G2T	mapped	{start=36,end=40}	{start=36,end=40}	0.6	{iou=1.000,intersection=4.000,union=4.000,shifted_start_hyp=36.000,shifted_end_hyp=40.000,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=15.000,type=video,eval=CD}	violate	violate
+002	M01000G2T	mapped	{start=42,end=45}	{start=44,end=47}	0.7	{iou=0.200,intersection=1.000,union=5.000,shifted_start_hyp=42.000,shifted_end_hyp=47.000,pct_temp_tp=1.000,pct_temp_fp=0.667,collar=15.000,type=video,eval=CD}	violate	adhere
+002	M01000G2T	unmapped	{start=46,end=49}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0,eval=MD}	violate	EMPTY_NA
+002	M01000H0B	mapped	{start=0,end=70}	{start=0,end=70}	0.8	{iou=1.000,intersection=71.000,union=71.000,shifted_start_hyp=0.000,shifted_end_hyp=70.000,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=150.000,type=text,eval=CD}	adhere	adhere
+002	M01000H0B	mapped	{start=80,end=150}	{start=120,end=169}	0.9	{iou=0.344,intersection=31.000,union=90.000,shifted_start_hyp=80.000,shifted_end_hyp=169.000,pct_temp_tp=1.000,pct_temp_fp=0.268,collar=150.000,type=text,eval=CD}	violate	violate
+002	M01000H0B	mapped	{start=220,end=280}	{start=220,end=320}	0.7	{iou=0.604,intersection=61.000,union=101.000,shifted_start_hyp=220.000,shifted_end_hyp=320.000,pct_temp_tp=1.000,pct_temp_fp=0.656,collar=150.000,type=text,eval=CD}	adhere	adhere,violate
+002	M01000H0B	unmapped	{start=290,end=350}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0,eval=MD}	adhere	EMPTY_NA
+002	M01000H0B	mapped	{start=360,end=500}	{start=370,end=490}	0.6	{iou=0.858,intersection=121.000,union=141.000,shifted_start_hyp=360.000,shifted_end_hyp=500.000,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=150.000,type=text,eval=CD}	adhere,violate	adhere,violate

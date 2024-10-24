@@ -1,2 +1,2 @@
 class	file_id	eval	ref	sys	llr	parameters	ref_status	hyp_status
-108	AlignFile	mapped	{start=660.45,end=717.78}	{start=420.01,end=721.68}	-0.8888888888888888	{iou=0.190,intersection=57.330,union=301.670,shifted_start_hyp=420.010,shifted_end_hyp=721.680,pct_temp_tp=1.000,pct_temp_fp=4.262,collar=15.000,type=audio}	adhere	adhere
+108	AlignFile	mapped	{start=660.45,end=717.78}	{start=420.01,end=721.68}	-0.8888888888888888	{iou=0.190,intersection=57.330,union=301.670,shifted_start_hyp=420.010,shifted_end_hyp=721.680,pct_temp_tp=1.000,pct_temp_fp=4.262,collar=15.000,type=audio,eval=CD}	adhere	adhere
