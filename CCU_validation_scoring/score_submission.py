@@ -58,43 +58,50 @@ def get_contained_index(ref_row, hyp):
         return hyp[(ref_row['file_id'] == hyp['file_id']) & (ref_row['start'] <= hyp['start']) & (ref_row['end'] >= hyp['end'])].index
 
 def pre_filter_system_in_noann_region(hyp, ref):
-        """
-        Remove any system instances WHOLLY Contained intial or final file noscore regions
-        """
-        hyp.reset_index()
-        for fileid in set(ref['file_id']):
-                sref = ref[(ref['file_id'] == fileid) & (ref.Class == 'noann') ]
-                #print(sref)
-                ### Straight drop of instances within the begin/end of *ALL* NoScore Regions
-                for ind in sref.index:
-                    hyp.drop(get_contained_index(sref.loc[ind], hyp),  inplace = True)
+		"""
+		Remove any system instances WHOLLY Contained intial or final file noscore regions
+		"""
+		hyp.reset_index()
+		for fileid in set(ref['file_id']):
+				sref = ref[(ref['file_id'] == fileid) & (ref.Class == 'noann') ]
+				#print(sref)
+				### Straight drop of instances within the begin/end of *ALL* NoScore Regions
+				for ind in sref.index:
+					hyp.drop(get_contained_index(sref.loc[ind], hyp),  inplace = True)
 
-                ### Reset system boundaries to the begin of the NoScore
-                if (True):
-                    for ind in sref.index:  ### These are ONLY noscore Refs
-                        for index, row in hyp[hyp.file_id == fileid].iterrows():
-                            #print(f"index hyp[{index}] {row.Class} H:{row.start}:{row.end} ?? R:{sref.loc[ind].start}:{sref.loc[ind].end}")
-                            if (row.start < sref.loc[ind].start and sref.loc[ind].end < row.end): ### Full overlap
-                                #print("Shucks")
-                                hyp.at[index,'hyp_uid'] = row.hyp_uid + "-UnDroppedFullOverlap"
-                                #x=1
-                            else:
-                                if (row.start < sref.loc[ind].end and sref.loc[ind].end < row.end):  ### Straddles the boundary
-                                    hyp.at[index,'start'] = sref.loc[ind].end
-                                    hyp.at[index,'hyp_uid'] = row.hyp_uid + "-TruncStart"
-                                    hyp.at[index,'hyp_isTruncated'] = True
-                                    #print(f"   Truncated start H:{hyp.at[index,'start']}:{hyp.at[index,'end']}")
-                                    #x=1
-                                if (row.start < sref.loc[ind].start and sref.loc[ind].start < row.end):  ### Straddles the boundary
-                                    hyp.at[index,'end'] = sref.loc[ind].start
-                                    hyp.at[index,'hyp_uid'] = row.hyp_uid + "-TruncEnd"
-                                    hyp.at[index,'hyp_isTruncated'] = True
-                                    #x=1
-                            #print(f"   Truncated end H:{hyp.at[index,'start']}:{hyp.at[index,'end']}")
-                
-        #print(hyp[hyp.Class == '108'])
-        #exit(0)
-        return(hyp)
+				### Reset system boundaries to the begin of the NoScore
+				if (True):
+					for ind in sref.index:  ### These are ONLY noscore Refs
+						for index, row in hyp[hyp.file_id == fileid].iterrows():
+							Type = list(sref["type"])[0]
+							#print(f"index hyp[{index}] {row.Class} H:{row.start}:{row.end} ?? R:{sref.loc[ind].start}:{sref.loc[ind].end}")
+							if (row.start < sref.loc[ind].start and sref.loc[ind].end < row.end): ### Full overlap
+								#print("Shucks")
+								hyp.at[index,'hyp_uid'] = row.hyp_uid + "-UnDroppedFullOverlap"
+								#x=1
+							else:
+								if (row.start < sref.loc[ind].end and sref.loc[ind].end < row.end):  ### Straddles the boundary
+									if Type == "text":
+										hyp.at[index,'start'] = sref.loc[ind].end + 1
+									else:
+										hyp.at[index,'start'] = sref.loc[ind].end
+									hyp.at[index,'hyp_uid'] = row.hyp_uid + "-TruncStart"
+									hyp.at[index,'hyp_isTruncated'] = True
+									#print(f"   Truncated start H:{hyp.at[index,'start']}:{hyp.at[index,'end']}")
+									#x=1
+								if (row.start < sref.loc[ind].start and sref.loc[ind].start < row.end):  ### Straddles the boundary
+									if Type == "text":
+										hyp.at[index,'end'] = sref.loc[ind].start - 1
+									else:
+										hyp.at[index,'end'] = sref.loc[ind].start
+									hyp.at[index,'hyp_uid'] = row.hyp_uid + "-TruncEnd"
+									hyp.at[index,'hyp_isTruncated'] = True
+									#x=1
+							#print(f"   Truncated end H:{hyp.at[index,'start']}:{hyp.at[index,'end']}")
+				
+		#print(hyp[hyp.Class == '108'])
+		#exit(0)
+		return(hyp)
 
 def set_text_gap(arg):
     if (arg):

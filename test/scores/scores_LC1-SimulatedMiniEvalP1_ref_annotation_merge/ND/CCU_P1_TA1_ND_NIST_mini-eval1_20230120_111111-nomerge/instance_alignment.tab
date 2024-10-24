@@ -18,7 +18,7 @@ class	file_id	eval	ref	sys	llr	parameters	ref_status	hyp_status
 002	M01000G2T	unmapped	{start=46,end=49}	{}		{pct_temp_tp=0.0,pct_temp_fp=0.0}	violate	EMPTY_NA
 002	M01000H0B	mapped	{start=0,end=70}	{start=0,end=30}	0.8	{iou=0.437,intersection=31.000,union=71.000,shifted_start_hyp=0.000,shifted_end_hyp=70.000,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=150.000,type=text}	adhere	adhere
 002	M01000H0B	unmapped	{}	{start=40,end=70}	0.8	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
-002	M01000H0B	mapped	{start=80,end=150}	{start=120,end=170}	0.9	{iou=0.341,intersection=31.000,union=91.000,shifted_start_hyp=80.000,shifted_end_hyp=170.000,pct_temp_tp=1.000,pct_temp_fp=0.282,collar=150.000,type=text}	violate	violate
+002	M01000H0B	mapped	{start=80,end=150}	{start=120,end=169}	0.9	{iou=0.344,intersection=31.000,union=90.000,shifted_start_hyp=80.000,shifted_end_hyp=169.000,pct_temp_tp=1.000,pct_temp_fp=0.268,collar=150.000,type=text}	violate	violate
 002	M01000H0B	mapped	{start=220,end=280}	{start=220,end=240}	0.7	{iou=0.344,intersection=21.000,union=61.000,shifted_start_hyp=220.000,shifted_end_hyp=280.000,pct_temp_tp=1.000,pct_temp_fp=0.000,collar=150.000,type=text}	adhere	adhere
 002	M01000H0B	mapped	{start=290,end=350}	{start=260,end=320}	0.8	{iou=0.341,intersection=31.000,union=91.000,shifted_start_hyp=260.000,shifted_end_hyp=350.000,pct_temp_tp=1.000,pct_temp_fp=0.492,collar=150.000,type=text}	adhere	violate
 002	M01000H0B	unmapped	{}	{start=370,end=420}	0.6	{pct_temp_tp=0.0,pct_temp_fp=1.0}	EMPTY_NA	adhere
