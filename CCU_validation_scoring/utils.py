@@ -791,6 +791,8 @@ def generate_alignment_file(ref, hyp, task):
 			return 'CD'
 		if row['tp'] == 0 and row['fp'] == 1:
 			return 'FA'
+		if row['forgive-fp'] == 1:
+			return 'F-FA'
 		return 'MD'
 
 	hyp["eval"] = hyp.apply(lambda row: categorise(row), axis=1)
@@ -812,6 +814,7 @@ def generate_alignment_file(ref, hyp, task):
 		#print(ref_format)
 		
 		hyp_format = hyp.copy()
+		#print(hyp_format)
 		### Duplicate the rows for the MD from the correctness constraint
 		new_md = hyp_format[(hyp_format.fp == 1) & (hyp_format.md == 1)].copy()
 		new_md[['fp', 'md', 'eval_score']] = [0, 1, 'MD']
@@ -839,14 +842,18 @@ def generate_alignment_file(ref, hyp, task):
 		hyp_format['pct_fp_f'] =            hyp_format['pct_fp'].apply(           lambda x: 'pct_temp_fp={:.3f}'.format(x))
 		hyp_format['collar'] =              hyp_format['scale_collar'].apply(     lambda x: 'collar={:.3f}'.format(x))
 		hyp_format['type'] =                hyp_format['type'].apply(             lambda x: 'type={}'.format(x))
+		hyp_format['eval_str'] =            hyp_format['eval_score'].apply(       lambda x: 'eval={}'.format(x))
 
-		hyp_format['parameters'] = '{' + hyp_format['IoU_f'] + ',' + hyp_format['intersection_f'] + ',' + hyp_format['union_f'] + ',' + hyp_format['shifted_sys_start_f'] + ',' + hyp_format['shifted_sys_end_f'] + ',' + hyp_format['pct_tp_f'] + ',' + hyp_format['pct_fp_f'] + ',' + hyp_format['collar'] + ',' + hyp_format['type'] + '}'
+		hyp_format['parameters'] = '{' + hyp_format['IoU_f'] + ',' + hyp_format['intersection_f'] + ',' + hyp_format['union_f'] + ',' + hyp_format['shifted_sys_start_f'] + ',' + hyp_format['shifted_sys_end_f'] + ',' + hyp_format['pct_tp_f'] + ',' + hyp_format['pct_fp_f'] + ',' + hyp_format['collar'] + ',' + hyp_format['type'] + ',' + hyp_format['eval_str'] + '}'
+#		hyp_format['parameters'] = '{' + hyp_format['IoU_f'] + ',' + hyp_format['intersection_f'] + ',' + hyp_format['union_f'] + ',' + hyp_format['shifted_sys_start_f'] + ',' + hyp_format['shifted_sys_end_f'] + ',' + hyp_format['pct_tp_f'] + ',' + hyp_format['pct_fp_f'] + ',' + hyp_format['collar'] + ',' + hyp_format['type'] + '}'
 
 		hyp_format.loc[hyp_format.eval_score == 'FA', "ref"] = "{}"  ### start_ref is now a string!!!
 		hyp_format.loc[hyp_format.eval_score == 'MD', "sys"] = "{}"  ### start_ref is now a string!!!
 		#hyp_format.loc[hyp_format["eval"] == "unmapped", "ref"] = "{}"
-		hyp_format.loc[hyp_format.eval_score == 'FA', "parameters"] = "{pct_temp_tp=0.0,pct_temp_fp=1.0}"
-		hyp_format.loc[hyp_format.eval_score == 'MD', "parameters"] = "{pct_temp_tp=0.0,pct_temp_fp=0.0}"
+		#hyp_format.loc[hyp_format.eval_score == 'FA', "parameters"] = hyp_format[hyp_format.eval_score == 'FA','eval_str'].apply(lambda x: "{" + "pct_temp_tp=0.0,pct_temp_fp=1.0,{}".format(x) + "}" )
+		#hyp_format.loc[hyp_format.eval_score == 'MD', "parameters"] = hyp_format[hyp_format.eval_score == 'MD','eval_str'].apply(lambda x: "{" + "pct_temp_tp=0.0,pct_temp_fp=0.0,{}".format(x) + "}")
+		hyp_format.loc[hyp_format.eval_score == 'FA', "parameters"] = "{pct_temp_tp=0.0,pct_temp_fp=1.0,eval=FA}"
+		hyp_format.loc[hyp_format.eval_score == 'MD', "parameters"] = "{pct_temp_tp=0.0,pct_temp_fp=0.0,eval=MD}"
 
 		#print("hyp_format befor filtering columns")
 		#print(hyp_format)

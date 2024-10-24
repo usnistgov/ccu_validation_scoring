@@ -1,4 +1,5 @@
 import os
+import math
 import logging
 from re import M
 import numpy as np
@@ -244,7 +245,7 @@ def compute_ious(row, ref, class_type, time_span_scale_collar, text_span_scale_c
         collar = text_span_scale_collar if (list(types)[0] == 'text') else time_span_scale_collar
 
         refs['IoU'], refs['intersection'], refs['union'], refs['shifted_sys_start'], refs['shifted_sys_end'], refs['pct_tp'],  refs['pct_fp'], refs['scale_collar'], refs['hyp_uid'], refs['hyp_isTruncated'] = segment_iou_v2(row.start, row.end, row.hyp_uid, row.hyp_isTruncated, [refs.start, refs.end], collar, row.type)  #####  ROW is the hyp #######
-        if (align_hacks == ""):
+        if (align_hacks == "" or align_hacks == "OneRef:ManyHyp"): ### NOTE, the OneRef:ManyHyp hack use the default alignment
             #print("One to One")
             if (len(refs.loc[refs.IoU > 0]) > 1) & ("NO_SCORE_REGION" in refs.loc[refs.IoU == refs.IoU.max()].Class.values):
                 #If the class of highest iou is no score region, then pick the second highest
@@ -254,7 +255,7 @@ def compute_ious(row, ref, class_type, time_span_scale_collar, text_span_scale_c
                 rmax = rmax_candidate.loc[rmax_candidate.start == rmax_candidate.start.min()]
             rout = rmax.copy()
             rout[['start_hyp', 'end_hyp', 'llr']] = row.start, row.end, row.llr
-        elif (align_hacks == "ManyRef:OneHyp"):
+        elif (align_hacks in ["ManyRef:OneHyp", "ManyRef:ManyHyp"]):
             ### One to Many
             rout = refs
             rout = rout[rout.isNSCR | ((~rout.isNSCR) & (rout.intersection > 0))]   ### Removes rout with non-zero intersection
@@ -267,9 +268,13 @@ def compute_ious(row, ref, class_type, time_span_scale_collar, text_span_scale_c
                 for i in range(0, len(rout_index)):
                     if (i > 0):  ### Reset the start to the previous mid
                         gap_mid = (rout.loc[rout_index[i-1]].end + rout.loc[rout_index[i]].start) / 2
+                        if (rout.loc[rout_index[i]].type == 'text'):
+                            gap_mid = math.floor(gap_mid) + 1
                         rout.loc[rout_index[i], 'new_hyp_start'] = gap_mid
                     if (i < len(rout_index)-1):  ### Reset the end
                         gap_mid = (rout.loc[rout_index[i]].end + rout.loc[rout_index[i+1]].start) / 2
+                        if (rout.loc[rout_index[i]].type == 'text'):
+                            gap_mid = math.floor(gap_mid)
                         rout.loc[rout_index[i], 'new_hyp_end'] = gap_mid
                 for index, ro_ in rout.iterrows():
                     o = {}
@@ -310,7 +315,7 @@ def separate_alignment_reference_by_type_ap_cal(df):
 
     return df_audio,df_video,df_text
 
-def generate_align_cal_measure_by_type(ihyp, ref, iou_thresholds, Class, task):
+def generate_align_cal_measure_by_type(ihyp, ref, iou_thresholds, Class, task, align_hacks):
 
     npos = len(ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False])
     output = {}
@@ -349,7 +354,7 @@ def generate_align_cal_measure_by_type(ihyp, ref, iou_thresholds, Class, task):
     # Determine TP/FP @ IoU-Threshold
     for iout, params in iou_thresholds.items():
         ### This resets the tp and fp for each correctness threshold 
-        ihyp[['tp', 'fp', 'md']] = [ 0, 1, 0 ]
+        ihyp[['tp', 'fp', 'md', 'forgive-fp']] = [ 0, 1, 0, 0 ]
         ### This resets no-score regions to be nothing making them no scores
         ihyp.loc[ihyp.isNSCR & ihyp.intersection > 0.0, ['tp', 'fp', 'md']] = [ 0, 0, 0 ]
         
@@ -389,6 +394,10 @@ def generate_align_cal_measure_by_type(ihyp, ref, iou_thresholds, Class, task):
                     ihyp.loc[ind, 'fp'] = 0
                 first = False            
         
+        # Find FPs to forgive
+        if (align_hacks in ["OneRef:ManyHyp", "ManyRef:ManyHyp"]):
+            ihyp.loc[~ihyp['start_ref'].isna() & ihyp['fp'] == 1, ['fp', 'forgive-fp']] = [0, 1]
+
         # MDs are still in the alignment struct so the need to be removed for AP calc
         
         ihyp["cum_tp"] = np.cumsum(ihyp.tp).astype(float)
@@ -440,7 +449,7 @@ def generate_align_cal_measure_by_type(ihyp, ref, iou_thresholds, Class, task):
         measures['sum_md_at_MinLLR'] = npos - ihyp.tp.sum()
         output[iout] = measures
  
-        ihyp_fields = ["Class","type","tp","fp","md","ref_uid","hyp_uid","hyp_isTruncated","file_id","start_ref","end_ref","start_hyp","end_hyp","IoU","llr","intersection", "union", 'shifted_sys_start', 'shifted_sys_end', 'pct_tp', 'pct_fp', 'scale_collar']
+        ihyp_fields = ["Class","type","tp","fp","md","forgive-fp","ref_uid","hyp_uid","hyp_isTruncated","file_id","start_ref","end_ref","start_hyp","end_hyp","IoU","llr","intersection", "union", 'shifted_sys_start', 'shifted_sys_end', 'pct_tp', 'pct_fp', 'scale_collar']
         if (task == "norm"):
             ihyp_fields.append("status")
             ihyp_fields.append("hyp_status")
@@ -529,19 +538,19 @@ def compute_average_precision_tad(ref, hyp, Class, iou_thresholds, task, time_sp
     ref_audio,ref_video,ref_text = separate_alignment_reference_by_type_ap_cal(ref)
     # exit(0)
 
-    output_all, alignment_all = generate_align_cal_measure_by_type(ihyp, ref, iou_thresholds, Class, task)
+    output_all, alignment_all = generate_align_cal_measure_by_type(ihyp, ref, iou_thresholds, Class, task, align_hacks)
     final_alignment_df = generate_alignment_file(ref.loc[ref.Class.str.contains('NO_SCORE_REGION')==False], alignment_all, task)
     result_tuple = (final_alignment_df, output_all)
 
     for i in Type:
         if i == "audio":
-            output_audio, alignment_audio = generate_align_cal_measure_by_type(ihyp_audio, ref_audio, iou_thresholds, Class, task)
+            output_audio, alignment_audio = generate_align_cal_measure_by_type(ihyp_audio, ref_audio, iou_thresholds, Class, task, align_hacks)
             result_tuple = result_tuple + (output_audio,)
         if i == "text":
-            output_text, alignment_text = generate_align_cal_measure_by_type(ihyp_text, ref_text, iou_thresholds, Class, task)
+            output_text, alignment_text = generate_align_cal_measure_by_type(ihyp_text, ref_text, iou_thresholds, Class, task, align_hacks)
             result_tuple = result_tuple + (output_text,)
         if i == "video":
-            output_video, alignment_video = generate_align_cal_measure_by_type(ihyp_video, ref_video, iou_thresholds, Class, task)
+            output_video, alignment_video = generate_align_cal_measure_by_type(ihyp_video, ref_video, iou_thresholds, Class, task, align_hacks)
             result_tuple = result_tuple + (output_video,)
     
     return result_tuple
