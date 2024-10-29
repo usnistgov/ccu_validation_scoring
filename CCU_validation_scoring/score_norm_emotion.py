@@ -182,6 +182,9 @@ def segment_iou_v2(sys_start, sys_end, sys_uid, sys_isTrunc, refs, collar, type)
     
     def cal_metric(value, input_type=type):
 
+        if type != "text" and value == 0:
+            print("inter is zero")
+
         if value < 0:
             new_value = 0
         else:
