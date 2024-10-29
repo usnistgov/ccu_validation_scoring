@@ -129,7 +129,7 @@ def file_based_merge_ref(ref, annot_segments, file_merge_proportion):
 		count = 0
 		for i,j in zip(startpoint,endpoint):
 			for k in range(sub_annot_segments.shape[0]):
-				if i <= start[k] and i < end[k] and j >= end[k]:
+				if i <= start[k] and i <= end[k] and j >= end[k]:
 					temp_step[count].extend([float(start[k]), float(end[k])])
 					temp_label[count].extend(list(sub.loc[(sub["start"] == start[k]) & (sub["end"] == end[k]), "Class"].values))
 				if i <= start[k] and i < end[k] and j < end[k] and start[k] < j:
@@ -142,7 +142,7 @@ def file_based_merge_ref(ref, annot_segments, file_merge_proportion):
 						temp_step[count+1].extend([float(start[k]), float(end[k])])
 						temp_label[count+1].extend(list(sub.loc[(sub["start"] == start[k]) & (sub["end"] == end[k]), "Class"].values))
 			count = count + 1
-		
+
 		for i in range(len(temp_step)):
 			if len(temp_step[i]) > 0:
 				final_step[i] = [min(temp_step[i]), max(temp_step[i])]
@@ -162,7 +162,6 @@ def file_based_merge_ref(ref, annot_segments, file_merge_proportion):
 
 	new_ref = pd.DataFrame(list_of_lists, columns=['file_id', 'Class', 'start', 'end', 'Class_type', 'type', 'length'])
 	new_seg = new_ref[["file_id","start","end"]].drop_duplicates()
-
 	return new_ref, new_seg			
 			
 def check_remove_start_end_same(ref):
