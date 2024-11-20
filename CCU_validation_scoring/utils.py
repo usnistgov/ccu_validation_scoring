@@ -389,13 +389,14 @@ def file_based_merge_sys(hyp, ref_segment):
 	list_of_lists = []
 	for file_id in file_ids:
 		sub_hyp = hyp.loc[hyp["file_id"] == file_id]
-		type = list(sub_hyp["type"])[0]
-		sub_ref_segments = ref_segment.loc[ref_segment["file_id"] == file_id]
+		if sub_hyp.shape[0] > 0:
+			type = list(sub_hyp["type"])[0]
+			sub_ref_segments = ref_segment.loc[ref_segment["file_id"] == file_id]
 
-		if type == "text":
-			list_of_lists = define_sys_boundary_text(sub_hyp, sub_ref_segments, list_of_lists, file_id, type)
-		else:
-			list_of_lists = define_sys_boundary_general(sub_hyp, sub_ref_segments, list_of_lists, file_id, type)
+			if type == "text":
+				list_of_lists = define_sys_boundary_text(sub_hyp, sub_ref_segments, list_of_lists, file_id, type)
+			else:
+				list_of_lists = define_sys_boundary_general(sub_hyp, sub_ref_segments, list_of_lists, file_id, type)
 
 	new_sys = pd.DataFrame(list_of_lists, columns=['file_id', 'Class', 'start', 'end', 'llr', 'file_uid', 'type'])
 	new_sys["hyp_uid"] = ["H{}".format(x) for x in new_sys.index]
