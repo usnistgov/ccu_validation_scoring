@@ -2,7 +2,7 @@
 
 **Version:** 1.3.5
 
-**Date:** September 5, 2024
+**Date:** December 17, 2024
 
 
 ## Table of Content
@@ -372,6 +372,8 @@ CCU_scoring score-ed -s <emotion_submission_directory> -ref <reference_directory
  * `-d`: dump reference and system inputs as they are processed during scoring
 
  * `-q`: do not dump ther final alignment and scores to stdout
+
+ * `--align_hacks`: Provide 'ManyRef:ManyHyp' to apply Many-to-Many instance matching alignment algorithm
 
  * `-lf`: Filter system output by LLRs. The option requires the form <ORDER>:by_value:<VALUE>.  <ORDER> is one of: 'after_read|after_transforms'.  <VALUE> is the floating point threshold to retain detections with values >= <VALUE>
 

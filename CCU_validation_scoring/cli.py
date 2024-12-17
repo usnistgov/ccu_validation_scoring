@@ -152,7 +152,7 @@ def main():
     score_ed_parser.add_argument("-mv", "--minimum_vote_agreement", type=int, default=2, required=False, help="Set the mimimum agreement for voting between annotators. Default is 2 agreeing annotators per segment.")
     score_ed_parser.add_argument("-d", "--dump_inputs", action='store_true', help="Dump reference and system inputs as they are processed during scoring.")
     score_ed_parser.add_argument("-q", "--quiet", action='store_true', default=False, help="Do not dump ther final alignment and scores to stdout.")
-    score_ed_parser.add_argument(      "--align_hacks", type=str, default="", help="NIST Field for undocumented experiments.")
+    score_ed_parser.add_argument(      "--align_hacks", type=str, default="", help="Provide 'ManyRef:ManyHyp' to apply Many-to-Many instance matching alignment algorithm")
     score_ed_parser.add_argument("-lf", "--llr_filter", type=str, default="", help="Filter system output by LLRs.  The option requires the form <ORDER>:by_value:<VALUE>.  <ORDER> is one of: 'after_read|after_transforms'.  <VALUE> is the floating point threshold to retain detections with values >= <VALUE>")
     score_ed_parser.add_argument("-fm", "--file_merge_proportion", type=str, choices=['1/5', '1/4', '1/3', '1/2', '1'], required=False, help='choose one from list to define Filemerge proportion')
 
