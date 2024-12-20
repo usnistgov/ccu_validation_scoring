@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [1.3.5] - 2024-12-17
 - Added Many-to-Many instance matching alignment algorithm for ED scoring.
-- Implemented full, half, one third and quarter filemerge scoring method for ED scoring
+- Implemented full, half, one third, quarter and one fifth filemerge scoring method for ED scoring
 - Added judgement voting threshold for ED scoring. Default is still 2
 - Added LLR filtering to filter system output for CD, ND and ED scoring
 - Added micro metrics for ND and ED scoring
